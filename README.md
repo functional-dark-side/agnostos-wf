@@ -8,7 +8,7 @@
 
 #### Disclaimer: This is a work in progress!
 
-The workflow is still under development. Please, conctact us in case you are interested in using it, and do not cite without the author's permission.
+The workflow is still under development. Please, conctact us in case you are interested in using it.
 
 #### Snakemake workflow usage:
 
