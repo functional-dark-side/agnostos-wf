@@ -1,6 +1,6 @@
 ## The Agnostos workflow
 
-<div class="img_container" style="width:70%; margin:2em auto;">
+<div class="img_container" style="width:60%; margin:2em auto;">
 
 <img src="/assets/unkn_fig1.png" width="80%">
 
