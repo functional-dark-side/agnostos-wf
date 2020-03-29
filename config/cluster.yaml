@@ -1,0 +1,90 @@
+__default__:
+    time: 1000:00:00
+    ntasks: 1
+    nodes: 1
+    ntasks_per_node: 1
+    partition: nomaster
+    cpus_per_task: 1
+
+pfam_annotation:
+    nodes: 2
+    ntasks: 56
+    ntasks_per_node: 28
+    cpus_per_task: 1
+    partition: nomaster
+
+spurious_shadow:
+    nodes: 2
+    ntasks: 56
+    ntasks_per_node: 28
+    cpus_per_task: 1
+    partition: nomaster
+
+mmseqs_clustering:
+    nodes: 9
+    ntasks: 9
+    ntasks_per_node: 1
+    cpus_per_task: 28
+    partition: nomaster
+
+mmseqs_clustering_update:
+    nodes: 9
+    ntasks: 9
+    ntasks_per_node: 1
+    cpus_per_task: 28
+    partition: nomaster
+
+mmseqs_clustering_results:
+    nodes: 9
+    ntasks: 9
+    ntasks_per_node: 2
+    cpus_per_task: 14
+    partition: nomaster
+  
+cluster_compositional_validation:
+    nodes: 9
+    ntasks: 36
+    ntasks_per_node: 4
+    partition: nomaster
+
+cluster_refinement:
+    nodes: 4
+    ntasks: 4
+    ntasks-per_node: 1
+    cpus_per_task: 28
+    partition: nomaster
+
+cluster_classification:
+    time: 1000:00:00
+    nodes: 9
+    ntasks_per_node: 1
+    ntasks: 9
+    cpus_per_task: 28
+    partition: nomaster
+
+cluster_category_refinement:
+    nodes: 9
+    ntasks: 63
+    ntasks_per_node: 7
+    partition: nomaster
+
+cluster_category_database:
+    nodes: 9
+    ntasks: 126
+    ntasks_per_node: 14
+    partition: nomaster
+
+cluster_category_stats:
+    time: 1000:00:00
+    nodes: 9
+    ntasks_per_node: 1
+    ntasks: 9
+    cpus_per_task: 28
+    partition: nomaster
+
+cluster_communities:
+    time: 1000:00:00
+    nodes: 9
+    ntasks_per_node: 4
+    ntasks: 36
+    partition: nomaster

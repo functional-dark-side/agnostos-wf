@@ -1,0 +1,47 @@
+# shell.executable("/bin/bash") shell.prefix("source $HOME/.bashrc; ")
+import glob
+
+configfile: "config/config.yaml"
+
+workdir: config["wdir"]
+
+#SAMPLES, = glob_wildcards(config['new_data'] + "/{smp}_contigs.fasta")
+
+rule all:
+    input:
+        prodigal_fa_done = config["rdir"] + "/gene_prediction/gp.done",
+        pfam_annotation_done = config["rdir"] + "/pfam_annotation/annotation.done",
+        pfam_annotation_res_done = config["rdir"] + "/pfam_annotation/annot_res.done",
+        mmseqs_cluster_update_done = config["rdir"] + "/mmseqs_clustering/updt.done",
+        mmseqs_clustering_res_done = config["rdir"] + "/mmseqs_clustering/clu_res.done",
+        spurious_shadow_done = config["rdir"] + "/spurious_shadow/spsh.done",
+        cluster_fvalidation_done = config["rdir"] + "/functional_validation/fval.done",
+        cluster_cvalidation_done = config["rdir"] + "/compositional_validation/cval.done",
+        cluster_validation_done = config["rdir"] + "/validation/val.done",
+        cluster_refinement_done = config["rdir"] + "/cluster_refinement/ref.done",
+        cluster_classific_done = config["rdir"] + "/cluster_classification/class.done",
+        cluster_categ_ref_done = config["rdir"] + "/cluster_categories/cat_ref.done",
+        cluster_categ_db_done = config["rdir"] + "/cluster_category_DB/cat_db.done",
+        cluster_categ_stats_done = config["rdir"] + "/cluster_category_stats/cat_stats.done",
+        cluster_comm_done = config["rdir"] + "/cluster_communities/comm.done",
+        integrated_cludb_done = config["rdir"] + "/integrated_cluster_DB/integdb.done",
+        report_done = config["rdir"] + "/report/workflow_report.html"
+
+include: "rules/gene_prediction.smk"
+include: "rules/pfam_annotation.smk"
+include: "rules/pfam_annotation_results.smk"
+include: "rules/mmseqs_clustering_update.smk"
+include: "rules/mmseqs_clustering_results.smk"
+include: "rules/spurious_shadow.smk"
+include: "rules/cluster_pfam_annotation.smk"
+include: "rules/cluster_functional_validation.smk"
+include: "rules/cluster_compositional_validation.smk"
+include: "rules/cluster_validation_results.smk"
+include: "rules/cluster_refinement.smk"
+include: "rules/cluster_classification.smk"
+include: "rules/cluster_category_refinement.smk"
+include: "rules/cluster_category_database.smk"
+include: "rules/cluster_category_stats.smk"
+include: "rules/cluster_communities.smk"
+include: "rules/integrated_cluster_db.smk"
+include: "rules/workflow_report.smk"

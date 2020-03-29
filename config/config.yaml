@@ -1,0 +1,85 @@
+# This file should contain everything to configure the workflow on a global scale.
+# In case of sample based data, it should be complemented by a samples.tsv file that contains
+# one row per sample. It can be parsed easily via pandas.
+wdir: "/vol/cloud/unk_workflow/agnostos-wf"
+rdir: "/vol/cloud/test_wkfl/results"
+data: "/vol/cloud/test_wkfl/data"
+
+# Threads configuration
+threads_default: 28
+threads_collect: 28
+threads_cat_ref: 4
+# Databases
+pfam_db: "/vol/cloud/test_wkfl/databases/Pfam-A.hmm"
+pfam_clan: "/vol/cloud/test_wkfl/databases/Pfam-A.clans.tsv.gz"
+antifam_db: "/vol/cloud/test_wkfl/databases/AntiFam.hmm"
+uniref90_db: "/vol/cloud/test_wkfl/databases/uniref90.fasta.gz"
+nr_db: "/vol/cloud/test_wkfl/databases/nr.fasta.gz"
+uniclust_db: "/vol/scratch/DBs/uniclust30_2017_10/uniclust30_2017_10"
+uniprot_db: "/vol/cloud/test_wkfl/databases/uniprotKB.fasta.gz"
+pfam_hh_db: "/vol/cloud/test_wkfl/databases/pfam"
+DPD: "/vol/cloud/test_wkfl/databases/dpd_uniprot_sprot.fasta"
+db_dir: "/vol/cloud/test_wkfl/databases/"
+taxdb: "UniProtKB"
+
+# Files retrieved from the databases
+# List of shared reduced Pfam domain names (dowloadable from Figshare..)
+pfam_shared_terms: "/vol/cloud/test_wkfl/databases/pfam_files/Pfam-31_names_mod_01122019.tsv"
+# Created using the protein accessions and the descriptions found on the fasta headers
+uniref90_prot: "/vol/cloud/test_wkfl/databases/uniref90.proteins.tsv.gz"
+nr_prot: "/vol/cloud/test_wkfl/databases/nr.proteins.tsv.gz"
+# Information dowloaded from Dataset-S1 from the DPD paper:
+dpd_info: "/vol/cloud/test_wkfl/databases/dpd_ids_all_info.tsv"
+
+# Local template folder
+local_tmp: "/vol/scratch/tmp"
+
+# MPI runner (de.NBI cloud, SLURM)
+mpi_runner: "srun --mpi=pmi2"
+
+# Gene prediction
+prodigal_bin: "prodigal"
+
+# Annotation
+hmmer_bin: "/vol/cloud/test_wkfl/bin/hmmsearch"
+
+# Clustering config
+ffindex_apply: "/vol/cloud/test_wkfl/bin/ffindex_apply_mpi"
+mmseqs_bin: "/vol/cloud/test_wkfl/bin/mmseqs"
+mmseqs_tmp: "/vol/cloud/test/test_wf/tmp"
+mmseqs_local_tmp: "/vol/scratch/tmp"
+mmseqs_split_mem: "100G"
+mmseqs_split: 10
+
+# Clustering results config
+seqtk_bin: "seqtk"
+
+# Spurious and shadows config
+hmmpress_bin: "/vol/cloud/test_wkfl/bin/hmmpress"
+
+# Compositional validation config
+datamash_bin: "datamash"
+famsa_bin: "/vol/cloud/test_wkfl/bin/famsa"
+odseq_bin: "/vol/cloud/test_wkfl/bin/OD-seq"
+parasail_bin: "/vol/cloud/test_wkfl/bin/parasail_aligner"
+parallel_bin: "parallel"
+get_stats: "/vol/cloud/agnostos-wf/scripts/get_stats.r"
+isconn: "/vol/cloud/agnostos-wf/scripts/is_connected"
+filterg: "/vol/cloud/agnostos-wf/scripts/filter_graph"
+igraph_lib: "export LD_LIBRARY_PATH=/vol/cloud/test_wkfl/bin/igraph/lib:${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
+
+# Cluster classification config
+seqkit_bin: "seqkit"
+filterbyname: "filterbyname.sh"
+hhcons_bin: "/vol/cloud/test_wkfl/bin/hh-suite/bin/hhconsensus"
+
+# Cluster category refinement
+hhsuite: "/vol/cloud/test_wkfl/bin/hh-suite"
+hhblits_bin_mpi: "/vol/cloud/test_wkfl/bin/hh-suite/bin/hhblits_mpi"
+hhmake: "/vol/cloud/test_wkfl/bin/hh-suite/bin/hhmake"
+hhblits_prob: 90
+hypo_filt: 1.0
+
+# Cluster communities
+hhblits_bin: "/vol/cloud/test_wkfl/bin/hh-suite/bin/hhblits"
+hhsearch_bin: "/vol/cloud/test_wkfl/bin/hh-suite/bin/hhsearch"
