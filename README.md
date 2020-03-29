@@ -1,7 +1,7 @@
 ## The Agnostos workflow
 
 
-![unkn_fig1](/assets/unkn_fig1.png)
+<img src="/assets/unkn_fig1.png" width="70%">
 
 #### Disclaimer: This is a work in progress!
 
