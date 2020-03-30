@@ -204,6 +204,8 @@ rule cluster_category_refinement:
             <(awk '{{print $1,$3}}' {params.ref_clu} | sort -k1,1) \
             > {params.categ_orfs}
 
+        gzip {params.categ_orfs}
+
         # Gather cluster annotations obtained from the classification and the two refinement steps
         class=$(dirname {input.k})
         categ=$(dirname {output.k})

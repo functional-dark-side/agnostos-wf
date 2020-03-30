@@ -9,18 +9,22 @@ rule integrated_cluster_db:
     params:
         mmseqs_bin = config["mmseqs_bin"],
         mmseqs_tmp = config["mmseqs_tmp"],
+        local_tmp   = config["mmseqs_local_tmp"],
         idir = config["rdir"] + "/integrated_cluster_DB",
         original = config["rdir"] + "/mmseqs_clustering/cluDB_original_name_rep_size.tsv",
         shared = config["rdir"] + "/mmseqs_clustering/cluDB_shared_name_rep_size.tsv",
         new = config["rdir"] + "/mmseqs_clustering/cluDB_new_name_rep_size.tsv",
         tmpl = config["rdir"] + "/integrated_cluster_DB/tmpl",
         clu_seq = config["rdir"] + "/cluster_categories/refined_clusterDB",
+        clu_gene = config["rdir"] + "/cluster_categories/cluster_ids_categ_genes.tsv.gz",
         sp_sh = config["rdir"] + "/spurious_shadow/spurious_shadow_info.tsv",
         multi_annot = config["rdir"] + "/annot_and_clust/pfam_name_acc_clan_multi.tsv",
         isp_sh = config["rdir"] + "/integrated_cluster_DB/spurious_shadow_info.tsv",
         imulti_annot = config["rdir"] + "/integrated_cluster_DB/pfam_name_acc_clan_multi.tsv",
+        iclu_gene = config["rdir"] + "/integrated_cluster_DB/cluster_ids_categ_genes.tsv.gz",
         clu_origin = config["rdir"] + "/integrated_cluster_DB/cluDB_name_origin_size.tsv",
         or_clu_cat = config["ordir"] + "/cluster_ids_categ.tsv",
+        or_clu_gene = config["ordir"] + "cluster_ids_categ_genes.tsv.gz",
         or_clu_com = config["ordir"] + "/cluster_communities.tsv",
         or_clu_stats = config["ordir"] + "/cluster_category_summary_stats.tsv",
         or_hq_clu = config["ordir"] + "/HQ_clusters.tsv",
@@ -54,6 +58,7 @@ rule integrated_cluster_db:
             <(awk -vOFS='\\t' '{{print $1,"shared",$3}}' {params.shared}) \
             <(awk -vOFS='\\t' '{{print $1,"new",$3}}' {params.new}) > {params.clu_origin}
 
+
         # Spurious and shadow genes information:
         cp {params.sp_sh} {params.isp_sh}
 
@@ -70,6 +75,12 @@ rule integrated_cluster_db:
 
         # Integrated set of cluster categories
         cat {input.clu_cat} {params.or_clu_cat} > {output.iclu_cat}
+
+        # and the cluster genes
+        zcat {params.clu_gene} {params.or_clu_gene} | gzip > {params.iclu_gene}
+
+        join -11 -21 <(sort -k1,1 {output.iclu_cat} ) \
+            <(awk '{{print $1,$3}}' {params.clu_info} | sort -k1,1 --parallel {threads} )
 
         # Integrated set of cluster communities
         # to avoid having overlapping communities names, we append the dataset origin

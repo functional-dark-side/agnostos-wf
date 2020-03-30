@@ -112,7 +112,7 @@ rule mmseqs_clustering_results:
             <(sort --parallel={threads} -k2,2 {params.info1} ) > {params.tmp} 2>>{log.err}
 
         # Add length info
-        {params.seqtk_bin} comp {input.all_orfsfa} | cut -f1,2 > {params.length}
+        sed -e 's/\\x0//g' {params.cluseqdb} | {params.seqtk_bin} comp | cut -f1,2 > {params.length}
 
         join -11 -22 <(sort -k1,1 --parallel={threads} -T {params.local_tmp} {params.length}) \
          <(sort -k2,2 --parallel={threads} -T {params.mmseqs_tmp} {params.tmp}) > {output.clu_info} 2>>{log.err}
