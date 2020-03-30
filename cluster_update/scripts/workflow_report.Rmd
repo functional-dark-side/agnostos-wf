@@ -96,6 +96,7 @@ shared = fread(paste0(dir,"/mmseqs_clustering/cluDB_shared_name_rep_size.tsv"),s
 original = fread(paste0(dir,"/mmseqs_clustering/cluDB_original_name_rep_size.tsv"),stringsAsFactors = F,header = F,sep="\t")
 
 tibble(Total_number_of_clusters=dim(new)[1] + dim(shared)[1] + dim(original)[1],
+       Total_number_of_genes=sum(as.numeric(new$V3)) + sum(as.numeric(shared$V3)) + sum(as.numeric(original$V3)),
        Original = dim(original)[1],
        Shared = dim(shared)[1],
        New = dim(new)[1]) %>% kable(digits=3, format.args = list(big.mark = ",")) %>%
