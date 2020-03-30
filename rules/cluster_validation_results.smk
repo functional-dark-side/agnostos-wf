@@ -28,11 +28,11 @@ rule cluster_validation_results:
 
         #Retrieve old cluster representatives information
         # Not annotated clusters
-        # 
-        join -12 -21 <(awk '{{print $1,$2}}' {input.cval} | sort -k2,2 --parallel={threads}) \
+        #
+        join -11 -21 <(awk '{{print $1,$2}}' {input.cval} | sort -k1,1 --parallel={threads}) \
           <(awk '{{print $1,$2,"noannot",$3}}' {params.cl_noannot} | sort -k1,1 --parallel={threads}) > {params.val_annot}
         # Annotated clusters
-        join -12 -21 <(awk '{{print $1,$2}}' {input.cval} | sort -k2,2 --parallel={threads}) \
+        join -11 -21 <(awk '{{print $1,$2}}' {input.cval} | sort -k1,1 --parallel={threads}) \
           <(awk '{{print $1,$2,"annot",$3}}' {params.cl_annot} | sort -k1,1 --parallel={threads} ) >> {params.val_annot}
 
         awk -vOFS='\\t' '{{print $2,$1,$3,$5,$4}}'  {params.val_annot} \
@@ -41,7 +41,7 @@ rule cluster_validation_results:
         # Combine with functional validation results
         # Results in SQlite as table of database and plots(as R objects)
          [[ -f {params.valdb} ]] && rm {params.valdb}
-        
+
          ./{params.val_res} --valdb {params.valdb} \
                             --fval_res {input.fval} \
                             --cval_res {input.cval} \

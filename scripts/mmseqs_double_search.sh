@@ -190,5 +190,5 @@ awk -v P="${HYPO}" 'BEGIN{FS="\t"}{a[$2][$16]++}END{for (i in a) {N=a[i]["hypo"]
 
 awk '{print $2"\t"$1"\t"$11"\t"$15}' "${FOUT}" >"${FP}"
 
-rm -rf "${F}" "${merged}"* "${aln_2b}"* "${top1}"* "${res1}"* "${res2}"* "${aligned}"* "${aligned_db}"* "${DIR}"/tmp_hsp1 "${DIR}"/tmp_hsp2
-
+rm -rf "${F}" "${FOUT}" "${queryDB}"* "${targetDB}"* "${merged}"* "${aln_2b}"* "${top1}"* "${res1}"* "${res2}"* "${aligned}"* "${aligned_db}"*
+rm -rf "${DIR}"/tmp_hsp1 "${DIR}"/tmp_hsp2

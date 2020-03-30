@@ -96,7 +96,7 @@ rule cluster_refinement:
 
         # annotated (check those left with no-annotated sequences): join with file with all annotated clusters (using the orfs)
         join -11 -21 <(sort -k1,1 {params.tmp1}) \
-          <(awk '{{print $1,$3}}' {params.annot} \
+          <(awk '{{print $3,$4}}' {params.annot} \
           |  sort -k1,1) > {output.ref_annot}
 
         # Reorder columns to have cl_name - orf - pfam_name
@@ -170,7 +170,10 @@ rule cluster_refinement:
         # Reorder columns: 1:cl_name|2:new_repres|3:orf|4:cl_size|5:orf_length|6:partial
         awk -vOFS='\\t' '{{print $1,$6,$2,$4,$5,$3}}' {params.tmp5} > {output.ref_clu}
 
-        #rm {params.tmp} {params.tmp1}
+        # cleaning the results...
+        rm -rf {params.tmp} {params.tmp1} {params.tmp2} {params.tmp3} {params.tmp4} {params.tmp5}
+        rm -rf {params.toremove} {params.toremove_cl}.index {params.rej} {params.good_noshadow}
+        rm -rf {params.tmpdb} {params.tmpdb}.index {params.tmpdb}.dbtype
 
         """
 

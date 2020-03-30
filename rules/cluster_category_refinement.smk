@@ -122,6 +122,12 @@ rule cluster_category_refinement:
             cp {input.eu} {output.eu}
         fi
 
+        # clean the results ...
+
+        rm -rf {params.hmm_eu} {params.hmm_eu}.index {params.hmm_eu}.dbtype
+        rm -rf {params.tmp_eu} {params.tmp_eu}.index {params.tmp_eu}.dbtype
+        rm -rf {params.tmp_eu}_hypo_char
+
         #######
         ## Known without Pfam refinement, searching for remote homologies (in the Pfam DB)
 
@@ -192,6 +198,12 @@ rule cluster_category_refinement:
             # The categories mantain the same clusters
             echo "No KWP was found to be remote homolog of a Pfam domain"
         fi
+
+        # clean the results ...
+
+        rm -rf {params.hmm_kwp} {params.hmm_kwp}.index {params.hmm_kwp}.dbtype {params.hmm_kwp}.ff*
+        rm -rf {params.tmp_kwp} {params.tmp_kwp}.index {params.tmp_kwp}.dbtype
+        rm -rf {params.tmp_kwp}_filt.tsv
 
         # Create a file with cl_name and category
         cat <(awk -vOFS='\\t' '{{print $1,"K"}}' {output.k}) \

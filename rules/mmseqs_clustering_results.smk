@@ -80,7 +80,7 @@ rule mmseqs_clustering_results:
         awk -vOFS='\\t' '$3>=2{{print $1,$2}}' {params.info1} > {params.tmp1}
         join -12 -21 <(sort -k2,2 {params.tmp1}) <(sort -k1,1 {input.clu} ) > {params.tmp}
 
-        awk -vOFS='\\t' '{{print $2,$3}}' {params.tmp} > {output.clusters}
+        awk -vOFS='\\t' '{{print $2,$1,$3}}' {params.tmp} > {output.clusters}
 
         # Singletons
         awk -vOFS='\\t' '$3=="1"{{print $1,$2}}' {params.info1} > {output.singl}

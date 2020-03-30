@@ -164,12 +164,12 @@ rule mmseqs_clustering_results:
         join -12 -21 <(sort -k2,2 {params.tmp1}) \
         <( awk -vFS='\\t' -vOFS='\\t' '{{print $2,$3}}' {output.clu_info} | sort -k1,1) > {params.tmp} 2>>{log.err}
 
-        awk -vOFS='\\t' '{{print $2,$3}}' {params.tmp} > {output.clusters}
+        awk -vOFS='\\t' '{{print $2,$1,$3}}' {params.tmp} > {output.clusters}
 
         # Singletons
         awk -vOFS='\\t' '$3=="1"{{print $1,$2}}' {params.info2} > {output.singl}
 
-        rm {params.tmp} {params.tmp1}
+        rm {params.tmp} {params.tmp1} {params.namedb} {params.namedb}.index {params.namedb}.dbtype
 
         """
 

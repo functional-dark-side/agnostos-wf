@@ -62,7 +62,7 @@ rule cluster_category_stats:
           --format-mode 2 --threads {threads} \
           --format-output 'query,target,pident,alnlen,mismatch,gapopen,qstart,qend,tstart,tend,evalue,bits,qcov,tcov'
 
-        rm {params.dark_dir}/refined_cl_orfs_db* {params.dark_dir}/dpd_db* {params.dark_dir}/refined_cl_orfs_dpd_db*
+        rm -rf {params.dark_dir}/refined_cl_orfs_db* {params.dark_dir}/dpd_db* {params.dark_dir}/refined_cl_orfs_dpd_db* {params.dark_dir}/tmp
 
         # Extract best-hits
         export LANG=C; export LC_ALL=C; sort -k1,1 -k11,11g -k13,13gr -k14,14gr {params.dark_dir}/refined_cl_orfs_dpd.tsv | \

@@ -3,7 +3,8 @@
 #### mg_gtdb_db_wf/
 
 -   cluster_ids_categ.tsv - Table with cluster ids and categories.
--   cluster_ids_categ_orfs.tsv.gz - Table with cluster ids and categories and genes (ORFs-headers).
+-   cluster_ids_categ_genes.tsv.gz - Table with cluster ids and categories and genes (ORFs-headers).
+-   cluster_db_size_categ_origin.tsv.gz - Table with cluster ids the sequence original database/provenience, the cluster size and the cluster categories (ORFs-headers).
 -   cluster_category_summary_stats.tsv - A summary table with the refined cluster statistics. It includes cluster size, ORF length stats, cluster ORF completeness stats, HQ clusters, cluster level of darkness and disorder, and taxonomic info (prevalent taxonomy and taxonomic entropy).
 -   HQ_clusters.tsv - set of high quality (HQ) clusters (clusters with high percentage of complete ORFs). Fields: cluster name, category.
 -   cluster_communities.tsv - Table containing the correspondence between cluster and cluster communitites. Fields: cluster name, community name, category.
@@ -45,7 +46,8 @@ Additional metadata (not required for the workflow)
 #### mg_gtdb_omrgcv2_db_wf/
 
 -   cluster_ids_categ.tsv - Table with cluster ids and categories.
--   cluster_ids_categ_orfs.tsv.gz - Table with cluster ids and categories and genes (ORFs-headers).
+-   cluster_ids_categ_genes.tsv.gz - Table with cluster ids and categories and genes (ORFs-headers).
+-   cluster_db_size_categ.tsv.gz - Table with cluster ids the sequence original database/provenience, the cluster size and the cluster categories (ORFs-headers).
 -   cluster_category_summary_stats.tsv - A summary table with the refined cluster statistics. It includes cluster size, ORF length stats, cluster ORF completeness stats, HQ clusters, cluster level of darkness and disorder, and taxonomic info (prevalent taxonomy and taxonomic entropy).
 -   HQ_clusters.tsv - set of high quality (HQ) clusters (clusters with high percentage of complete ORFs). Fields: cluster name, category.
 -   cluster_communities.tsv - Table containing the correspondence between cluster and cluster communitites. Fields: cluster name, community name, category.

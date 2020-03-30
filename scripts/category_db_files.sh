@@ -126,35 +126,33 @@ for categ in $CATEG; do
 
     # Retrieve set of ORFs for each category
     sed -e 's/\x0//g' "${RES}"/"${categ}"_clseqdb >"${RES}"/"${categ}"_clu_orfs.fasta
+
     grep '^>' "${RES}"/"${categ}"_clu_orfs.fasta | sed 's/^>//' >"${RES}"/"${categ}"_orfs.txt
 
     # Retrieve alignments, consensus sequences and HMMs
     ${RUNNER} "${MMSEQS_BIN}" apply "${RES}"/"${categ}"_clseqdb "${RES}"/"${categ}"_aln \
-        --threads "${NSLOTS}" \
+        --threads 1 \
         -- "${ALN}" STDIN STDOUT 2>/dev/null
 
     ${RUNNER} "${MMSEQS_BIN}" apply "${RES}"/"${categ}"_aln "${RES}"/"${categ}"_a3m_db \
-        --threads "${NSLOTS}" \
+        --threads 1 \
         -- "${REFORM}" "${HHSUITE}"
 
     ${RUNNER} "${MMSEQS_BIN}" apply "${RES}"/"${categ}"_aln "${RES}"/"${categ}"_cons \
-        --threads "${NSLOTS}" \
+        --threads 1 \
         -- "${CONS}" "${HHSUITE}"/bin/hhconsensus
-
-    rm -f "${RES}"/"${categ}"_aln.ff*
-    rm -f "${RES}"/"${categ}"_a3m.ff*
 
     ln -sf "${RES}"/"${categ}"_aln "${RES}"/"${categ}"_aln.ffdata
     ln -sf "${RES}"/"${categ}"_aln.index "${RES}"/"${categ}"_aln.ffindex
     ln -sf "${RES}"/"${categ}"_a3m_db "${RES}"/"${categ}"_a3m.ffdata
     ln -sf "${RES}"/"${categ}"_a3m_db.index "${RES}"/"${categ}"_a3m.ffindex
 
-    ${RUNNER} "${HHSUITE}"/bin/cstranslate_mpi -i "${RES}"/"${categ}"_aln -o "${RES}"/"${categ}"_cs219 \
+    OMP_NUM_THREADS="${NSLOTS}" "${HHSUITE}"/bin/cstranslate -i "${RES}"/"${categ}"_aln -o "${RES}"/"${categ}"_cs219 \
         -A "${HHSUITE}"/data/cs219.lib -D "${HHSUITE}"/data/context_data.lib \
-        -x 0.3 -c 4 -b -f -I fas
+        -x 0.3 -c 4 -b -f -I fas &>/dev/null
 
     ${RUNNER} "${MMSEQS_BIN}" apply "${RES}"/"${categ}"_aln "${RES}"/"${categ}"_hhm_db \
-        --threads "${NSLOTS}" \
+        --threads 1 \
         -- "${HHMAKE}" "${HHSUITE}"/bin/hhmake
 
     ln -sf "${RES}"/"${categ}"_cs219.ffdata "${RES}"/"${categ}"_cs219
@@ -162,10 +160,18 @@ for categ in $CATEG; do
     ln -sf "${RES}"/"${categ}"_hhm_db "${RES}"/"${categ}"_hhm.ffdata
     ln -sf "${RES}"/"${categ}"_hhm_db.index "${RES}"/"${categ}"_hhm.ffindex
 
-    rm "${RES}"/"${categ}"_cs219.log.*
+    #rm "${RES}"/"${categ}"_cs219.log.*
 done
 
 echo "Done building hh-suite databases for ${categ}"
+
+if [[ ${STEP} = "known refinement" ]]; then
+    rm -rf "${RES}"/"${categ}"_cs219* "${RES}"/"${categ}"_aln* "${RES}"/"${categ}"_a3m* "${RES}"/"${categ}"_cons* "${RES}"/"${categ}"_clseqdb*
+    rm -rf "${RES}"/"${categ}"_clu_orfs.fasta "${RES}"/"${categ}"_orfs.txt
+elif [[ ${STEP} = "unknown refinement" ]]; then
+    rm -rf "${RES}"/"${categ}"_cs219* "${RES}"/"${categ}"_aln* "${RES}"/"${categ}"_a3m* "${RES}"/"${categ}"_cons* "${RES}"/"${categ}"_clseqdb*
+    rm -rf "${RES}"/"${categ}"_clu_orfs.fasta "${RES}"/"${categ}"_orfs.txt
+fi
 
 if [[ ${STEP} = "category database" ]]; then
 
@@ -174,6 +180,8 @@ if [[ ${STEP} = "category database" ]]; then
   "${MMSEQS_BIN}" concatdbs "${RES}"/k_hhm_db "${RES}"/kwp_hhm_db "${RES}"/tmp1_hhm_db --threads 1
 
   "${MMSEQS_BIN}" concatdbs "${RES}"/tmp_hhm_db "${RES}"/tmp1_hhm_db "${RES}"/clu_hhm_db --threads 1
+
+  rm "${RES}"/tmp_hhm_db* "${RES}"/tmp1_hhm_db* "${RES}"/"${NAM}"*
 
   echo "Done building clusters hmm databases"
 fi

@@ -66,6 +66,8 @@ rule cluster_compositional_validation:
         # collect cluster main compositional validation stats and cluster rejected (bad-aligned) ORFs
         {params.collect} {params.stat_dir} {output.cl_cval} {output.cval_rej} {params.parallel_bin} {params.threads_collect} 2>{log.err} 1>{log.out}
 
+        rm -rf {params.outdb} {params.outdb}.index {params.outdb}.dbtype
+
         """
 
 

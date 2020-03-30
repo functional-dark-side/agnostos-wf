@@ -46,7 +46,8 @@ rule cluster_communities:
 
       # Start cluster community inference
       ./{params.get_comm} -c {params.comm_config} 1>{log.out} 2>{log.err}
-
+      
+      rm -rf ${{OUT}}/tmp
       """
 
 rule cluster_comm_done:

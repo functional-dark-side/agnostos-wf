@@ -163,11 +163,11 @@ rule cluster_classification:
         {params.outdir}/uniref-nohits_vs_NR_char.txt > {output.kwp}
 
         # Add annotation info:
-        cat {params.outdir}/noannot_vs_uniref90_E{params.evalue_thr}_hypo_char \
-            {params.outdir}/uniref-nohits_vs_NR_E{params.evalue_thr}_hypo_char > {params.outdir}/noannot_uniref_nr_annotations.tsv
+        cat {params.outdir}/noannot_vs_uniref90_E{params.evalue_thr}_prot.tsv \
+            {params.outdir}/uniref-nohits_vs_NR_E{params.evalue_thr}_prot.tsv > {params.outdir}/noannot_uniref_nr_annotations.tsv
         ## KWP annotations
-        join -11 -22 <(sort -k1,1 {output.kwp} ) \
-            <(sort -k2,2 {params.outdir}/noannot_uniref_nr_annotations.tsv) > {params.outdir}/kwp_annotations.tsv
+        join -11 -21 <(sort -k1,1 {output.kwp} ) \
+            <(sort -k1,1 {params.outdir}/noannot_uniref_nr_annotations.tsv) > {params.outdir}/kwp_annotations.tsv
 
         # Knowns (Ks) and Genomic unknowns (GUs)
 
@@ -187,8 +187,8 @@ rule cluster_classification:
          {params.outdir}/uniref-nohits_vs_NR_hypo.txt > {output.gu}
 
         ## GU annotations
-        join -11 -22 <(sort -k1,1 {output.gu} ) \
-            <(sort -k2,2 {params.outdir}/noannot_uniref_nr_annotations.tsv) > {params.outdir}/gu_annotations.tsv
+        join -11 -21 <(sort -k1,1 {output.gu} ) \
+            <(sort -k1,1 {params.outdir}/noannot_uniref_nr_annotations.tsv) > {params.outdir}/gu_annotations.tsv
         awk 'NR>1 && $9=="DUF"{{print $1,"PFAM","0.0",$6}}' {params.dom_arch} >> {params.outdir}/gu_annotations.tsv
 
         # Retrieve the Knowns cluster set

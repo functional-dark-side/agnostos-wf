@@ -165,6 +165,14 @@ done
 
 echo "Done building hh-suite databases for ${categ}"
 
+if [[ ${STEP} = "known refinement" ]]; then
+    rm -rf "${RES}"/"${categ}"_cs219* "${RES}"/"${categ}"_aln* "${RES}"/"${categ}"_a3m* "${RES}"/"${categ}"_cons* "${RES}"/"${categ}"_clseqdb*
+    rm -rf "${RES}"/"${categ}"_clu_orfs.fasta "${RES}"/"${categ}"_orfs.txt
+elif [[ ${STEP} = "unknown refinement" ]]; then
+    rm -rf "${RES}"/"${categ}"_cs219* "${RES}"/"${categ}"_aln* "${RES}"/"${categ}"_a3m* "${RES}"/"${categ}"_cons* "${RES}"/"${categ}"_clseqdb*
+    rm -rf "${RES}"/"${categ}"_clu_orfs.fasta "${RES}"/"${categ}"_orfs.txt
+fi
+
 if [[ ${STEP} = "category database" ]]; then
 
   "${MMSEQS_BIN}" concatdbs "${RES}"/eu_hhm_db "${RES}"/gu_hhm_db "${RES}"/tmp_hhm_db --threads 1
@@ -172,6 +180,8 @@ if [[ ${STEP} = "category database" ]]; then
   "${MMSEQS_BIN}" concatdbs "${RES}"/k_hhm_db "${RES}"/kwp_hhm_db "${RES}"/tmp1_hhm_db --threads 1
 
   "${MMSEQS_BIN}" concatdbs "${RES}"/tmp_hhm_db "${RES}"/tmp1_hhm_db "${RES}"/clu_hhm_db --threads 1
+
+  rm "${RES}"/tmp_hhm_db* "${RES}"/tmp1_hhm_db* "${RES}"/"${NAM}"*
 
   echo "Done building clusters hmm databases"
 fi

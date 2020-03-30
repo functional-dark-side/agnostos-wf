@@ -107,3 +107,5 @@ sed -i 's/ /\t/g' "${RES}"
 
 # Optional: create a taxonomy Kraken-style report that can be visualized using the interactive metagenomics data explorer Pavian
 #"${MMSEQS_BIN}" taxonomyreport "${targetDB}" "${taxresDB}" "${report}" --threads "${NSLOTS}"
+
+rm -rf "${taxresDB}"* "${queryDB}"** "${targetDB}"* "${DIR}"/tmp

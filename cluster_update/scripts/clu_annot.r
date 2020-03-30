@@ -61,7 +61,7 @@ options(readr.num_columns = 0)
 # Pfam annotation results
 annot <- fread(opt$pfam_annot, stringsAsFactors = F, header = F) %>% setNames(c("orf", "name", "acc", "clan"))
 # Clustering results
-clu <- fread(opt$clusters, stringsAsFactors = F, header = F) %>% setNames(c("rep", "orf"))
+clu <- fread(opt$clusters, stringsAsFactors = F, header = F) %>% setNames(c("cl_name","rep", "orf"))
 
 clu_annot <- clu %>% dt_left_join(annot, by = "orf")
 
@@ -75,18 +75,20 @@ partial <- fread(opt$partial, header = F, colClasses = c("character", "character
 
 # Annotated clusters
 clu_annot %>%
-  group_by(rep) %>%
+  group_by(cl_name,rep) %>%
   mutate(annot = ifelse(any(!is.na(name)), "annot", "noannot")) %>%
   dt_filter(annot == "annot") %>%
   dt_select(-annot) %>%
   dt_left_join(partial, by = "orf") %>%
+  select(cl_name,rep,orf,name,acc,clan,partial) %>%
   write_tsv(path = opt$output_annot, col_names = F)
 
 # Not annotated clusters
 clu_annot %>%
-  group_by(rep) %>%
+  group_by(cl_name,rep) %>%
   mutate(annot = ifelse(any(!is.na(name)), "annot", "noannot")) %>%
   dt_filter(annot == "noannot") %>%
   dt_select(-annot) %>%
   dt_left_join(partial, by = "orf") %>%
+  select(cl_name,rep,orf,name,acc,clan,partial) %>%
   write_tsv(path = opt$output_noannot, col_names = F)

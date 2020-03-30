@@ -63,6 +63,7 @@ rule cluster_category_database:
         {params.mmseqs_bin} convertprofiledb {params.clu_hhm} {output.clu_hmm} \
             --threads {threads} 2>{log.err}
 
+        rm {params.clu_hhm} {params.clu_hhm}.index {params.clu_hhm}.dbtype
         """
 
 rule cluster_categ_db_done:
