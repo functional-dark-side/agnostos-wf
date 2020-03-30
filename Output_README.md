@@ -1,6 +1,5 @@
 ## Workflow output data structure
 
-
 ### Creation-mode
 
 The results of the creation-mode workflow are structured in folders corresponding to the workflow steps.
@@ -93,7 +92,7 @@ The results of the creation-mode workflow are structured in folders correspondin
     -   k/kwp/gu/eu_clu_orfs.fasta - category genes amino acid sequences.
     -   k/kwp/gu/eu_clseqdb.index - category cluster sequence MMseqs2 database.
     -   clu_hmm_db - cluster HMM profiles MMseqs2 database (for profile searches).
-    Th following databases are the HH-SUITE DBs of the different cluster categories:
+    The following databases are the HH-SUITE DBs of the different cluster categories:
     -   k/kwp/gu/eu_aln
     -   k/kwp/gu/eu_a3m_db
     -   k/kwp/gu/eu_cons
