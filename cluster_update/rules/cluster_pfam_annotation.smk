@@ -57,7 +57,7 @@ rule cluster_pfam_annotation:
                              --clusters {input.clu} \
                              --partial {input.partial} \
                              --output_annot {output.cl_annot} \
-                             --output_noannot {output.cl_noannot}
+                             --output_noannot {output.cl_noannot} 2>{log.err}
 
         ## 3. Singleton annotations
 

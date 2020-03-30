@@ -118,7 +118,8 @@ rule mmseqs_clustering_results:
          <(sort -k2,2 --parallel={threads} -T {params.mmseqs_tmp} {params.tmp}) > {output.clu_info} 2>>{log.err}
 
         # Reorder fields (cl_name rep orf length size)
-        sort -k4,4n {output.clu_info} | awk -vOFS='\\t' '{{print $4,$3,$1,$2,$5}}' > {params.tmp}
+        sort -k4,4n --parallel={threads} -T {params.mmseqs_tmp} {output.clu_info} \
+        | awk -vOFS='\\t' '{{print $4,$3,$1,$2,$5}}' > {params.tmp}
 
         cp {params.tmp} {output.clu_info}
 
@@ -162,7 +163,7 @@ rule mmseqs_clustering_results:
         # Clusters with more than 1 member
         awk -vOFS='\\t' '$3>=2{{print $1,$2}}' {params.info2} > {params.tmp1}
         join -12 -21 <(sort -k2,2 {params.tmp1}) \
-        <( awk -vFS='\\t' -vOFS='\\t' '{{print $2,$3}}' {output.clu_info} | sort -k1,1) > {params.tmp} 2>>{log.err}
+        <(sort -k1,1 --parallel={threads} -T {params.local_tmp} {input.clu} ) > {params.tmp}
 
         awk -vOFS='\\t' '{{print $2,$1,$3}}' {params.tmp} > {output.clusters}
 
