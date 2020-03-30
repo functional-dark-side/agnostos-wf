@@ -8,7 +8,7 @@
 
 #### Disclaimer: This is a work in progress!
 
-The workflow is still under development. Please, conctact us in case you are interested in using it.
+The workflow is still under development and it is subject to change. No guarentee is made regarding the functioning of the workflow and the accuracy of the results. Please, conctact us in case you are interested in using it.
 
 #### Snakemake workflow usage:
 
@@ -58,6 +58,12 @@ Profile_search/profile_search.sh --query your-genes.fasta --info your-genes_add_
 
 The "--info" file is optional, and should be a table with the correspondence of the genes to the contigs and/or genomes/MAGs/samples. The format should be gene - genome (or sample_ID) etc.
 
+<br>
+
+###### THE FUNCTIONAL DARK SIDE OF GENOMES AND METAGENOMES
+To lern more about what we are doing check out our website  [dark.metagenomics.eu](https://dark.metagenomics.eu/).
+
+<br>
 
 ##### Citation:
 
