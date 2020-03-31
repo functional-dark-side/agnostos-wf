@@ -8,6 +8,7 @@ rule cluster_refinement:
       params:
         mmseqs_bin = config["mmseqs_bin"],
         mpi_runner = config["mpi_runner"],
+        local_tmp= config["mmseqs_local_tmp"],
         good_noshadow = config["rdir"] + "/cluster_refinement/good_noshadow_clusters.txt",
         cluseqdb = config["rdir"] + "/mmseqs_clustering/new_clu_seqDB",
         clu_info = config["rdir"] + "/mmseqs_clustering/cluDB_info.tsv",
@@ -75,7 +76,7 @@ rule cluster_refinement:
         if [[ -s {params.toremove} ]]; then
                 # add cluster membership
                 join -11 -21 <(sort {params.toremove}) \
-                <(awk '{{print $3,$1}}' {params.clu_info} | sort -k1,1) \
+                <(awk '{{print $3,$1}}' {params.clu_info} | sort -k1,1 --parallel={threads} -T {params.local_tmp}) \
                 > {params.toremove_cl}
 
                 # remove the single orfs from the clusters with less than 10% bad-aligned ORFs and less than 30% shadows.
@@ -85,7 +86,8 @@ rule cluster_refinement:
                 # Create tables with new seqs and new clusters for some stats and checking the numbers
                 join -11 -21 <(sort -k1,1 {params.name_index}) <(sort -k1,1 {params.refdb}.index) > {params.tmp}
                 join -11 -21 <(awk '{{print $2}}' {params.tmp} | sort -k1,1) \
-                    <(awk '{{print $1,$3}}' {params.clu_info} | sort -k1,1) > {params.tmp1}
+                    <(awk '{{print $1,$3}}' {params.clu_info} \
+                    | sort -k1,1 --parallel={threads} -T {params.local_tmp}) > {params.tmp1}
                 # Remove "bad" ORFs from the refined table
                 join -12 -21 -v1 <(sort -k2,2 {params.tmp1}) \
                     <(sort -k1,1 {params.toremove}) > {params.tmp} && mv {params.tmp} {params.tmp1}
@@ -96,7 +98,7 @@ rule cluster_refinement:
 
         # annotated (check those left with no-annotated sequences): join with file with all annotated clusters (using the orfs)
         join -11 -21 <(sort -k1,1 {params.tmp1}) \
-          <(awk '{{print $3,$4}}' {params.annot} \
+          <(awk '{{print $3,$1}}' {params.annot} \
           |  sort -k1,1) > {output.ref_annot}
 
         # Reorder columns to have cl_name - orf - pfam_name
@@ -156,16 +158,18 @@ rule cluster_refinement:
 
         # Add cluster size and ORF length
         # Columns clu_info: 1:cl_name|2:old_repr|3:orf|4:orf_len|5:cl_size
-        # Columns intermediate: 1:orf|2:partial_info|3:cl_name|4:old_repr|5:cl_size|6:orf_len
+        # Columns intermediate: 1:orf|2:partial_info|3:cl_name|4:old_repr|5:orf_len|6:cl_size
         # Columns tmp4: 1:cl_name|2:orf|3:partial|4:cl_size|5:orf_len
         join -11 -21 <(sort -k1,1 {params.tmp3}) \
-            <(awk '{{print $3,$2,$5,$4}}' {params.clu_info} | sort -k1,1) | sort -k3,3 | \
-            awk -vOFS="\t" '{{print $3,$1,$2,$5,$6}}' > {params.tmp4}
+            <(awk '{{print $3,$2,$4,$5}}' {params.clu_info} \
+            | sort -k1,1 --parallel={threads} -T {params.local_tmp}) \
+            | sort -k3,3 \
+            | awk -vOFS='\\t' '{{print $3,$1,$2,$6,$5}}' > {params.tmp4}
 
         # Add new representatives from validation
         # Columns tmp5: 1:cl_name|2:orf|3:partial|4:cl_size|5:orf_len|6:new_repr
         join -11 -21 <(sort -k1,1 {params.tmp4}) \
-            <(awk '{{print $1,$2}}' {input.val_res} | sort -k1,1) > {params.tmp5}
+            <(awk '{{print $1,$2}}' {input.val_res} | sort -k1,1 --parallel={threads}) > {params.tmp5}
 
         # Reorder columns: 1:cl_name|2:new_repres|3:orf|4:cl_size|5:orf_length|6:partial
         awk -vOFS='\\t' '{{print $1,$6,$2,$4,$5,$3}}' {params.tmp5} > {output.ref_clu}
