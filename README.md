@@ -28,15 +28,15 @@ When everything is set...
 
 ##### Run the workflow:
 
-**1.  Database creation-mode**: Start from a set of genomic/metagenomic contigs in fasta format and retrieve a database of categorised gene clusters and cluster communities.
+**1.  DB-creation module**: Start from a set of genomic/metagenomic contigs in fasta format and retrieve a database of categorised gene clusters and cluster communities.
 
 ```{bash}
 snakemake --use-conda -j 100 --cluster-config config/cluster.yaml --cluster "sbatch --export=ALL -t {cluster.time} -c {threads} --ntasks-per-node {cluster.ntasks_per_node} --nodes {cluster.nodes} --cpus-per-task {cluster.cpus_per_task} --job-name {rulename}.{jobid} --partition {cluster.partition}" -R --until workflow_report
 ```
 
-**2.  Update-mode**: Add your genomic/metagenomic contigs or genes to the MG+GTDB cluster database, dowloadable from [here](). A description of the MG+GTDB database files can be found in the [clusterDB_README.md](clusterDB_README.md).
+**2.  DB-Update module**: Add your genomic/metagenomic contigs or genes to the agnostosDB cluster database, dowloadable from [here](). A description of the agnostosDB files can be found in the [agnostosDB_README.md](agnostosDB_README.md).
 
--   The cluster-update workflow is in the [cluster_update/](cluster_update) folder. To run it, you just need to enter the folder, modify the [config.yaml](cluster_update/config/config.yaml) and [config_communities.yaml](cluster_update/config/config_communities.yaml)files specifying your input data and the output paths, and then run the command:
+-   The DB-update workflow is in the [db_update/](db_update) folder. To run it, you just need to enter the folder, modify the [config.yaml](db_update/config/config.yaml) and [config_communities.yaml](db_update/config/config_communities.yaml)files specifying your input data and the output paths, and then run the command:
 
 ```{bash}
 snakemake -s Snakefile --use-conda -j 100 --cluster-config config/cluster.yaml --cluster "sbatch --export=ALL -t {cluster.time} -c {threads} --ntasks-per-node {cluster.ntasks_per_node} --nodes {cluster.nodes} --cpus-per-task {cluster.cpus_per_task} --job-name {rulename}.{jobid} --partition {cluster.partition}" -R --until workflow_report

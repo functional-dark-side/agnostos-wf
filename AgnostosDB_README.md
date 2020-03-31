@@ -1,6 +1,6 @@
-## MG+GTDB clusterDB data structure
+## AgnostosDB data structure
 
-#### mg_gtdb_db_wf/
+#### agnostosDB/
 
 -   cluster_ids_categ.tsv - Table with cluster ids and categories.
 -   cluster_ids_categ_genes.tsv.gz - Table with cluster ids and categories and genes (ORFs-headers).
@@ -36,14 +36,14 @@ Additional metadata (not required for the workflow)
     -   mg_gtdb_lineage_specific_clusters.tsv.gz - Lineage specific clusters.
     -   mg_gtdb_lineage_specific_communities.tsv.gz - Lineage specific clusters communitites.
 
-#### MG+GTDB numbers overview
+#### AgnostosDB numbers overview
 
 <img alt="mg_gtdb_numbers.png" src="assets/mg_gtdb_numbers.png" width="80%" height="" >
 
 
-## MG+GTDB+OM-RGC-v2 clusterDB data structure
+## AgnostosDB + OM-RGC-v2 data structure
 
-#### mg_gtdb_omrgcv2_db_wf/
+#### agnostosDB_omrgcv2/
 
 -   cluster_ids_categ.tsv - Table with cluster ids and categories.
 -   cluster_ids_categ_genes.tsv.gz - Table with cluster ids and categories and genes (ORFs-headers).
@@ -83,6 +83,6 @@ Additional metadata (not required for the workflow)
     -   OM-RGC_v2_all_genes_class_categ_pairs.tsv.gz - Coexpression pairs table.
     -   OM-RGC_v2_genes_class_categ.tsv.gz - TARA OM-RGC-v2 classification in known and unknown genes in comparison with our annotation in the four categories.
 
-#### MG+GTDB+OMRGC2 numbers overview
+#### AgnostosDB + OM-RGC-v2 numbers overview
 
 <img alt="mg_gtdb_omrgc2.png" src="assets/mg_gtdb_omrgc2.png" width="90%" height="" >

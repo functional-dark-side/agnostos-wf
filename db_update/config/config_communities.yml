@@ -12,13 +12,13 @@ default:
   entropy_cores:        32 # Number of cores to calculate MCL cluster entropy (uses a lot of RAM, 32 for bigmems)
   das_refinement_cores: 64
   # Files
-  wd:                   "/vol/cloud/giant_viruses/cluster_update/results/cluster_communities"
-  graph_lib:            "/vol/cloud/giant_viruses/agnostos-wf/cluster_update/scripts/communities_inference/graph_lib.R"
-  cl_cat:               "/vol/cloud/giant_viruses/cluster_update/results/cluster_categories/cluster_ids_categ.tsv"
-  cl_comp:              "/vol/cloud/giant_viruses/cluster_update/results/cluster_category_stats/cluster_category_completeness.tsv"
+  wd:                   "/vol/cloud/giant_viruses/db_update/results/cluster_communities"
+  graph_lib:            "/vol/cloud/giant_viruses/agnostos-wf/db_update/scripts/communities_inference/graph_lib.R"
+  cl_cat:               "/vol/cloud/giant_viruses/db_update/results/cluster_categories/cluster_ids_categ.tsv"
+  cl_comp:              "/vol/cloud/giant_viruses/db_update/results/cluster_category_stats/cluster_category_completeness.tsv"
   p_clan:               "/vol/cloud/databases/Pfam-A.clans.tsv.gz"
-  p_doms:               "/vol/cloud/giant_viruses/cluster_update/results/cluster_classification/cluster_pfam_domain_architectures.tsv"
-  hhblits_results:      "/vol/cloud/giant_viruses/cluster_update/results/cluster_communities/k_hhblits.tsv"
+  p_doms:               "/vol/cloud/giant_viruses/db_update/results/cluster_classification/cluster_pfam_domain_architectures.tsv"
+  hhblits_results:      "/vol/cloud/giant_viruses/db_update/results/cluster_communities/k_hhblits.tsv"
   # Files with results that can be loaded to skip time consuming steps, leave it empty to recalculate them
   k_g_mcl_list:         ""
   k_gc:                 ""
@@ -27,12 +27,12 @@ default:
   da_dist:              ""
   k_das_refinement:     ""
 
-  kwp_hhblits_results:  "/vol/cloud/giant_viruses/cluster_update/results/cluster_communities/kwp_hhblits.tsv"
+  kwp_hhblits_results:  "/vol/cloud/giant_viruses/db_update/results/cluster_communities/kwp_hhblits.tsv"
   kwp_g_mcl_list:       ""
   kwp_gc:               ""
-  gu_hhblits_results:   "/vol/cloud/giant_viruses/cluster_update/results/cluster_communities/gu_hhblits.tsv"
+  gu_hhblits_results:   "/vol/cloud/giant_viruses/db_update/results/cluster_communities/gu_hhblits.tsv"
   gu_g_mcl_list:        ""
   gu_gc:                ""
-  eu_hhblits_results:   "/vol/cloud/giant_viruses/cluster_update/results/cluster_communities/eu_hhblits.tsv"
+  eu_hhblits_results:   "/vol/cloud/giant_viruses/db_update/results/cluster_communities/eu_hhblits.tsv"
   eu_g_mcl_list:        ""
   eu_gc:                ""

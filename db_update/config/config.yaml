@@ -1,8 +1,8 @@
 # This file should contain everything to configure the workflow on a global scale.
 # In case of sample based data, it should be complemented by a samples.tsv file that contains
 # one row per sample. It can be parsed easily via pandas.
-wdir: "/vol/cloud/giant_viruses/agnostos-wf/cluster_update"
-rdir: "/vol/cloud/giant_viruses/cluster_update/results"
+wdir: "/vol/cloud/giant_viruses/agnostos-wf/db_update"
+rdir: "/vol/cloud/giant_viruses/db_update/results"
 data: "/vol/cloud/giant_viruses/data"
 
 # Cluster update configuration
@@ -60,7 +60,7 @@ hmmer_bin: "/vol/cloud/giant_viruses/agnostos-wf/bin/hmmsearch"
 # Clustering config
 ffindex_apply: "/vol/cloud/giant_viruses/agnostos-wf/bin/ffindex_apply_mpi"
 mmseqs_bin: "/vol/cloud/giant_viruses/agnostos-wf/bin/mmseqs"
-mmseqs_tmp: "/vol/cloud/giant_viruses/agnostos-wf/cluster_update/tmp"
+mmseqs_tmp: "/vol/cloud/giant_viruses/agnostos-wf/db_update/tmp"
 mmseqs_local_tmp: "/vol/scratch/tmp"
 mmseqs_split_mem: "100G"
 mmseqs_split: 10
