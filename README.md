@@ -36,16 +36,10 @@ snakemake --use-conda -j 100 --cluster-config config/cluster.yaml --cluster "sba
 
 **2.  DB-Update module**: Add your genomic/metagenomic contigs or genes to the agnostosDB cluster database, dowloadable from [here](). A description of the agnostosDB files can be found in the [agnostosDB_README.md](agnostosDB_README.md).
 
--   The DB-update workflow is in the [db_update/](db_update) folder. To run it, you just need to enter the folder, modify the [config.yaml](db_update/config/config.yaml) and [config_communities.yaml](db_update/config/config_communities.yaml)files specifying your input data and the output paths, and then run the command:
+-   The DB-update workflow is in the [db_update/](db_update) folder. To run it, you just need to enter the folder, modify the [config.yaml](db_update/config/config.yaml) and [config_communities.yaml](db_update/config/config_communities.yaml) files specifying your input data and the output paths, and then run the command:
 
 ```{bash}
 snakemake -s Snakefile --use-conda -j 100 --cluster-config config/cluster.yaml --cluster "sbatch --export=ALL -t {cluster.time} -c {threads} --ntasks-per-node {cluster.ntasks_per_node} --nodes {cluster.nodes} --cpus-per-task {cluster.cpus_per_task} --job-name {rulename}.{jobid} --partition {cluster.partition}" -R --until workflow_report
-```
-
-NB: Make sure to remove eventual "*" from your fasta sequences. Below you have an example on how to do it:
-
-```{bash}
-seqkit replace -s -p "\*" -r "" my_seqs.fasta > my_seqs_clean.fasta
 ```
 
 **3.  Profile-search**: the profile-search vs the MG+GTDB HMM profile DB is not part of the Snakemake workflow. However, if you want to search your set of genes against our profiles you just need to dowload the profile DB from [here](), or the full DB, including contextual data, from [here]() (in this second case you can find the profile DB in "cluster_category_DB/clu_hmm_db").
