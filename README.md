@@ -42,6 +42,8 @@ snakemake --use-conda -j 100 --cluster-config config/cluster.yaml --cluster "sba
 snakemake -s Snakefile --use-conda -j 100 --cluster-config config/cluster.yaml --cluster "sbatch --export=ALL -t {cluster.time} -c {threads} --ntasks-per-node {cluster.ntasks_per_node} --nodes {cluster.nodes} --cpus-per-task {cluster.cpus_per_task} --job-name {rulename}.{jobid} --partition {cluster.partition}" -R --until workflow_report
 ```
 
+<br>
+
 **Output**
 
 The output of these 2 modules is described in the [Output_README.md](Output_README.md).
@@ -58,7 +60,7 @@ Profile_search/profile_search.sh --query your-genes.fasta --info your-genes_add_
 
 The "--info" file is optional, and should be a table with the correspondence of the genes to the contigs and/or genomes/MAGs/samples. The format should be gene - genome (or sample_ID) etc.
 
-<br>
+* * *
 
 ###### THE FUNCTIONAL DARK SIDE OF GENOMES AND METAGENOMES
 To lern more about what we are doing check out our website  [dark.metagenomics.eu](https://dark.metagenomics.eu/).
