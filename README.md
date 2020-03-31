@@ -60,6 +60,8 @@ Profile_search/profile_search.sh --query your-genes.fasta --info your-genes_add_
 
 The "--info" file is optional, and should be a table with the correspondence of the genes to the contigs and/or genomes/MAGs/samples. The format should be gene - genome (or sample_ID) etc.
 
+<br>
+
 * * *
 
 ###### THE FUNCTIONAL DARK SIDE OF GENOMES AND METAGENOMES
