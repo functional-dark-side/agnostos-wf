@@ -10,13 +10,13 @@
 
 The workflow is still under development and it is subject to change. No guarentee is made regarding the functioning of the workflow and the accuracy of the results. Please, conctact us in case you are interested in using it.
 
-#### Snakemake workflow usage:
+### Snakemake workflow usage:
 
 The "agnostos-wf" snakemake workflow was developed using/runs in the de.NBI Cloud.
 We used a cluster setup with 10 nodes of 28 cores and 252 G of memory each.
 The cluster was build using BiBiGrid and it is using SLURM as Grid Batch Scheduler.
 
-##### Before running it:
+#### Before running it:
 
 1.  Run the installation script [installation_script.sh](util/installation_script.sh).
 
@@ -26,7 +26,7 @@ The cluster was build using BiBiGrid and it is using SLURM as Grid Batch Schedul
 
 When everything is set...
 
-##### Run the workflow:
+### Run the workflow:
 
 **1.  DB-creation module**: Start from a set of genomic/metagenomic contigs in fasta format and retrieve a database of categorised gene clusters and cluster communities.
 
@@ -65,6 +65,6 @@ To lern more about what we are doing check out our website  [dark.metagenomics.e
 
 <br>
 
-##### Citation:
+#### Citation:
 
 Vanni, C., Schechter M., Delmont, T.O., Buttigieg P.L., Acinas S., Barberan A., Casamayor E.O., Siren K., Steinegger M., Eren M. A., Glöckner F.O and Fernandez-Guerra A.. (2020). Light into the darkness: Unifying the known and unknown coding sequence space in microbiome analyses. In preparation.
