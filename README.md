@@ -42,7 +42,11 @@ snakemake --use-conda -j 100 --cluster-config config/cluster.yaml --cluster "sba
 snakemake -s Snakefile --use-conda -j 100 --cluster-config config/cluster.yaml --cluster "sbatch --export=ALL -t {cluster.time} -c {threads} --ntasks-per-node {cluster.ntasks_per_node} --nodes {cluster.nodes} --cpus-per-task {cluster.cpus_per_task} --job-name {rulename}.{jobid} --partition {cluster.partition}" -R --until workflow_report
 ```
 
-**3.  Profile-search**: the profile-search vs the MG+GTDB HMM profile DB is not part of the Snakemake workflow. However, if you want to search your set of genes against our profiles you just need to dowload the profile DB from [here](), or the full DB, including contextual data, from [here]() (in this second case you can find the profile DB in "cluster_category_DB/clu_hmm_db").
+The output of these 2 modules is described in the [Output_README.md](Output_README.md).
+
+<br>
+
+**3.  Profile-search**: the profile-search vs the AgnostosDB cluster HMM profiles database is not part of the Snakemake workflow. However, if you want to search your set of genes against our profiles you just need to dowload the profile DB from [here](), or the full DB, including contextual data, from [here]() (in this second case you can find the profile DB in "cluster_category_DB/clu_hmm_db").
 The scripts can be found in the [Profile_search/](Profile_search) folder.
 To run the search you just need the following command:
 
