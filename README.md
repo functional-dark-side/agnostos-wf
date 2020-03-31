@@ -65,7 +65,8 @@ The "--info" file is optional, and should be a table with the correspondence of 
 ###### THE FUNCTIONAL DARK SIDE OF GENOMES AND METAGENOMES
 To lern more about what we are doing check out our website  [dark.metagenomics.eu](https://dark.metagenomics.eu/).
 
-<br>
+
+* * *
 
 #### Citation:
 
