@@ -129,6 +129,7 @@ The results structure is the same as the creation-mode one (the clusters process
     -   cluster_category_summary_stats.tsv - summary table containing various information about the clusters.
     -   pfam_name_acc_clan_multi.tsv - all genes Pfam annotations.
     -   K/KWP/GU/EU_annotations.tsv.gz - category annotations.
+    -   orf_partial_info.tsv.gz - list of gene headers and their level of completness, based on the Prodigal prediction results.
     -   HQ_clusters.tsv - set of high quality clusters (clusters with high percentage of complete genes).
     -   spurious_shadow_info.tsv - summary table with gene quality information.
     -   cluster_category_DB/

@@ -5,7 +5,8 @@
 -   cluster_ids_categ.tsv - Table with cluster ids and categories.
 -   cluster_ids_categ_genes.tsv.gz - Table with cluster ids and categories and genes (ORFs-headers).
 -   cluster_db_size_categ_origin.tsv.gz - Table with cluster ids the sequence original database/provenience, the cluster size and the cluster categories (ORFs-headers).
--   cluster_category_summary_stats.tsv - A summary table with the refined cluster statistics. It includes cluster size, ORF length stats, cluster ORF completeness stats, HQ clusters, cluster level of darkness and disorder, and taxonomic info (prevalent taxonomy and taxonomic entropy).
+-   cluster_category_summary_stats.tsv - A summary table with the refined cluster statistics. It includes cluster size, gene length stats, cluster gene completeness stats, HQ clusters, cluster level of darkness and disorder, and taxonomic info (prevalent taxonomy and taxonomic entropy).
+-   orf_partial_info.tsv.gz - list of gene headers and their level of completness, based on the Prodigal prediction results.
 -   HQ_clusters.tsv - set of high quality (HQ) clusters (clusters with high percentage of complete ORFs). Fields: cluster name, category.
 -   cluster_communities.tsv - Table containing the correspondence between cluster and cluster communitites. Fields: cluster name, community name, category.
 -   pfam_name_acc_clan_multi.tsv - All genes Pfam multi-domain annotations. Fields: orf, Pfam_name, Pfam_accession, Pfam_clan.
@@ -49,6 +50,7 @@ Additional metadata (not required for the workflow)
 -   cluster_ids_categ_genes.tsv.gz - Table with cluster ids and categories and genes (ORFs-headers).
 -   cluster_db_size_categ.tsv.gz - Table with cluster ids the sequence original database/provenience, the cluster size and the cluster categories (ORFs-headers).
 -   cluster_category_summary_stats.tsv - A summary table with the refined cluster statistics. It includes cluster size, ORF length stats, cluster ORF completeness stats, HQ clusters, cluster level of darkness and disorder, and taxonomic info (prevalent taxonomy and taxonomic entropy).
+-   orf_partial_info.tsv.gz - list of gene headers and their level of completness, based on the Prodigal prediction results.
 -   HQ_clusters.tsv - set of high quality (HQ) clusters (clusters with high percentage of complete ORFs). Fields: cluster name, category.
 -   cluster_communities.tsv - Table containing the correspondence between cluster and cluster communitites. Fields: cluster name, community name, category.
 -   pfam_name_acc_clan_multi.tsv - All genes Pfam multi-domain annotations. Fields: orf, Pfam_name, Pfam_accession, Pfam_clan.
