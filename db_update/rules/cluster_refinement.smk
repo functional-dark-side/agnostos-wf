@@ -13,6 +13,7 @@ rule cluster_refinement:
         cluseqdb = config["rdir"] + "/mmseqs_clustering/new_clu_seqDB",
         clu_info = config["rdir"] + "/mmseqs_clustering/cluDB_info.tsv",
         partial = config["rdir"] + "/gene_prediction/orf_partial_info.tsv",
+        or_partial = config["ordir"] + "/orf_partial_info.tsv",
         name_index = config["rdir"] + "/mmseqs_clustering/new_cluDB_name_index.txt",
         tmpdb = config["rdir"] + "/cluster_refinement/clu_good_noshadow_seqDB",
         rej = config["rdir"] + "/cluster_refinement/clu_good_noshadow_rejected_orfs.txt",
@@ -98,7 +99,7 @@ rule cluster_refinement:
 
         # annotated (check those left with no-annotated sequences): join with file with all annotated clusters (using the orfs)
         join -11 -21 <(sort -k1,1 {params.tmp1}) \
-          <(awk '{{print $3,$1}}' {params.annot} \
+          <(awk '{{print $3,$4}}' {params.annot} \
           |  sort -k1,1) > {output.ref_annot}
 
         # Reorder columns to have cl_name - orf - pfam_name
