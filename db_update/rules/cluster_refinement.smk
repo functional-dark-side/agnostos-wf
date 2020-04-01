@@ -157,13 +157,13 @@ rule cluster_refinement:
         # Columns tmp3: 1:orf|2:partial_info|3:cl_name
         join -11 -21 <(cat {params.partial} <(zcat {params.or_partial}) \
         | sort -k1,1 --parallel={threads} -T {params.local_tmp}) \
-            <(sort -k1,1 {params.tmp1}) > {params.tmp3}
+            <(sort -k1,1 --parallel={threads} {params.tmp1}) > {params.tmp3}
 
         # Add cluster size and ORF length
         # Columns clu_info: 1:cl_name|2:old_repr|3:orf|4:orf_len|5:cl_size
         # Columns intermediate: 1:orf|2:partial_info|3:cl_name|4:old_repr|5:orf_len|6:cl_size
         # Columns tmp4: 1:cl_name|2:orf|3:partial|4:cl_size|5:orf_len
-        join -11 -21 <(sort -k1,1 {params.tmp3}) \
+        join -11 -21 <(sort -k1,1 --parallel={threads} {params.tmp3}) \
             <(awk '{{print $3,$2,$4,$5}}' {params.clu_info} \
             | sort -k1,1 --parallel={threads} -T {params.local_tmp}) \
             | sort -k3,3 \
@@ -171,7 +171,7 @@ rule cluster_refinement:
 
         # Add new representatives from validation
         # Columns tmp5: 1:cl_name|2:orf|3:partial|4:cl_size|5:orf_len|6:new_repr
-        join -11 -21 <(sort -k1,1 {params.tmp4}) \
+        join -11 -21 <(sort -k1,1 --parallel={threads} -T {params.local_tmp} {params.tmp4}) \
             <(awk '{{print $1,$2}}' {input.val_res} | sort -k1,1 --parallel={threads}) > {params.tmp5}
 
         # Reorder columns: 1:cl_name|2:new_repres|3:orf|4:cl_size|5:orf_length|6:partial
