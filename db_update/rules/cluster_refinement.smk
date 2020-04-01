@@ -13,7 +13,7 @@ rule cluster_refinement:
         cluseqdb = config["rdir"] + "/mmseqs_clustering/new_clu_seqDB",
         clu_info = config["rdir"] + "/mmseqs_clustering/cluDB_info.tsv",
         partial = config["rdir"] + "/gene_prediction/orf_partial_info.tsv",
-        or_partial = config["ordir"] + "/orf_partial_info.tsv",
+        or_partial = config["ordir"] + "/orf_partial_info.tsv.gz",
         name_index = config["rdir"] + "/mmseqs_clustering/new_cluDB_name_index.txt",
         tmpdb = config["rdir"] + "/cluster_refinement/clu_good_noshadow_seqDB",
         rej = config["rdir"] + "/cluster_refinement/clu_good_noshadow_rejected_orfs.txt",
@@ -152,9 +152,11 @@ rule cluster_refinement:
                                         {params.refdb_noannot} 2>>{log.err} 1>>{log.out}
 
         # Add ORF partial information to the refined cluster table
+
         # Colums partial: 1:orf|2:partial_info
         # Columns tmp3: 1:orf|2:partial_info|3:cl_name
-        join -11 -21 <(sort -k1,1 {params.partial}) \
+        join -11 -21 <(cat {params.partial} <(zcat {params.or_partial}) \
+        | sort -k1,1 --parallel={threads} -T {params.local_tmp}) \
             <(sort -k1,1 {params.tmp1}) > {params.tmp3}
 
         # Add cluster size and ORF length

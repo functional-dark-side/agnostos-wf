@@ -19,8 +19,10 @@ rule integrated_cluster_db:
         clu_gene = config["rdir"] + "/cluster_categories/cluster_ids_categ_genes.tsv.gz",
         sp_sh = config["rdir"] + "/spurious_shadow/spurious_shadow_info.tsv",
         multi_annot = config["rdir"] + "/annot_and_clust/pfam_name_acc_clan_multi.tsv",
+        partial = config["rdir"] + "/gene_prediction/orf_partial_info.tsv",
         isp_sh = config["rdir"] + "/integrated_cluster_DB/spurious_shadow_info.tsv",
         imulti_annot = config["rdir"] + "/integrated_cluster_DB/pfam_name_acc_clan_multi.tsv",
+        ipartial = config["rdir"] + "/integrated_cluster_DB/orf_partial_info.tsv.gz",
         iclu_gene = config["rdir"] + "/integrated_cluster_DB/cluster_ids_categ_genes.tsv.gz",
         clu_origin = config["rdir"] + "/integrated_cluster_DB/cluDB_name_origin_size.tsv",
         or_clu_cat = config["ordir"] + "/cluster_ids_categ.tsv",
@@ -29,7 +31,8 @@ rule integrated_cluster_db:
         or_clu_stats = config["ordir"] + "/cluster_category_summary_stats.tsv",
         or_hq_clu = config["ordir"] + "/HQ_clusters.tsv",
         or_clu_hmm = config["ordir"] + "/cluster_category_DB/clu_hmm_db",
-        or_clu_seq = config["ordir"] + "/cluster_category_DB/clu_seqDB"
+        or_clu_seq = config["ordir"] + "/cluster_category_DB/clu_seqDB",
+        or_partial = config["ordir"] + "/orf_partial_info.tsv.gz"
     log:
         out = "logs/integ_stdout.log",
         err = "logs/integ_stderr.err"
@@ -58,6 +61,8 @@ rule integrated_cluster_db:
             <(awk -vOFS='\\t' '{{print $1,"shared",$3}}' {params.shared}) \
             <(awk -vOFS='\\t' '{{print $1,"new",$3}}' {params.new}) > {params.clu_origin}
 
+        # All gene headers and partiality information
+        cat {params.partial} <(zcat {params.or_partial}) | gzip > {params.ipartial}
 
         # Spurious and shadow genes information:
         cp {params.sp_sh} {params.isp_sh}
