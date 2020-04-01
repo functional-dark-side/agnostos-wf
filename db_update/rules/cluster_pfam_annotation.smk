@@ -8,10 +8,13 @@ rule cluster_pfam_annotation:
     params:
         cl_annotr = "scripts/clu_annot.r",
         pfam_clan = config["pfam_clan"],
+        local_tmp = config["mmseqs_local_tmp"],
         singl = config["rdir"] + "/mmseqs_clustering/cluDB_singletons.tsv",
         s_annot = config["rdir"] + "/annot_and_clust/singletons_pfam_annot.tsv",
         or_multi_annot = config["ordir"] + "/pfam_name_acc_clan_multi.tsv",
         multi_annot = config["rdir"] + "/annot_and_clust/pfam_name_acc_clan_multi.tsv",
+        or_partial = config["ordir"] + "/orf_partial_info.tsv.gz",
+        partial = config["rdir"] + "/annot_and_clust/new_orf_partial_info.tsv",
         tmp = config["rdir"] + "/annot_and_clust/tmp",
         concat = "scripts/concat_multi_annot.awk"
     output:
@@ -49,13 +52,18 @@ rule cluster_pfam_annotation:
 
         cat {params.or_multi_annot} >> {params.multi_annot}
 
+        # Gene completeness information combined
+        join -11 -21 <(cat {input.partial} <(zcat {params.or_partial}) \
+        | sort -k1,1 --parallel={threads} -T {params.local_tmp}) \
+        <( awk '{{print $2}}' {input.clu} | sort -k1,1 --parallel={threads}) > {params.partial}
+
         ## 2. Cluster annotations
 
         # The r script "clu_annot.r" distribute the Pfam annotation in the clusters,
         # creating two sets: "annotated_clusters" and "not_annotated_clusters"
         ./{params.cl_annotr} --pfam_annot {params.multi_annot} \
                              --clusters {input.clu} \
-                             --partial {input.partial} \
+                             --partial {params.partial} \
                              --output_annot {output.cl_annot} \
                              --output_noannot {output.cl_noannot} 2>{log.err}
 

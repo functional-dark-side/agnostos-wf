@@ -12,8 +12,7 @@ rule cluster_refinement:
         good_noshadow = config["rdir"] + "/cluster_refinement/good_noshadow_clusters.txt",
         cluseqdb = config["rdir"] + "/mmseqs_clustering/new_clu_seqDB",
         clu_info = config["rdir"] + "/mmseqs_clustering/cluDB_info.tsv",
-        partial = config["rdir"] + "/gene_prediction/orf_partial_info.tsv",
-        or_partial = config["ordir"] + "/orf_partial_info.tsv.gz",
+        partial = config["rdir"] + "/annot_and_clust/new_orf_partial_info.tsv",
         name_index = config["rdir"] + "/mmseqs_clustering/new_cluDB_name_index.txt",
         tmpdb = config["rdir"] + "/cluster_refinement/clu_good_noshadow_seqDB",
         rej = config["rdir"] + "/cluster_refinement/clu_good_noshadow_rejected_orfs.txt",
@@ -155,9 +154,8 @@ rule cluster_refinement:
 
         # Colums partial: 1:orf|2:partial_info
         # Columns tmp3: 1:orf|2:partial_info|3:cl_name
-        join -11 -21 <(cat {params.partial} <(zcat {params.or_partial}) \
-        | sort -k1,1 --parallel={threads} -T {params.local_tmp}) \
-            <(sort -k1,1 --parallel={threads} {params.tmp1}) > {params.tmp3}
+        join -11 -21 <(sort -k1,1 --parallel={threads} {params.partial}) \
+            <(sort -k1,1 --parallel={threads} -T {params.local_tmp} {params.tmp1}) > {params.tmp3}
 
         # Add cluster size and ORF length
         # Columns clu_info: 1:cl_name|2:old_repr|3:orf|4:orf_len|5:cl_size
