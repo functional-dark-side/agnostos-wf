@@ -55,7 +55,9 @@ rule cluster_pfam_annotation:
         # Gene completeness information combined
         join -11 -21 <(cat {input.partial} <(zcat {params.or_partial}) \
         | sort -k1,1 --parallel={threads} -T {params.local_tmp}) \
-        <( awk '{{print $2}}' {input.clu} | sort -k1,1 --parallel={threads}) > {params.partial}
+        <( awk '{{print $3}}' {input.clu} | sort -k1,1 --parallel={threads}) > {params.partial}
+
+        sed -i 's/ /\t/g' {params.partial}
 
         ## 2. Cluster annotations
 

@@ -71,7 +71,7 @@ clu_annot <- clu %>% dt_left_join(annot, by = "orf")
 # "1" indicates the gene is "unfinished" at that edge (i.e. a partial gene).
 # For example: "01" means a gene is partial at the right boundary, "11" indicates both edges are incomplete,
 # and "00" indicates a complete gene with a start and stop codon.
-partial <- fread(opt$partial, header = F, colClasses = c("character", "character")) %>% setNames(c("orf", "partial"))
+partial <- fread(opt$partial, header = F, colClasses = c("character", "character"), sep="\t") %>% setNames(c("orf", "partial"))
 
 # Annotated clusters
 clu_annot %>%
