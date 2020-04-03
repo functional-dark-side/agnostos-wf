@@ -84,9 +84,6 @@ rule integrated_cluster_db:
         # and the cluster genes
         zcat {params.clu_gene} {params.or_clu_gene} | gzip > {params.iclu_gene}
 
-        join -11 -21 <(sort -k1,1 {output.iclu_cat} ) \
-            <(awk '{{print $1,$3}}' {params.clu_info} | sort -k1,1 --parallel {threads} )
-
         # Integrated set of cluster communities
         # to avoid having overlapping communities names, we append the dataset origin
         cat <(awk -vOFS='\\t' 'NR>1{{print $1,$2"_new",$3}}' {input.clu_com} ) \
