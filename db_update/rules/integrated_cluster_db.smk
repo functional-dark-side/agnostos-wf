@@ -26,7 +26,7 @@ rule integrated_cluster_db:
         iclu_gene = config["rdir"] + "/integrated_cluster_DB/cluster_ids_categ_genes.tsv.gz",
         clu_origin = config["rdir"] + "/integrated_cluster_DB/cluDB_name_origin_size.tsv",
         or_clu_cat = config["ordir"] + "/cluster_ids_categ.tsv",
-        or_clu_gene = config["ordir"] + "cluster_ids_categ_genes.tsv.gz",
+        or_clu_gene = config["ordir"] + "/cluster_ids_categ_genes.tsv.gz",
         or_clu_com = config["ordir"] + "/cluster_communities.tsv",
         or_clu_stats = config["ordir"] + "/cluster_category_summary_stats.tsv",
         or_hq_clu = config["ordir"] + "/HQ_clusters.tsv",
