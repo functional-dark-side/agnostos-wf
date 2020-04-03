@@ -100,7 +100,7 @@ rm -rf "${DIR}"/taxres*
 sed -i 's/ /__/g' "${taxres}"
 
 # Add cluster information
-join -13 -21 <(sort -k3,3 <(zcat"${CL_INFO}")) \
+join -13 -21 <(sort -k3,3 <(zcat "${CL_INFO}")) \
   <(sort -k1,1 "${taxres}") >"${RES}"
 
 sed -i 's/ /\t/g' "${RES}"
