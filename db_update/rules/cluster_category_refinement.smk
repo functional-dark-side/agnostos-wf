@@ -33,7 +33,7 @@ rule cluster_category_refinement:
         hypo_filt = config["hypo_filt"],
         ref_clu = config["rdir"] + "/cluster_refinement/refined_clusters.tsv",
         categ_orfs = config["rdir"] + \
-            "/cluster_categories/cluster_ids_categ_orfs.tsv",
+            "/cluster_categories/cluster_ids_categ_genes.tsv",
         outdir = config["rdir"] + "/cluster_categories",
         hmm_eu = config["rdir"] + "/cluster_categories/eu_hhm_db",
         hmm_kwp = config["rdir"] + "/cluster_categories/kwp_hhm_db",

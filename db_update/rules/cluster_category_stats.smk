@@ -13,7 +13,7 @@ rule cluster_category_stats:
         stats = "scripts/cluster_category_stats.r",
         ref = config["rdir"] + "/cluster_refinement/refined_clusters.tsv",
         refdb = config["rdir"] + "/cluster_refinement/refined_clusterDB",
-        cl_cat_orfs = config["rdir"] + "/cluster_categories/cluster_ids_categ_orfs.tsv",
+        cl_cat_genes = config["rdir"] + "/cluster_categories/cluster_ids_categ_genes.tsv",
         tax_dir = config["rdir"] + "/cluster_category_stats/taxonomy",
         tax = config["rdir"] + "/cluster_category_stats/taxonomy/cluster_category_taxonomy.tsv",
         dark = config["rdir"] + "/cluster_category_stats/darkness/cluster_category_darkness.tsv",
@@ -37,7 +37,7 @@ rule cluster_category_stats:
         ./{params.mmseqs_tax} --search {params.mmseqs_bin} \
                               --input {params.refdb} \
                               --taxdb {params.taxdb} \
-                              --cl_info {params.cl_cat_orfs}  \
+                              --cl_info {params.cl_cat_genes}  \
                               --output {params.tax} \
                               --outdir {params.outdir} \
                               --mpi_runner "{params.mpi_runner}" \
@@ -46,31 +46,31 @@ rule cluster_category_stats:
         ## Cluster level of darkness
         mkdir -p {params.dark_dir}
         # Extract all sequences from the refined database set:
-        sed -e 's/\\x0//g' {params.refdb} | gzip > {params.dark_dir}/refined_cl_orfs.fasta.gz
+        sed -e 's/\\x0//g' {params.refdb} | gzip > {params.dark_dir}/refined_cl_genes.fasta.gz
 
         # Create MMseqs2 databases
-        {params.mmseqs_bin} createdb {params.dark_dir}/refined_cl_orfs.fasta.gz {params.dark_dir}/refined_cl_orfs_db
+        {params.mmseqs_bin} createdb {params.dark_dir}/refined_cl_genes.fasta.gz {params.dark_dir}/refined_cl_genes_db
         {params.mmseqs_bin} createdb {params.DPD} {params.dark_dir}/dpd_db
         # Search
-        {params.mmseqs_bin} search {params.dark_dir}/refined_cl_orfs_db {params.dark_dir}/dpd_db \
-          {params.dark_dir}/refined_cl_orfs_dpd_db {params.dark_dir}/tmp \
+        {params.mmseqs_bin} search {params.dark_dir}/refined_cl_genes_db {params.dark_dir}/dpd_db \
+          {params.dark_dir}/refined_cl_genes_dpd_db {params.dark_dir}/tmp \
           --threads {threads} --max-seqs 300 \
           -e 1e-20 --cov-mode 0 -c 0.6 --mpi-runner "{params.mpi_runner}"
 
-        {params.mmseqs_bin} convertalis {params.dark_dir}/refined_cl_orfs_db {params.dark_dir}/dpd_db \
-          {params.dark_dir}/refined_cl_orfs_dpd_db {params.dark_dir}/refined_cl_orfs_dpd.tsv \
+        {params.mmseqs_bin} convertalis {params.dark_dir}/refined_cl_genes_db {params.dark_dir}/dpd_db \
+          {params.dark_dir}/refined_cl_genes_dpd_db {params.dark_dir}/refined_cl_genes_dpd.tsv \
           --format-mode 2 --threads {threads} \
           --format-output 'query,target,pident,alnlen,mismatch,gapopen,qstart,qend,tstart,tend,evalue,bits,qcov,tcov'
 
-        rm -rf {params.dark_dir}/refined_cl_orfs_db* {params.dark_dir}/dpd_db* {params.dark_dir}/refined_cl_orfs_dpd_db* {params.dark_dir}/tmp
+        rm -rf {params.dark_dir}/refined_cl_genes_db* {params.dark_dir}/dpd_db* {params.dark_dir}/refined_cl_genes_dpd_db* {params.dark_dir}/tmp
 
         # Extract best-hits
-        export LANG=C; export LC_ALL=C; sort -k1,1 -k11,11g -k13,13gr -k14,14gr {params.dark_dir}/refined_cl_orfs_dpd.tsv | \
-          sort -u -k1,1 --merge > {params.dark_dir}/refined_cl_orfs_dpd_bh.tsv
+        export LANG=C; export LC_ALL=C; sort -k1,1 -k11,11g -k13,13gr -k14,14gr {params.dark_dir}/refined_cl_genes_dpd.tsv | \
+          sort -u -k1,1 --merge > {params.dark_dir}/refined_cl_genes_dpd_bh.tsv
 
         # Join with cluster categories
-        join -11 -23 <(awk '{{print $1,$2}}' {params.dark_dir}/refined_cl_orfs_dpd_bh.tsv | sort -k1,1) \
-          <(sort -k3,3 <(zcat {params.cl_cat_orfs})) > {params.dark}
+        join -11 -23 <(awk '{{print $1,$2}}' {params.dark_dir}/refined_cl_genes_dpd_bh.tsv | sort -k1,1) \
+          <(sort -k3,3 <(zcat {params.cl_cat_genes})) > {params.dark}
 
         sed -i 's/ /\\t/g' {params.dark}
 
