@@ -230,7 +230,7 @@ cat_compl <- cat_stats %>%
 
 # Cluster taxonomy stats
 cl_tax <- fread(opt$clu_tax,
-  stringsAsFactors = F, header = F, fill = T
+  stringsAsFactors = F, header = F, fill = T, sep="\t",
 ) %>%
   setNames(c("orf", "cl_name", "category", "taxid", "rank", "classific", "lineage"))
 # Filter out the unclassified ones and split the taxonomic levels in the lineage
