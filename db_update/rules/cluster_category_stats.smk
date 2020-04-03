@@ -70,7 +70,7 @@ rule cluster_category_stats:
 
         # Join with cluster categories
         join -11 -23 <(awk '{{print $1,$2}}' {params.dark_dir}/refined_cl_orfs_dpd_bh.tsv | sort -k1,1) \
-          <(sort -k3,3 {params.cl_cat_orfs}) > {params.dark}
+          <(sort -k3,3 <(zcat {params.cl_cat_orfs})) > {params.dark}
 
         sed -i 's/ /\\t/g' {params.dark}
 
