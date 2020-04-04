@@ -143,7 +143,7 @@ orf_annot <- dim(clu_annot)[1]
 
 tibble(Type=c("Clusters","Genes"),
        Annotated_clusters=c(cl_annot,orf_annot),
-       Not_annotated_clusters=c(dim(clu)[1]-cl_annot,
+       Not_annotated_clusters=c(dim(clu %>% filter(V3>1))[1]-cl_annot,
        sum(clu %>% filter(V3>1)  %>% .$V3)-orf_annot)) %>% kable(digits=3, format.args = list(big.mark = ",")) %>%
   kable_styling(bootstrap_options = c("striped", "condensed"),full_width = F)
 
