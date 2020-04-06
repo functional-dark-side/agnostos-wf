@@ -1,9 +1,9 @@
 # This file should contain everything to configure the workflow on a global scale.
 # In case of sample based data, it should be complemented by a samples.tsv file that contains
 # one row per sample. It can be parsed easily via pandas.
-wdir: "/dir/agnostos-wf"
-rdir: "/dir/db_creation"
-data: "/dir/data"
+wdir: "/vol/cloud/agnostos-wf"
+rdir: "/vol/cloud/agnostos-wf/db_creation"
+data: "/vol/cloud/agnostos-wf/data"
 
 # Threads configuration
 threads_default: 28
