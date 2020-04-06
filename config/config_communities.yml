@@ -13,7 +13,7 @@ default:
   das_refinement_cores: 64
   # Files
   wd:                   "/vol/cloud/results/cluster_communities"
-  graph_lib:            "/vol/cloud/unk_workflow/agnostos-wf/scripts/communities_inference/graph_lib.R"
+  graph_lib:            "/vol/cloud/agnostos-wf/scripts/communities_inference/graph_lib.R"
   cl_cat:               "/vol/cloud/results/cluster_categories/cluster_ids_categ.tsv"
   cl_comp:              "/vol/cloud/results/cluster_category_stats/cluster_category_completeness.tsv"
   p_clan:               "/vol/cloud/databases/Pfam-A.clans.tsv.gz"
