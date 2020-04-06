@@ -6,17 +6,23 @@ set -x
 usage() { echo -e "Usage: $(basename $0) [OPTIONS...]
 Options:
 --query            genes fasta sequences \
+--clu_hmm          cluster HMMs db \
+--clu_cat        cluster categories table \
 --info             genes additional information \
 --mmseqs           location of mmseqs binary \
   --threads          number of threads to use" 1>&2; exit 1; }
 
-OPT_LIST="query:,info:,mmseqs:,threads:"
+OPT_LIST="query:,clu_hmm:,clu_cat:,info:,mmseqs:,threads:"
 
 eval set -- $(getopt -o '' --long "${OPT_LIST}" -- "$@")
 while true; do
   case "$1" in
     --query)
       QUERY=$2; shift 2 ;;
+    --clu_hmm)
+      CLHMM=$2; shift 2 ;;
+    --clu_cat)
+      CLCAT=$2; shift 2 ;;
     --info)
       INFO=$2; shift 2 ;;
     --mmseqs)
@@ -37,8 +43,6 @@ fi
 MMSEQS_BIN=${MMSEQS_BIN:=~/opt/MMseqs2/bin/mmseqs}
 
 # Fixed variables
-CLHMM="${PWD}"/mg_gtdb_hmm_db #/bioinf/projects/megx/UNKNOWNS/2017_11/mg_gtdb_hmm_db
-CL_CATEG="${PWD}"/mg_gtdb_kept_cluster_categories_class.tsv.gz
 MPI="srun --mpi=pmi2"
 EFILTER="${PWD}"/scripts/evalue_filter.awk
 MVOTE="${PWD}"/scripts/majority_vote_categ.R
@@ -78,7 +82,7 @@ fi
 awk -v P=0.9 -f "${EFILTER}" "${OUTDIR}"/"${NAME}"_vs_mg_gtdb_hmm_hits.tsv > "${OUTDIR}"/"${NAME}"_vs_mg_gtdb_hmm_res_qcov06_e90.tsv
 # Add functional category information
 join -12 -21 <(sort -k2,2 "${OUTDIR}"/"${NAME}"_vs_mg_gtdb_hmm_res_qcov06_e90.tsv ) \
-  <(sort -k1,1  <(zcat "${CL_CATEG}")) \
+  <(sort -k1,1  <(zcat "${CLCAT}")) \
   > "${OUTDIR}"/"${NAME}"_vs_mg_gtdb_hmm_search_res.tsv
 
 gzip "${OUTDIR}"/"${NAME}"_vs_mg_gtdb_hmm_search_res.tsv

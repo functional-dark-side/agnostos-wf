@@ -55,7 +55,7 @@ The scripts can be found in the [Profile_search/](Profile_search) folder.
 To run the search you just need the following command:
 
 ```{bash}
-Profile_search/profile_search.sh --query your-genes.fasta --info your-genes_add_info.tsv --mmseqs /path/to/mmseqs --threads num-threads
+Profile_search/profile_search.sh --query your-genes.fasta --clu_hmm clu_hmm_db --clu_cat cluster_ids_categ.tsv --info your-genes_add_info.tsv --mmseqs /path/to/mmseqs --threads num-threads
 ```
 
 The "--info" file is optional, and should be a table with the correspondence of the genes to the contigs and/or genomes/MAGs/samples. The format should be gene - genome (or sample_ID) etc.
