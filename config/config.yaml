@@ -1,9 +1,9 @@
 # This file should contain everything to configure the workflow on a global scale.
 # In case of sample based data, it should be complemented by a samples.tsv file that contains
 # one row per sample. It can be parsed easily via pandas.
-wdir: "/vol/cloud/agnostos-wf"
-rdir: "/vol/cloud/db_creation"
-data: "/vol/cloud/data"
+wdir: "/dir/agnostos-wf"
+rdir: "/dir/db_creation"
+data: "/dir/data"
 
 # Threads configuration
 threads_default: 28
@@ -46,7 +46,7 @@ hmmer_bin: "/vol/cloud/agnostos-wf/bin/hmmsearch"
 # Clustering config
 ffindex_apply: "/vol/cloud/agnostos-wf/bin/ffindex_apply_mpi"
 mmseqs_bin: "/vol/cloud/agnostos-wf/bin/mmseqs"
-mmseqs_tmp: "/vol/cloud/test/test_wf/tmp"
+mmseqs_tmp: "/vol/cloud/agnostos-wf/tmp"
 mmseqs_local_tmp: "/vol/scratch/tmp"
 mmseqs_split_mem: "100G"
 mmseqs_split: 10
