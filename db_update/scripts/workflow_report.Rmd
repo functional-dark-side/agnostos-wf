@@ -252,9 +252,10 @@ ref <- fread(paste(dir,"/cluster_refinement/refined_clusters.tsv",sep=""),
                  stringsAsFactors = F,header = F)
 
 tibble(Type=c("Number of clusters","Percentage of clusters","Number of genes","Percentage of genes"),
-       Refined=c(length(unique(ref$V1)),length(unique(ref$V1))/val$total_clusters,dim(ref)[1],dim(ref)[1]/val$total_orfs*100),
-       Discrded=c(val$good_cl_n-length(unique(ref$V1)),(val$good_cl_n-length(unique(ref$V1)))/val$total_clusters*100,
-                  val$good_cl_orfs-dim(ref)[1], (val$good_cl_orfs-dim(ref)[1])/val$total_orfs*100)) %>% kable(digits=3, format.args = list(big.mark = ",")) %>%
+       Refined=c(length(unique(ref$V1)),length(unique(ref$V1))/val$good_cl_n*100,
+       dim(ref)[1],dim(ref)[1]/val$good_cl_orfs*100),
+       Discrded=c(val$good_cl_n-length(unique(ref$V1)),(val$good_cl_n-length(unique(ref$V1)))/val$good_cl_n*100,
+                  val$good_cl_orfs-dim(ref)[1], (val$good_cl_orfs-dim(ref)[1])/val$good_cl_orfs*100)) %>% kable(digits=3, format.args = list(big.mark = ",")) %>%
   kable_styling(bootstrap_options = c("striped", "condensed"),full_width = F)
 
 ```
@@ -343,14 +344,16 @@ tibble(Number_of_clusters=c("Pre-unknown_refinement","Unknown_refinement", "Post
        K=c(k1," ",paste(k1," (",k1/length(unique(ref$V1))*100,"%)")),
        KWP=c(kwp1,paste("+",kwp2),paste(kwp3," (",kwp3/length(unique(ref$V1))*100,"%)")),
        GU=c(gu1,paste("+",gu2),paste(gu3," (",gu3/length(unique(ref$V1))*100,"%)")),
-       EU=c(eu1,paste("-",eu2),paste(eu3," (",eu3/length(unique(ref$V1))*100,"%)"))) %>% kable(digits=3, format.args = list(big.mark = ",")) %>%
+       EU=c(eu1,paste("-",eu2),paste(eu3," (",eu3/length(unique(ref$V1))*100,"%)"))) %>%
+       kable(digits=3, format.args = list(big.mark = ",")) %>%
   kable_styling(bootstrap_options = c("striped", "condensed"),full_width = F)
 
 tibble(Number_of_clusters=c("Pre-known_refinement","Known_refinement", "Post-known_refinement"),
        K=c(k1,paste("+",k2),paste(k3," (",k3/length(unique(ref$V1))*100,"%)")),
        KWP=c(kwp3,paste("-",(k2+gu4)),paste(kwp4," (",kwp4/length(unique(ref$V1))*100,"%)")),
        GU=c(gu3,paste("+",gu4),paste(gu5," (",gu5/length(unique(ref$V1))*100,"%)")),
-       EU=c(eu3," ",paste(eu3," (",eu3/length(unique(ref$V1))*100,"%)"))) %>% kable(digits=3, format.args = list(big.mark = ",")) %>%
+       EU=c(eu3," ",paste(eu3," (",eu3/length(unique(ref$V1))*100,"%)"))) %>%
+       kable(digits=3, format.args = list(big.mark = ",")) %>%
   kable_styling(bootstrap_options = c("striped", "condensed"),full_width = F)
 ```
 
