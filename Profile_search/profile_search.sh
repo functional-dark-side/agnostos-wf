@@ -82,7 +82,7 @@ fi
 awk -v P=0.9 -f "${EFILTER}" "${OUTDIR}"/"${NAME}"_vs_mg_gtdb_hmm_hits.tsv > "${OUTDIR}"/"${NAME}"_vs_mg_gtdb_hmm_res_qcov06_e90.tsv
 # Add functional category information
 join -12 -21 <(sort -k2,2 "${OUTDIR}"/"${NAME}"_vs_mg_gtdb_hmm_res_qcov06_e90.tsv ) \
-  <(sort -k1,1  <(zcat "${CLCAT}")) \
+  <(sort -k1,1   "${CLCAT}") \
   > "${OUTDIR}"/"${NAME}"_vs_mg_gtdb_hmm_search_res.tsv
 
 gzip "${OUTDIR}"/"${NAME}"_vs_mg_gtdb_hmm_search_res.tsv
