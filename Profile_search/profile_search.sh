@@ -47,7 +47,7 @@ MPI="srun --mpi=pmi2"
 EFILTER="${PWD}"/agnostos-wf/Profile_search/evalue_filter.awk
 MVOTE="${PWD}"/agnostos-wf/Profile_search/majority_vote_categ.R
 LTMP=/vol/scratch/tmp
-OUTDIR="${PWD}"/results
+OUTDIR="${PWD}"/profile_search_res
 
 mkdir -p "${OUTDIR}"
 
@@ -95,4 +95,3 @@ gzip "${OUTDIR}"/"${NAME}"_vs_mg_gtdb_hmm_search_res.tsv
 # Parse results to get best-hits and category proportions per sample (or genome or contig..)
 # NB: the info file should have the following format: <gene> <sample> (or <genome>, or <contig>)
 Rscript --vanilla "${MVOTE}" "${OUTDIR}"/"${NAME}"_vs_mg_gtdb_hmm_search_res.tsv.gz "${INFO}"
-

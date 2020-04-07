@@ -62,6 +62,7 @@ args = commandArgs(trailingOnly=TRUE)
 
 res=basename(args[1])
 res=gsub(".tsv.gz","",res)
+dir=dirname(args[1])
 
 # Find consensus category
 # 1. read e-value filtered results
@@ -75,7 +76,7 @@ df_summ <- efilters %>% left_join(votes) %>% group_by(gene) %>%
   select(gene,majority,cl_name,category,is_best)
 #write.table(df_summ,paste(getwd(),"/",res,"_summary.tsv",sep=""), col.names = T, row.names = F, quote = F, sep = "\t")
 df_best <- df_summ %>% filter(is_best==TRUE) %>% select(-is_best,-category) %>% rename(category=majority)
-write.table(df_best,paste(res,"_best-hits.tsv",sep=""), col.names = T, row.names = F, quote = F, sep = "\t")
+write.table(df_best,paste(dir,"/",res,"_best-hits.tsv",sep=""), col.names = T, row.names = F, quote = F, sep = "\t")
 
 # Join with info about genomes/MAGs
 # Must be a table with the corrispondence of the genes to the contigs (and in case also to the genomes/MAGs)
@@ -90,8 +91,8 @@ res_info_class <- df_best %>% left_join(info,by="gene") %>%
   mutate(class=case_when(grepl('U',category) ~ "Unknown",
                          TRUE ~ "Known")) %>%
   group_by(sample, total_ngenes, class) %>% count()
-write.table(res_info_class,paste0(res,"_summary-classes.tsv"), col.names = T, row.names = F, quote = F, sep = "\t")
+write.table(res_info_class,paste0(dir,"/",res,"_summary-classes.tsv"), col.names = T, row.names = F, quote = F, sep = "\t")
 
 res_info_categ <- df_best %>% left_join(info,by="gene") %>%
   group_by(sample, total_ngenes, category) %>% count()
-write.table(res_info_categ,paste0(res,"_summary-categ.tsv"), col.names = T, row.names = F, quote = F, sep = "\t")
+write.table(res_info_categ,paste0(dir,"/",res,"_summary-categ.tsv"), col.names = T, row.names = F, quote = F, sep = "\t")
