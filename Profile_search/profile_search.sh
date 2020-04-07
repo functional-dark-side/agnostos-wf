@@ -44,8 +44,8 @@ MMSEQS_BIN=${MMSEQS_BIN:=~/opt/MMseqs2/bin/mmseqs}
 
 # Fixed variables
 MPI="srun --mpi=pmi2"
-EFILTER="${PWD}"/scripts/evalue_filter.awk
-MVOTE="${PWD}"/scripts/majority_vote_categ.R
+EFILTER="${PWD}"/agnostos-wf/Profile_search/evalue_filter.awk
+MVOTE="${PWD}"/agnostos-wf/Profile_search/majority_vote_categ.R
 LTMP=/vol/scratch/tmp
 OUTDIR="${PWD}"/results
 
@@ -62,12 +62,13 @@ NSEQS=$(grep -c '^>' "${QUERY}")
 
 if [[ ${NSEQS} -ge 10000 ]]; then
   # Sequernce-profile search against the Cluster HMM profiles
-  sbatch --ntasks-per-node 1 --wait\
+  sbatch --ntasks-per-node 1 --wait \
     --nodes 9 --cpus-per-task 28 \
     --job-name profs --partition nomaster \
     --wrap " ${MMSEQS_BIN} search ${QUERY_DB} ${CLHMM} ${OUTDIR}/${NAME}_vs_mg_gtdb_hmm_db ${OUTDIR}/tmp \
     --local-tmp ${LTMP} \
     --threads ${NSLOTS} -e 1e-20 --cov-mode 2 -c 0.6 \
+    --split-mode 0 --split-memory-limit 150G \
     --mpi-runner \"${MPI}\" "
 else
   # Sequernce-profile search against the Cluster HMM profiles
@@ -95,4 +96,3 @@ gzip "${OUTDIR}"/"${NAME}"_vs_mg_gtdb_hmm_search_res.tsv
 # NB: the info file should have the following format: <gene> <sample> (or <genome>, or <contig>)
 Rscript --vanilla "${MVOTE}" "${OUTDIR}"/"${NAME}"_vs_mg_gtdb_hmm_search_res.tsv.gz "${INFO}"
 
-rm "${MAG}"_genes* "${MAG}"_mg_gtdb_db* "${MAG}"_mg_gtdb_qcov06_e90.tsv

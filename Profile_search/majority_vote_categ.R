@@ -1,4 +1,23 @@
 #!/usr/bin/env Rscript
+
+is.installed <- function(pkg){
+  is.element(pkg, installed.packages()[,1])
+}
+
+if (!is.installed("tidyverse") || !is.installed("data.table") || !is.installed("maditr")){
+  cat("We will try to install the packages... (this will be only be done once)\n")
+  Sys.sleep(5)
+  if (!is.installed("tidyverse")){
+    suppressMessages(install.packages("tidyverse", repos = "https://cloud.r-project.org/"))
+  }
+  if (!is.installed("data.table")){
+    suppressMessages(install.packages("data.table", repos = "https://cloud.r-project.org/"))
+  }
+  if (!is.installed("maditr")){
+    suppressMessages(install.packages("maditr", repos = "https://cloud.r-project.org/"))
+  }
+}
+
 library(tidyverse)
 library(data.table)
 library(parallel)
@@ -46,7 +65,7 @@ res=gsub(".tsv.gz","",res)
 
 # Find consensus category
 # 1. read e-value filtered results
-efilters <- fread(paste0(getwd(),"/",args[1]), stringsAsFactors = F, header = F) %>% dt_select(V1,V2,V11,V13,V14,V15) %>%
+efilters <- fread(args[1], stringsAsFactors = F, header = F) %>% dt_select(V1,V2,V11,V13,V14,V15) %>%
   setNames(c("cl_name","gene","evalue","qcov","tcov","category"))
 # get major categories
 votes <- get_majority(efilters)
@@ -56,12 +75,12 @@ df_summ <- efilters %>% left_join(votes) %>% group_by(gene) %>%
   select(gene,majority,cl_name,category,is_best)
 #write.table(df_summ,paste(getwd(),"/",res,"_summary.tsv",sep=""), col.names = T, row.names = F, quote = F, sep = "\t")
 df_best <- df_summ %>% filter(is_best==TRUE) %>% select(-is_best,-category) %>% rename(category=majority)
-write.table(df_best,paste(getwd(),"/",res,"_best-hits.tsv",sep=""), col.names = T, row.names = F, quote = F, sep = "\t")
+write.table(df_best,paste(res,"_best-hits.tsv",sep=""), col.names = T, row.names = F, quote = F, sep = "\t")
 
 # Join with info about genomes/MAGs
 # Must be a table with the corrispondence of the genes to the contigs (and in case also to the genomes/MAGs)
 #The format should be gene - genome (or sample_ID) etc..
-info <- fread(paste0(getwd(),"/",args[2]), stringsAsFactors = F, header = T) %>%
+info <- fread(args[2], stringsAsFactors = F, header = T) %>%
 setNames(c("gene","sample"))
 
 info <- info %>% group_by(sample) %>% add_count() %>%
@@ -71,8 +90,8 @@ res_info_class <- df_best %>% left_join(info,by="gene") %>%
   mutate(class=case_when(grepl('U',category) ~ "Unknown",
                          TRUE ~ "Known")) %>%
   group_by(sample, total_ngenes, class) %>% count()
-write.table(res_info_class,paste0(getwd(),"/",res,"_summary-classes.tsv"), col.names = T, row.names = F, quote = F, sep = "\t")
+write.table(res_info_class,paste0(res,"_summary-classes.tsv"), col.names = T, row.names = F, quote = F, sep = "\t")
 
 res_info_categ <- df_best %>% left_join(info,by="gene") %>%
   group_by(sample, total_ngenes, category) %>% count()
-write.table(res_info_categ,paste0(getwd(),"/",res,"_summary-categ.tsv"), col.names = T, row.names = F, quote = F, sep = "\t")
+write.table(res_info_categ,paste0(res,"_summary-categ.tsv"), col.names = T, row.names = F, quote = F, sep = "\t")

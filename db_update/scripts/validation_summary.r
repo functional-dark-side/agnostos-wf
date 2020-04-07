@@ -10,13 +10,13 @@ if (!is.installed("RSQLite") || !is.installed("dbplyr") || !is.installed("cowplo
   cat("We will try to install the packages... (this will be only be done once)\n")
   Sys.sleep(5)
   if (!is.installed("RSQLite")){
-    suppressMessages(install.packages("RSQlite", repos = "http://cran.us.r-project.org"))
+    suppressMessages(install.packages("RSQlite", repos = "https://cloud.r-project.org/"))
   }
   if (!is.installed("dbplyr")){
-    suppressMessages(install.packages("dbplyr", repos = "http://cran.us.r-project.org"))
+    suppressMessages(install.packages("dbplyr", repos = "https://cloud.r-project.org/"))
   }
   if (!is.installed("cowplot")){
-    suppressMessages(install.packages("cowplot", repos = "http://cran.us.r-project.org"))
+    suppressMessages(install.packages("cowplot", repos = "https://cloud.r-project.org/"))
   }
 }
 
