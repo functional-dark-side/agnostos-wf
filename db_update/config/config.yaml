@@ -1,22 +1,22 @@
 # This file should contain everything to configure the workflow on a global scale.
 # In case of sample based data, it should be complemented by a samples.tsv file that contains
 # one row per sample. It can be parsed easily via pandas.
-wdir: "/vol/cloud/giant_viruses/agnostos-wf/db_update"
-rdir: "/vol/cloud/giant_viruses/db_update/results"
-data: "/vol/cloud/giant_viruses/data"
+wdir: "/vol/cloud/agnostos-wf/db_update"
+rdir: "/vol/cloud/db_update"
+data: "/vol/cloud/data"
 
 # Cluster update configuration
 # Setting update to TRUE to run the cluster-update version of the snakemake workflow (otherwise FALSE or empty)
 update: "TRUE"
 # Path to original cluster DB (sequence and cluster DBs)
-ordir: "/vol/cloud/giant_viruses/mg_gtdb_db_wf"
+ordir: "/vol/cloud/agnostosDB"
 # Path to the sequences that need to be integrated
 # Formats: name_contigs.fasta or name_genes.fasta
-new_data: "/vol/cloud/giant_viruses/data/Collection_giant_viruses_genes.fasta"
+new_data: "/vol/cloud/data/Collection_giant_viruses_genes.fasta"
 # specify at which stage are your data, can be either "genes" or "contigs"
 new_data_stage: "genes" #"genes" or "contigs"
 # If you alrady have the gene predictions, please provide path to gene completeness information
-new_data_partial: "/vol/cloud/giant_viruses/data/Collection_giant_viruses_genes_partial_info.tsv"
+new_data_partial: "/vol/cloud/data/Collection_giant_viruses_genes_partial_info.tsv"
 
 # Threads configuration
 threads_default: 28
@@ -41,7 +41,7 @@ taxdb: "UniProtKB"
 pfam_shared_terms: "/vol/cloud/databases/pfam_files/Pfam-31_names_mod_01122019.tsv"
 # Created using the protein accessions and the descriptions found on the fasta headers
 uniref90_prot: "/vol/cloud/databases/uniref90.proteins.tsv.gz"
-nr_prot: "/vol/cloud/giant_viruses/databases/nr.proteins.tsv.gz"
+nr_prot: "/vol/cloud/databases/nr.proteins.tsv.gz"
 # Information dowloaded from Dataset-S1 from the DPD paper:
 dpd_info: "/vol/cloud/databases/dpd_ids_all_info.tsv"
 
@@ -55,12 +55,12 @@ mpi_runner: "srun --mpi=pmi2"
 prodigal_bin: "prodigal"
 
 # Annotation
-hmmer_bin: "/vol/cloud/giant_viruses/agnostos-wf/bin/hmmsearch"
+hmmer_bin: "/vol/cloud/agnostos-wf/bin/hmmsearch"
 
 # Clustering config
-ffindex_apply: "/vol/cloud/giant_viruses/agnostos-wf/bin/ffindex_apply_mpi"
-mmseqs_bin: "/vol/cloud/giant_viruses/agnostos-wf/bin/mmseqs"
-mmseqs_tmp: "/vol/cloud/giant_viruses/agnostos-wf/db_update/tmp"
+ffindex_apply: "/vol/cloud/agnostos-wf/bin/ffindex_apply_mpi"
+mmseqs_bin: "/vol/cloud/agnostos-wf/bin/mmseqs"
+mmseqs_tmp: "/vol/cloud/agnostos-wf/db_update/tmp"
 mmseqs_local_tmp: "/vol/scratch/tmp"
 mmseqs_split_mem: "100G"
 mmseqs_split: 10
@@ -69,28 +69,28 @@ mmseqs_split: 10
 seqtk_bin: "seqtk"
 
 # Spurious and shadows config
-hmmpress_bin: "/vol/cloud/giant_viruses/agnostos-wf/bin/hmmpress"
+hmmpress_bin: "/vol/cloud/agnostos-wf/bin/hmmpress"
 
 # Compositional validation config
 datamash_bin: "datamash"
-famsa_bin: "/vol/cloud/giant_viruses/agnostos-wf/bin/famsa"
-odseq_bin: "/vol/cloud/giant_viruses/agnostos-wf/bin/OD-seq"
-parasail_bin: "/vol/cloud/giant_viruses/agnostos-wf/bin/parasail_aligner"
+famsa_bin: "/vol/cloud/agnostos-wf/bin/famsa"
+odseq_bin: "/vol/cloud/agnostos-wf/bin/OD-seq"
+parasail_bin: "/vol/cloud/agnostos-wf/bin/parasail_aligner"
 parallel_bin: "parallel"
-igraph_lib: "export LD_LIBRARY_PATH=/vol/cloud/giant_viruses/agnostos-wf/bin/igraph/lib:${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
+igraph_lib: "export LD_LIBRARY_PATH=/vol/cloud/agnostos-wf/bin/igraph/lib:${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
 
 # Cluster classification config
 seqkit_bin: "seqkit"
 filterbyname: "filterbyname.sh"
-hhcons_bin: "/vol/cloud/giant_viruses/agnostos-wf/bin/hh-suite/bin/hhconsensus"
+hhcons_bin: "/vol/cloud/agnostos-wf/bin/hh-suite/bin/hhconsensus"
 
 # Cluster category refinement
-hhsuite: "/vol/cloud/giant_viruses/agnostos-wf/bin/hh-suite"
-hhblits_bin_mpi: "/vol/cloud/giant_viruses/agnostos-wf/bin/hh-suite/bin/hhblits_mpi"
-hhmake: "/vol/cloud/giant_viruses/agnostos-wf/bin/hh-suite/bin/hhmake"
+hhsuite: "/vol/cloud/agnostos-wf/bin/hh-suite"
+hhblits_bin_mpi: "/vol/cloud/agnostos-wf/bin/hh-suite/bin/hhblits_mpi"
+hhmake: "/vol/cloud/agnostos-wf/bin/hh-suite/bin/hhmake"
 hhblits_prob: 90
 hypo_filt: 1.0
 
 # Cluster communities
-hhblits_bin: "/vol/cloud/giant_viruses/agnostos-wf/bin/hh-suite/bin/hhblits"
-hhsearch_bin: "/vol/cloud/giant_viruses/agnostos-wf/bin/hh-suite/bin/hhsearch"
+hhblits_bin: "/vol/cloud/agnostos-wf/bin/hh-suite/bin/hhblits"
+hhsearch_bin: "/vol/cloud/agnostos-wf/bin/hh-suite/bin/hhsearch"

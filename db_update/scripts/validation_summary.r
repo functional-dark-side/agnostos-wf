@@ -265,7 +265,8 @@ lag <- brStick(p_rej_cl)$thresh_by_bsm %>% enframe() %>% mutate(lag = round(valu
 if (length(lag)!=0){
   rej_threshold <- brStick(p_rej_cl)$thresh_by_bsm[lag - 1]
 } else {
-  rej_threshold <- brStick(p_rej_cl)$thresh_by_bsm[length(brStick(p_rej_cl)$thresh_by_bsm)]
+  rej_threshold <- brStick(p_rej_cl)$thresh_by_bsm %>% as_tibble %>% filter(value<0.9) %>% .$value %>% max()
+  #rej_threshold <- brStick(p_rej_cl)$thresh_by_bsm[length(brStick(p_rej_cl)$thresh_by_bsm)]
 }
 val_stats <- data.frame(total_clusters = dim(cl_val_df)[1],
                         total_orfs = sum(cl_val_df$n_orfs),
