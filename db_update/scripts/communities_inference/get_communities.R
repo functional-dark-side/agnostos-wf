@@ -1117,7 +1117,8 @@ if (kwp_mids_l > 0){
   kwp_n_clus <-  kwp_communities$cl_name %>% unique() %>% length()
 }
 } else {
-  kwp_communities <- kwp_missing_ids %>% tibble::enframe(name = NULL) %>% rename(cl_name=value) %>% mutate(com=row_number())
+  kwp_communities <- kwp_missing_ids %>% tibble::enframe(name = NULL) %>%
+   rename(cl_name=value) %>% mutate(com=row_number(), cl_name=as.character(cl_name))
   kwp_n_comp <- kwp_communities$com %>% unique() %>% length()
   kwp_n_clus <-  kwp_communities$cl_name %>% unique() %>% length()
 }
@@ -1431,7 +1432,8 @@ if (gu_mids_l > 0){
   cat(" done\n")
 }
 } else {
-  gu_communities <- gu_missing_ids %>% tibble::enframe(name = NULL) %>% rename(cl_name=value) %>% mutate(com=row_number())
+  gu_communities <- gu_missing_ids %>% tibble::enframe(name = NULL) %>%
+   rename(cl_name=value) %>% mutate(com=row_number(), cl_name=as.character(cl_name))
   gu_n_comp <- gu_communities$com %>% unique() %>% length()
   gu_n_clus <-  gu_communities$cl_name %>% unique() %>% length()
 }
@@ -1748,7 +1750,8 @@ if (eu_mids_l > 0){
   eu_n_clus <-  eu_communities$cl_name %>% unique() %>% length()
 }
 } else {
-  eu_communities <- eu_missing_ids %>% tibble::enframe(name = NULL) %>% rename(cl_name=value) %>% mutate(com=row_number())
+  eu_communities <- eu_missing_ids %>% tibble::enframe(name = NULL) %>%
+   rename(cl_name=value) %>% mutate(com=row_number(), cl_name=as.character(cl_name))
   eu_n_comp <- eu_communities$com %>% unique() %>% length()
   eu_n_clus <-  eu_communities$cl_name %>% unique() %>% length()
 }
