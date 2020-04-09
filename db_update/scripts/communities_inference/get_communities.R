@@ -857,18 +857,18 @@ lo_env$kwp_hhblits_missing <- lo_env$kwp_hhblits_all %>%
   as_tibble() %>% mutate(score_col = Score/Cols)
 cat(paste0("Found ", scales::comma(length(kwp_missing_ids))), "clusters missing\n")
 
-
-# Let's create a graph
-msg("Inferring graph from HHBLITS results...")
-lo_env$kwp_hhb_bh <- lo_env$kwp_hhblits %>%
-  as_tibble() %>%
-  mutate(cl_name1 = as.character(cl_name1),
+if(dim(lo_env$kwp_hhblits)[1]!= 0){
+  # Let's create a graph
+  msg("Inferring graph from HHBLITS results...")
+  lo_env$kwp_hhb_bh <- lo_env$kwp_hhblits %>%
+    as_tibble() %>%
+    mutate(cl_name1 = as.character(cl_name1),
          cl_name2 = as.character(cl_name2)) %>%
-  mutate(score_col = Score/Cols)
+         mutate(score_col = Score/Cols)
 
-kwp_hh_g <- lo_env$kwp_hhb_bh %>%
-  select(cl_name1, cl_name2, score_col) %>%
-  rename(weight = score_col) %>%
+  kwp_hh_g <- lo_env$kwp_hhb_bh %>%
+    select(cl_name1, cl_name2, score_col) %>%
+    rename(weight = score_col) %>%
   igraph::graph_from_data_frame(directed = FALSE) %>%
   igraph::simplify(remove.multiple = TRUE, remove.loops = TRUE, edge.attr.comb = list("max")) %>%
   as_tbl_graph()
@@ -1116,7 +1116,11 @@ if (kwp_mids_l > 0){
   kwp_n_comp <- kwp_communities$com %>% unique() %>% length()
   kwp_n_clus <-  kwp_communities$cl_name %>% unique() %>% length()
 }
-
+} else {
+  kwp_communities <- kwp_missing_ids %>% tibble::enframe(name = NULL) %>% rename(cl_name=value) %>% mutate(com=row_number())
+  kwp_n_comp <- kwp_communities$com %>% unique() %>% length()
+  kwp_n_clus <-  kwp_communities$cl_name %>% unique() %>% length()
+}
 msg(paste0("We have been obtained ", scales::comma(kwp_n_comp), " from ", scales::comma(kwp_n_clus), " clusters\n"))
 
 # Do we have all communities
@@ -1169,16 +1173,16 @@ lo_env$gu_hhblits_missing <- lo_env$gu_hhblits_all %>%
   as_tibble() %>% mutate(score_col = Score/Cols)
 cat(paste0("Found ", scales::comma(length(gu_missing_ids))), "clusters missing\n")
 
-
-# Let's create a graph
-msg("Inferring graph from HHBLITS results...")
-lo_env$gu_hhb_bh <- lo_env$gu_hhblits %>%
-  as_tibble() %>%
-  mutate(cl_name1 = as.character(cl_name1),
+if(dim(lo_env$gu_hhblits)[1]!= 0){
+  # Let's create a graph
+  msg("Inferring graph from HHBLITS results...")
+  lo_env$gu_hhb_bh <- lo_env$gu_hhblits %>%
+    as_tibble() %>%
+    mutate(cl_name1 = as.character(cl_name1),
          cl_name2 = as.character(cl_name2)) %>%
-  mutate(score_col = Score/Cols)
+    mutate(score_col = Score/Cols)
 
-gu_hh_g <- lo_env$gu_hhb_bh %>%
+  gu_hh_g <- lo_env$gu_hhb_bh %>%
   select(cl_name1, cl_name2, score_col) %>%
   rename(weight = score_col) %>%
   igraph::graph_from_data_frame(directed = FALSE) %>%
@@ -1426,6 +1430,11 @@ if (gu_mids_l > 0){
   gu_n_clus <-  gu_communities$cl_name %>% unique() %>% length()
   cat(" done\n")
 }
+} else {
+  gu_communities <- gu_missing_ids %>% tibble::enframe(name = NULL) %>% rename(cl_name=value) %>% mutate(com=row_number())
+  gu_n_comp <- gu_communities$com %>% unique() %>% length()
+  gu_n_clus <-  gu_communities$cl_name %>% unique() %>% length()
+}
 
 msg(paste0("We have been obtained ", scales::comma(gu_n_comp), " from ", scales::comma(gu_n_clus), " clusters\n"))
 
@@ -1480,16 +1489,16 @@ lo_env$eu_hhblits_missing <- lo_env$eu_hhblits_all %>%
   as_tibble() %>% mutate(score_col = Score/Cols)
 cat(paste0("Found ", scales::comma(length(eu_missing_ids))), "clusters missing\n")
 
-
+if(dim(lo_env$eu_hhblits)[1]!= 0){
 # Let's create a graph
-msg("Inferring graph from HHBLITS results...")
-lo_env$eu_hhb_bh <- lo_env$eu_hhblits %>%
-  as_tibble() %>%
-  mutate(cl_name1 = as.character(cl_name1),
+  msg("Inferring graph from HHBLITS results...")
+  lo_env$eu_hhb_bh <- lo_env$eu_hhblits %>%
+    as_tibble() %>%
+    mutate(cl_name1 = as.character(cl_name1),
          cl_name2 = as.character(cl_name2)) %>%
-  mutate(score_col = Score/Cols)
+    mutate(score_col = Score/Cols)
 
-eu_hh_g <- lo_env$eu_hhb_bh %>%
+  eu_hh_g <- lo_env$eu_hhb_bh %>%
   select(cl_name1, cl_name2, score_col) %>%
   rename(weight = score_col) %>%
   igraph::graph_from_data_frame(directed = FALSE) %>%
@@ -1735,6 +1744,11 @@ if (eu_mids_l > 0){
              red("Skipped"), "\n"))
   msg("All clusters already assigned to a component\n")
   eu_communities <- eu_mcl_coms %>% rename(cl_name = vertex) %>% mutate(cl_name = as.character(cl_name)) %>% select(cl_name, com) %>% unique()
+  eu_n_comp <- eu_communities$com %>% unique() %>% length()
+  eu_n_clus <-  eu_communities$cl_name %>% unique() %>% length()
+}
+} else {
+  eu_communities <- eu_missing_ids %>% tibble::enframe(name = NULL) %>% rename(cl_name=value) %>% mutate(com=row_number())
   eu_n_comp <- eu_communities$com %>% unique() %>% length()
   eu_n_clus <-  eu_communities$cl_name %>% unique() %>% length()
 }
