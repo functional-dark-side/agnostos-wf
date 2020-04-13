@@ -244,7 +244,12 @@ cl_tax <- cl_tax %>%
     family = str_match(lineage, ";f_(.*?);.*")[, 2],
     genus = str_match(lineage, ";g_(.*?);.*")[, 2],
     species = str_match(lineage, ";s_(.*?)$")[, 2]
-  )
+  )  %>%
+  mutate(domain=case_when(classific=="Bacteria" ~ "Bacteria",
+                          classific=="Archaea" ~ "Archaea",
+                          classific=="Eukaryota" ~ "Eukaryota",
+                          classific=="Viruses" ~ "Viruses",
+                          TRUE ~ domain))
 
 # Taxonomic homogeneity
 homo_tax <- cl_tax %>%
