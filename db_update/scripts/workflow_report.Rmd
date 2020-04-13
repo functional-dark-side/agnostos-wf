@@ -174,7 +174,8 @@ tibble(Type=c("Number of clusters","Percentage of clusters"),
 
 load(paste0(dir,"/validation/compositional_validation_plots.rda"))
 
-rej_thr <- p_rej_clp$data %>% spread(class,clusters) %>% arrange(desc(threshold)) %>% filter(Observed>BSM) %>% slice(1)
+rej_thr <- p_rej_clp$data %>% spread(class,clusters) %>% filter(threshold < 0.9) %>%
+ arrange(desc(threshold)) %>% filter(Observed>BSM) %>% slice(1)
 
 tibble(Type=c("Non-homologous genes threshold","Number of clusters identified as bad"),
        rej_threshold=c(rej_thr$threshold,rej_thr$Observed)) %>% kable(digits=3, format.args = list(big.mark = ",")) %>%
