@@ -402,7 +402,7 @@ clu_stats <- clu_stats %>% select(-rep_compl) %>%
   dt_left_join(tax_entropy %>% ungroup() %>% mutate(cl_name = as.character(cl_name))) %>%
   dt_left_join(prev_tax %>% ungroup() %>% mutate(cl_name = as.character(cl_name))) %>%
   dt_left_join(cl_dark %>% ungroup() %>% mutate(cl_name = as.character(cl_name))) %>%
-  dt_left_join(HQ_clusters %>% mutate(is.HQ = TRUE))
+  dt_left_join(HQ_clusters %>% mutate(is.HQ = TRUE)) %>% distinct()
 write_tsv(clu_stats, path = opt$summ_stats, col_names = TRUE)
 
 ## Category general stats
