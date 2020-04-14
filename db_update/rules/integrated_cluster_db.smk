@@ -99,6 +99,7 @@ rule integrated_cluster_db:
 
         # New integarted cluster HMMs DB (for MMseqs profile searches)
         {params.mmseqs_bin} concatdbs {input.clu_hmm} {params.or_clu_hmm} {output.iclu_hmm} --threads 1 2>{log.err}
+        {params.mmseqs_bin} concatdbs {input.clu_hmm}_h {params.or_clu_hmm}_h {output.iclu_hmm}_h --threads 1 2>{log.err}
 
         # New integarted cluster sequence DB (MMseqs sequence database with clustered index)
         {params.mmseqs_bin} concatdbs {params.clu_seq} {params.or_clu_seq} {output.iclu_seq} --threads 1 2>{log.err}
