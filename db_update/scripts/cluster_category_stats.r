@@ -302,6 +302,14 @@ taxp <- ggplot(plot_tax %>% filter(n <= 50 & n > 0), aes(y = category, x = n, fi
 save(taxp, file = paste0(opt$output, "/cluster_category_taxonomy_plot.rda"))
 
 # Calculate cluster taxonomic entropy
+d <- cl_tax %>%
+  group_by(cl_name, category, domain) %>%
+  summarise(n = n()) %>%
+  mutate(df = n / sum(n)) %>%
+  group_by(cl_name, category) %>%
+  mutate(de = entropy.empirical(df, unit = "log2")) %>%
+  select(1, 2, 6) %>%
+  distinct()
 p <- cl_tax %>%
   group_by(cl_name, category, phylum) %>%
   summarise(n = n()) %>%
@@ -350,13 +358,14 @@ s <- cl_tax %>%
   mutate(se = entropy.empirical(sf, unit = "log2")) %>%
   select(1, 2, 6) %>%
   distinct()
-tax_entropy <- p %>%
+tax_entropy <- d %>%
+  left_join(p) %>%
   left_join(c) %>%
   left_join(o) %>%
   left_join(f) %>%
   left_join(g) %>%
   left_join(s)
-rm(p, c, o, f, g, s)
+rm(d,p, c, o, f, g, s)
 write_tsv(tax_entropy, path = paste0(opt$output, "/cluster_category_taxonomy_entropy.tsv"), col_names = TRUE)
 
 ## Retrieve the prevalent taxa for each cluster
