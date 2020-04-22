@@ -25,6 +25,7 @@ rule integrated_cluster_db:
         ipartial = config["rdir"] + "/integrated_cluster_DB/orf_partial_info.tsv.gz",
         iclu_gene = config["rdir"] + "/integrated_cluster_DB/cluster_ids_categ_genes.tsv.gz",
         clu_origin = config["rdir"] + "/integrated_cluster_DB/cluDB_name_origin_size.tsv",
+        or_clu_orig = config["ordir"] + "/cluster_db_size_categ_origin.tsv.gz",
         or_clu_cat = config["ordir"] + "/cluster_ids_categ.tsv",
         or_clu_gene = config["ordir"] + "/cluster_ids_categ_genes.tsv.gz",
         or_clu_com = config["ordir"] + "/cluster_communities.tsv",
@@ -56,10 +57,14 @@ rule integrated_cluster_db:
         mkdir -p ${{DIR}}
 
         # Summary table with cluster db origin (original/shared/new)
-
-        cat <(awk -vOFS='\\t' '{{print $1,"original",$3}}' {params.original}) \
-            <(awk -vOFS='\\t' '{{print $1,"shared",$3}}' {params.shared}) \
-            <(awk -vOFS='\\t' '{{print $1,"new",$3}}' {params.new}) > {params.clu_origin}
+        join -11 -21 <(zcat {params.or_clu_orig} | awk '{{print $1,$2}}' | sort -k1,1 --parallel={threads} ) \
+            <(awk '{{print $1,$3}}' {params.original} | sort -k1,1) > {params.clu_origin}
+        join -11 -21 <(zcat {params.or_clu_orig} | awk '{{print $1,$2}}' | sort -k1,1 --parallel={threads} ) \
+            <(awk '{{print $1,$3}}' {params.shared} | sort -k1,1) > {params.clu_origin}.temp
+        awk '{{print $1,$2"_new",$3}}' {params.clu_origin}.temp >> {params.clu_origin}
+        awk '{{print $1,"new",$3}}' {params.new} >> {params.clu_origin}
+        rm {params.clu_origin}.temp
+        sed -i 's/ /\t/g' {params.clu_origin}
 
         # All gene headers and partiality information
         cat {params.partial} <(zcat {params.or_partial}) | gzip > {params.ipartial}
