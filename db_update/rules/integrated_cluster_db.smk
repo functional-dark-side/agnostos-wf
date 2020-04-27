@@ -25,7 +25,7 @@ rule integrated_cluster_db:
         ipartial = config["rdir"] + "/integrated_cluster_DB/orf_partial_info.tsv.gz",
         iclu_gene = config["rdir"] + "/integrated_cluster_DB/cluster_ids_categ_genes.tsv.gz",
         clu_origin = config["rdir"] + "/integrated_cluster_DB/cluDB_name_origin_size.tsv",
-        or_clu_orig = config["ordir"] + "/cluster_db_size_categ.tsv.gz",
+        or_clu_orig = config["ordir"] + "/cluDB_name_origin_size.tsv",
         or_clu_cat = config["ordir"] + "/cluster_ids_categ.tsv",
         or_clu_gene = config["ordir"] + "/cluster_ids_categ_genes.tsv.gz",
         or_clu_com = config["ordir"] + "/cluster_communities.tsv",
