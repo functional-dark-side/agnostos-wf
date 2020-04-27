@@ -57,9 +57,9 @@ rule integrated_cluster_db:
         mkdir -p ${{DIR}}
 
         # Summary table with cluster db origin (original/shared/new)
-        join -11 -21 <(zcat {params.or_clu_orig} | awk '{{print $1,$2}}' | sort -k1,1 --parallel={threads} ) \
+        join -11 -21 <(awk '{{print $1,$2}}' {params.or_clu_orig} | sort -k1,1 --parallel={threads} ) \
             <(awk '{{print $1,$3}}' {params.original} | sort -k1,1) > {params.clu_origin}
-        join -11 -21 <(zcat {params.or_clu_orig} | awk '{{print $1,$2}}' | sort -k1,1 --parallel={threads} ) \
+        join -11 -21 <(awk '{{print $1,$2}}' {params.or_clu_orig} |  sort -k1,1 --parallel={threads} ) \
             <(awk '{{print $1,$3}}' {params.shared} | sort -k1,1) > {params.clu_origin}.temp
         awk '{{print $1,$2"_new",$3}}' {params.clu_origin}.temp >> {params.clu_origin}
         awk '{{print $1,"new",$3}}' {params.new} >> {params.clu_origin}
