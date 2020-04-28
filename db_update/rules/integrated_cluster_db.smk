@@ -18,10 +18,10 @@ rule integrated_cluster_db:
         clu_seq = config["rdir"] + "/cluster_categories/refined_clusterDB",
         clu_gene = config["rdir"] + "/cluster_categories/cluster_ids_categ_genes.tsv.gz",
         sp_sh = config["rdir"] + "/spurious_shadow/spurious_shadow_info.tsv",
-        multi_annot = config["rdir"] + "/annot_and_clust/pfam_name_acc_clan_multi.tsv",
+        multi_annot = config["rdir"] + "/annot_and_clust/pfam_name_acc_clan_multi.tsv.gz",
         partial = config["rdir"] + "/gene_prediction/orf_partial_info.tsv",
-        isp_sh = config["rdir"] + "/integrated_cluster_DB/spurious_shadow_info.tsv",
-        imulti_annot = config["rdir"] + "/integrated_cluster_DB/pfam_name_acc_clan_multi.tsv",
+        isp_sh = config["rdir"] + "/integrated_cluster_DB/spurious_shadow_info.tsv.gz",
+        imulti_annot = config["rdir"] + "/integrated_cluster_DB/pfam_name_acc_clan_multi.tsv.gz",
         ipartial = config["rdir"] + "/integrated_cluster_DB/orf_partial_info.tsv.gz",
         iclu_gene = config["rdir"] + "/integrated_cluster_DB/cluster_ids_categ_genes.tsv.gz",
         clu_origin = config["rdir"] + "/integrated_cluster_DB/cluDB_name_origin_size.tsv",
@@ -70,7 +70,7 @@ rule integrated_cluster_db:
         cat {params.partial} <(zcat {params.or_partial}) | gzip > {params.ipartial}
 
         # Spurious and shadow genes information:
-        cp {params.sp_sh} {params.isp_sh}
+        gzip -c {params.sp_sh} > {params.isp_sh}
 
         # All gene Pfam annotations:
         cp {params.multi_annot} {params.imulti_annot}

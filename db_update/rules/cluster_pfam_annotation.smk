@@ -50,7 +50,7 @@ rule cluster_pfam_annotation:
 
         mv {params.tmp} {params.multi_annot}
 
-        cat {params.or_multi_annot} >> {params.multi_annot}
+        zcat {params.or_multi_annot} >> {params.multi_annot}
 
         # Gene completeness information combined
         join -11 -21 <(cat {input.partial} <(zcat {params.or_partial}) \
@@ -72,7 +72,9 @@ rule cluster_pfam_annotation:
         ## 3. Singleton annotations
 
         join -12 -21 <(sort -k2,2 {params.singl} ) \
-        <(sort -k1,1 {params.multi_annot}) > {params.s_annot}
+        <(sort -k1,1 --parallel={threads} -T {params.local_tmp} {params.multi_annot}) > {params.s_annot}
+
+        gzip {params.multi_annot}
 
         """
 

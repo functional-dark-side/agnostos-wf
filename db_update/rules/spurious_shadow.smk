@@ -18,7 +18,7 @@ rule spurious_shadow:
         spur = config["rdir"] + "/spurious_shadow/spurious_orfs.tsv",
         all_shad = config["rdir"] + "/spurious_shadow/all_shadow_orfs.tsv",
         only_shad = config["rdir"] + "/spurious_shadow/shadow_orfs_info.tsv",
-        or_sp_sh = config["ordir"] + "/spurious_shadow_info.tsv",
+        or_sp_sh = config["ordir"] + "/spurious_shadow_info.tsv.gz",
         tmp1 = config["rdir"] + "/spurious_shadow/tmpl1",
         tmp2 = config["rdir"] + "/spurious_shadow/tmpl2"
     output:
@@ -104,7 +104,7 @@ rule spurious_shadow:
         awk -vOFS='\\t' '{{ for(i=1; i<=7; i++) if($i ~ /^ *$/) $i = 0 }};1' {params.tmp2} | \
             awk -vOFS='\\t' '{{print $2,$3,$1,$4,$7,$5,$6}}' > {output.sp_sh}
 
-        cat {params.or_sp_sh} >> {output.sp_sh}
+        zcat {params.or_sp_sh} >> {output.sp_sh}
 
         rm {params.tmp1} {params.tmp2}
         """
