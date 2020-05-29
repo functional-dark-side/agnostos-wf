@@ -92,7 +92,7 @@ shingl.jacc <- function(clstr, pfam){
 
   # Homog_pf: all members annotated to the same Pfam domain
   if(length(unique(m1$annot))==1){
-      m1 <- m1 %>% dplyr::select(memb,annot) %>% mutate(pres=1)
+      m1 <- m1 %>% dplyr::select(memb,annot) %>% mutate(pres=1) %>% distinct()
       ds <- Jaccard(m1)
       if(dim(m1)[1]==1){  #Only one annotated member
         median <- 1
@@ -114,7 +114,7 @@ shingl.jacc <- function(clstr, pfam){
   }
   # Homog_clan: all members annotated to the same Pfam clan
   else if(length(unique(m1$clan))==1 & any(m1$clan!="no_clan")==T){
-      m1 <- m1 %>% dplyr::select(memb,clan) %>% mutate(pres=1)
+      m1 <- m1 %>% dplyr::select(memb,clan) %>% mutate(pres=1) %>% distinct()
       ds <- Jaccard(m1)
       median <- median(as.matrix(ds)[lower.tri(as.matrix(ds))])
       rep <- clstrnoNA$rep[1]

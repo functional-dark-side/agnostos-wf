@@ -103,6 +103,7 @@ rule integrated_cluster_db:
         cat {input.hq_clu} <( awk -vOFS='\\t' 'NR>1{{print $0}}' {params.or_hq_clu}) > {output.ihq_clu}
 
         # New integarted cluster HMMs DB (for MMseqs profile searches)
+        ### add the wget and tar -xzvf mmseqs-profile (change params)
         {params.mmseqs_bin} concatdbs {input.clu_hmm} {params.or_clu_hmm} {output.iclu_hmm} --threads 1 2>{log.err}
         {params.mmseqs_bin} concatdbs {input.clu_hmm}_h {params.or_clu_hmm}_h {output.iclu_hmm}_h --threads 1 2>{log.err}
 

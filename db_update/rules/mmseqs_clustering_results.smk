@@ -153,6 +153,7 @@ rule mmseqs_clustering_results:
             {params.mmseqs_bin} createsubdb <(awk '{{print $1}}' {output.new_index}) \
                                             {params.cluseqdb} \
                                             {params.new_cluseqdb} 2>>{log.err}
+            rm {params.cluseqdb}_orig*
         else
             {params.mmseqs_bin} createsubdb <(awk '{{print $1}}' {output.new_index}) \
                                             {params.cluseqdb}_orig \

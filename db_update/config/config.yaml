@@ -12,11 +12,11 @@ update: "TRUE"
 ordir: "/vol/cloud/agnostosDB"
 # Path to the sequences that need to be integrated
 # Formats: name_contigs.fasta or name_genes.fasta
-new_data: "/vol/cloud/data/Collection_giant_viruses_genes.fasta"
+new_data: "/vol/cloud/data/new_genes.fasta"
 # specify at which stage are your data, can be either "genes" or "contigs"
 new_data_stage: "genes" #"genes" or "contigs"
 # If you alrady have the gene predictions, please provide path to gene completeness information
-new_data_partial: "/vol/cloud/data/Collection_giant_viruses_genes_partial_info.tsv"
+new_data_partial: "/vol/cloud/data/new_genes_partial_info.tsv"
 
 # Threads configuration
 threads_default: 28
