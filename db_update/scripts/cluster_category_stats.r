@@ -421,4 +421,4 @@ cat_stats <- cat_stats %>%
   distinct() %>%
   dt_left_join(tax_entropy %>% ungroup() %>% select(-cl_name) %>% group_by(category) %>% summarise_all(sum)) %>%
   dt_left_join(cat_dark)
-write_tsv(clu_stats, path = paste0(opt$output, "/only_category_summary_stats.tsv"), col_names = TRUE)
+write_tsv(cat_stats, path = paste0(opt$output, "/only_category_summary_stats.tsv"), col_names = TRUE)
