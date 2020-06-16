@@ -59,9 +59,9 @@ options(datatable.verbose = FALSE)
 options(readr.num_columns = 0)
 
 # Pfam annotation results
-annot <- fread(opt$pfam_annot, stringsAsFactors = F, header = F) %>% setNames(c("orf", "name", "acc", "clan"))
+annot <- fread(opt$pfam_annot, stringsAsFactors = F, header = F, sep="\t") %>% setNames(c("orf", "name", "acc", "clan"))
 # Clustering results
-clu <- fread(opt$clusters, stringsAsFactors = F, header = F) %>% setNames(c("cl_name","rep", "orf"))
+clu <- fread(opt$clusters, stringsAsFactors = F, header = F,sep="\t") %>% setNames(c("cl_name","rep", "orf"))
 
 clu_annot <- clu %>% dt_left_join(annot, by = "orf")
 
