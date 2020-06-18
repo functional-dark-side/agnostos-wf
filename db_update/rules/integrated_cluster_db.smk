@@ -25,14 +25,14 @@ rule integrated_cluster_db:
         ipartial = config["rdir"] + "/integrated_cluster_DB/orf_partial_info.tsv.gz",
         iclu_gene = config["rdir"] + "/integrated_cluster_DB/cluster_ids_categ_genes.tsv.gz",
         clu_origin = config["rdir"] + "/integrated_cluster_DB/cluDB_name_origin_size.tsv",
-        or_clu_orig = config["ordir"] + "/cluDB_name_origin_size.tsv",
-        or_clu_cat = config["ordir"] + "/cluster_ids_categ.tsv",
+        or_clu_orig = config["ordir"] + "/cluDB_name_origin_size.tsv.gz",
+        or_clu_cat = config["ordir"] + "/cluster_ids_categ.tsv.gz",
         or_clu_gene = config["ordir"] + "/cluster_ids_categ_genes.tsv.gz",
-        or_clu_com = config["ordir"] + "/cluster_communities.tsv",
-        or_clu_stats = config["ordir"] + "/cluster_category_summary_stats.tsv",
-        or_hq_clu = config["ordir"] + "/HQ_clusters.tsv",
-        or_clu_hmm = config["ordir"] + "/cluster_category_DB/clu_hmm_db",
-        or_clu_seq = config["ordir"] + "/cluster_category_DB/clu_seqDB",
+        or_clu_com = config["ordir"] + "/cluster_communities.tsv.gz",
+        or_clu_stats = config["ordir"] + "/cluster_category_summary_stats.tsv.gz",
+        or_hq_clu = config["ordir"] + "/HQ_clusters.tsv.gz",
+        or_clu_hmm = config["profile_dir"] + "/clu_hmm_db",
+        or_clu_seq = config["cluseqdb_dir"] + "/clu_seqDB",
         or_partial = config["ordir"] + "/orf_partial_info.tsv.gz"
     log:
         out = "logs/integ_stdout.log",
@@ -44,8 +44,8 @@ rule integrated_cluster_db:
         iclu_com = config["rdir"] + "/integrated_cluster_DB/cluster_communities.tsv",
         iclu_stats = config["rdir"] + "/integrated_cluster_DB/cluster_category_summary_stats.tsv",
         ihq_clu = config["rdir"] + "/integrated_cluster_DB/HQ_clusters.tsv",
-        iclu_hmm = config["rdir"] + "/integrated_cluster_DB/cluster_category_DB/clu_hmm_db",
-        iclu_seq = config["rdir"] + "/integrated_cluster_DB/cluster_category_DB/clu_seqDB"
+        iclu_hmm = config["rdir"] + "/integrated_cluster_DB/mmseqs_profiles/clu_hmm_db",
+        iclu_seq = config["rdir"] + "/integrated_cluster_DB/mmseqs_cluseqdb/clu_seqDB"
     shell:
         """
 
@@ -57,9 +57,9 @@ rule integrated_cluster_db:
         mkdir -p ${{DIR}}
 
         # Summary table with cluster db origin (original/shared/new)
-        join -11 -21 <(awk '{{print $1,$2}}' {params.or_clu_orig} | sort -k1,1 --parallel={threads} ) \
+        join -11 -21 <(zcat {params.or_clu_orig} | awk '{{print $1,$2}}' | sort -k1,1 --parallel={threads} ) \
             <(awk '{{print $1,$3}}' {params.original} | sort -k1,1) > {params.clu_origin}
-        join -11 -21 <(awk '{{print $1,$2}}' {params.or_clu_orig} |  sort -k1,1 --parallel={threads} ) \
+        join -11 -21 <(zcat {params.or_clu_orig} | awk '{{print $1,$2}}' |  sort -k1,1 --parallel={threads} ) \
             <(awk '{{print $1,$3}}' {params.shared} | sort -k1,1) > {params.clu_origin}.temp
         awk '{{print $1,$2"_new",$3}}' {params.clu_origin}.temp >> {params.clu_origin}
         awk '{{print $1,"new",$3}}' {params.new} >> {params.clu_origin}
@@ -84,7 +84,7 @@ rule integrated_cluster_db:
         cat <(zcat ${{ODIR}}/GU_annotations.tsv.gz) ${{NDIR}}/GU_annotations.tsv | gzip > {params.idir}/GU_annotations.tsv.gz
 
         # Integrated set of cluster categories
-        cat {input.clu_cat} {params.or_clu_cat} > {output.iclu_cat}
+        cat <(zcat {input.clu_cat}) {params.or_clu_cat} > {output.iclu_cat}
 
         # and the cluster genes
         zcat {params.clu_gene} {params.or_clu_gene} | gzip > {params.iclu_gene}
@@ -92,15 +92,15 @@ rule integrated_cluster_db:
         # Integrated set of cluster communities
         # to avoid having overlapping communities names, we append the dataset origin
         cat <(awk -vOFS='\\t' 'NR>1{{print $1,$2"_new",$3}}' {input.clu_com} ) \
-         <( awk -vOFS='\\t' 'NR>1{{print $1,$2"_or",$3}}' {params.or_clu_com}) > {output.iclu_com}
+         <( awk -vOFS='\\t' 'NR>1{{print $1,$2"_or",$3}}' <(zcat {params.or_clu_com})) > {output.iclu_com}
 
         echo -e "cl_name\tcom\tcategory" | cat - {output.iclu_com} > {params.tmpl} && mv {params.tmpl} {output.iclu_com}
 
         # Integrated cluster summary information
-        cat {input.clu_stats} <( awk -vOFS='\\t' 'NR>1{{print $0}}' {params.or_clu_stats}) > {output.iclu_stats}
+        cat {input.clu_stats} <(zcat {params.or_clu_stats} | awk -vOFS='\\t' 'NR>1{{print $0}}') > {output.iclu_stats}
 
         # Integrated set of high quality (HQ) clusters
-        cat {input.hq_clu} <( awk -vOFS='\\t' 'NR>1{{print $0}}' {params.or_hq_clu}) > {output.ihq_clu}
+        cat {input.hq_clu} <(zcat {params.or_hq_clu} | awk -vOFS='\\t' 'NR>1{{print $0}}' ) > {output.ihq_clu}
 
         # New integarted cluster HMMs DB (for MMseqs profile searches)
         ### add the wget and tar -xzvf mmseqs-profile (change params)

@@ -43,6 +43,7 @@ cat(paste("The data in input are at the stage of ",stage,", and the number of se
 print("Since the data to be integrated in input are at the contig stage, we performed a gene prediction with Prodigal (Prokaryotic Dynamic Programming Gene-finding Algorithm) (version 2.6.3: February 2016) program [[1]](#1), applied in metagenomic mode.
 The total number of predicted genes can be found in the following table.")
 
+contig_seqs <- system(paste0("grep -c '^>' ",input_data),intern = T)
 genes <- system(paste0("cat ",dir,"/gene_prediction/orf_seqs.txt", " | wc -l "),intern = T)
 tibble(Contigs=contig_seqs,Genes=genes) %>% kable(digits=3, format.args = list(big.mark = ",")) %>%
   kable_styling(bootstrap_options = c("striped", "condensed"),full_width = F)

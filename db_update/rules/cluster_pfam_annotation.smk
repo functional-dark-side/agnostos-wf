@@ -11,7 +11,7 @@ rule cluster_pfam_annotation:
         local_tmp = config["mmseqs_local_tmp"],
         singl = config["rdir"] + "/mmseqs_clustering/cluDB_singletons.tsv",
         s_annot = config["rdir"] + "/annot_and_clust/singletons_pfam_annot.tsv",
-        or_multi_annot = config["ordir"] + "/pfam_name_acc_clan_multi.tsv",
+        or_multi_annot = config["ordir"] + "/pfam_name_acc_clan_multi.tsv.gz",
         multi_annot = config["rdir"] + "/annot_and_clust/pfam_name_acc_clan_multi.tsv",
         or_partial = config["ordir"] + "/orf_partial_info.tsv.gz",
         partial = config["rdir"] + "/annot_and_clust/new_orf_partial_info.tsv",
