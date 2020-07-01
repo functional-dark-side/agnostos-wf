@@ -25,14 +25,17 @@ rule integrated_cluster_db:
         ipartial = config["rdir"] + "/integrated_cluster_DB/orf_partial_info.tsv.gz",
         iclu_gene = config["rdir"] + "/integrated_cluster_DB/cluster_ids_categ_genes.tsv.gz",
         clu_origin = config["rdir"] + "/integrated_cluster_DB/cluDB_name_origin_size.tsv",
+        or_dir = config["ordir"],
         or_clu_orig = config["ordir"] + "/cluDB_name_origin_size.tsv.gz",
         or_clu_cat = config["ordir"] + "/cluster_ids_categ.tsv.gz",
         or_clu_gene = config["ordir"] + "/cluster_ids_categ_genes.tsv.gz",
         or_clu_com = config["ordir"] + "/cluster_communities.tsv.gz",
         or_clu_stats = config["ordir"] + "/cluster_category_summary_stats.tsv.gz",
         or_hq_clu = config["ordir"] + "/HQ_clusters.tsv.gz",
-        or_clu_hmm = config["profile_dir"] + "/clu_hmm_db",
-        or_clu_seq = config["cluseqdb_dir"] + "/clu_seqDB",
+        or_profiles = config["ordir"] + "/mmseqs_profiles",
+        or_clu_hmm = config["ordir"] + "/*mmseqs-profiles/clu_hmm_db",
+        or_cluseqdb = config["ordir"] + "/mmseqs_cluseqdb",
+        or_clu_seq = config["ordir"] + "/*mmseqs-cluseqdb/clu_seqDB",
         or_partial = config["ordir"] + "/orf_partial_info.tsv.gz"
     log:
         out = "logs/integ_stdout.log",
@@ -79,37 +82,73 @@ rule integrated_cluster_db:
         ODIR=$(dirname {params.or_clu_cat})
         NDIR=$(dirname {input.clu_cat})
 
+        # Download original dataset category annotations
+        if [[ ! -s ${{ODIR}}/K_annotations.tsv.gz ]]; then
+            wget https://ndownloader.figshare.com/files/23063648 -O ${{ODIR}}/K_annotations.tsv.gz
+            wget https://ndownloader.figshare.com/files/23067074 -O ${{ODIR}}/KWP_annotations.tsv.gz
+            wget https://ndownloader.figshare.com/files/23067080 -O ${{ODIR}}/GU_annotations.tsv.gz
+        fi
+        # Combine with new ones
         cat <(zcat ${{ODIR}}/K_annotations.tsv.gz) ${{NDIR}}/K_annotations.tsv | gzip > {params.idir}/K_annotations.tsv.gz
         cat <(zcat ${{ODIR}}/KWP_annotations.tsv.gz) ${{NDIR}}/KWP_annotations.tsv | gzip > {params.idir}/KWP_annotations.tsv.gz
         cat <(zcat ${{ODIR}}/GU_annotations.tsv.gz) ${{NDIR}}/GU_annotations.tsv | gzip > {params.idir}/GU_annotations.tsv.gz
+        rm ${{ODIR}}/*_annotations.tsv.gz
 
         # Integrated set of cluster categories
+        # Download original gene cluster catgeory info
+        if [[ ! -s {params.or_clu_cat} ]]; then
+            wget https://ndownloader.figshare.com/files/23067140 -O {params.or_clu_cat}
+        fi
         cat <(zcat {input.clu_cat}) {params.or_clu_cat} > {output.iclu_cat}
 
         # and the cluster genes
+        if [[ ! -s {params.or_clu_gene} ]]; then
+            wget https://ndownloader.figshare.com/files/23067068 -O {params.or_clu_gene}
+        fi
         zcat {params.clu_gene} {params.or_clu_gene} | gzip > {params.iclu_gene}
 
         # Integrated set of cluster communities
         # to avoid having overlapping communities names, we append the dataset origin
+        if [[ ! -s {params.or_clu_com} ]]; then
+            wget https://ndownloader.figshare.com/files/23067134 -O {params.or_clu_com}
+        fi
         cat <(awk -vOFS='\\t' 'NR>1{{print $1,$2"_new",$3}}' {input.clu_com} ) \
          <( awk -vOFS='\\t' 'NR>1{{print $1,$2"_or",$3}}' <(zcat {params.or_clu_com})) > {output.iclu_com}
 
         echo -e "cl_name\tcom\tcategory" | cat - {output.iclu_com} > {params.tmpl} && mv {params.tmpl} {output.iclu_com}
 
         # Integrated cluster summary information
+        if [[ ! -s {params.or_clu_stats} ]]; then
+            wget https://ndownloader.figshare.com/files/23066981 -O {params.or_clu_stats}
+        fi
         cat {input.clu_stats} <(zcat {params.or_clu_stats} | awk -vOFS='\\t' 'NR>1{{print $0}}') > {output.iclu_stats}
 
         # Integrated set of high quality (HQ) clusters
+        if [[ ! -s {params.or_hq_clu} ]]; then
+            wget https://ndownloader.figshare.com/files/23067137 -O {params.or_hq_clu}
+        fi
         cat {input.hq_clu} <(zcat {params.or_hq_clu} | awk -vOFS='\\t' 'NR>1{{print $0}}' ) > {output.ihq_clu}
 
         # New integarted cluster HMMs DB (for MMseqs profile searches)
-        ### add the wget and tar -xzvf mmseqs-profile (change params)
+        # Download and uncompress the mmseqs-profiles
+        if [[ ! -s {params.or_clu_hmm} ]]; then
+            wget https://ndownloader.figshare.com/files/23066963 -O {params.or_profiles}.tar.gz
+            tar -C {params.or_dir} -xzvf {params.or_profiles}.tar.gz
+            rm {params.or_profiles}.tar.gz
+        fi
         {params.mmseqs_bin} concatdbs {input.clu_hmm} {params.or_clu_hmm} {output.iclu_hmm} --threads 1 2>{log.err}
         {params.mmseqs_bin} concatdbs {input.clu_hmm}_h {params.or_clu_hmm}_h {output.iclu_hmm}_h --threads 1 2>{log.err}
 
         # New integarted cluster sequence DB (MMseqs sequence database with clustered index)
+        if [[ ! -s {params.or_clu_seq} ]]; then
+            wget https://ndownloader.figshare.com/files/23066792 -O {params.or_cluseqdb}.tar.gz
+            tar -C {params.or_dir} -xzvf {params.or_cluseqdb}.tar.gz
+            rm {params.or_cluseqdb}.tar.gz
+        fi
         {params.mmseqs_bin} concatdbs {params.clu_seq} {params.or_clu_seq} {output.iclu_seq} --threads 1 2>{log.err}
 
+        # Remove original dataset files and directory
+        rm -rf {params.or_dir}
         """
 
 rule integrated_cludb_done:
@@ -118,8 +157,8 @@ rule integrated_cludb_done:
         iclu_com = config["rdir"] + "/integrated_cluster_DB/cluster_communities.tsv",
         iclu_stats = config["rdir"] + "/integrated_cluster_DB/cluster_category_summary_stats.tsv",
         ihq_clu = config["rdir"] + "/integrated_cluster_DB/HQ_clusters.tsv",
-        iclu_hmm = config["rdir"] + "/integrated_cluster_DB/cluster_category_DB/clu_hmm_db",
-        iclu_seq = config["rdir"] + "/integrated_cluster_DB/cluster_category_DB/clu_seqDB"
+        iclu_hmm = config["rdir"] + "/integrated_cluster_DB/mmseqs_profiles/clu_hmm_db",
+        iclu_seq = config["rdir"] + "/integrated_cluster_DB/mmseqs_cluseqdb/clu_seqDB"
     output:
         integdb_done = touch(config["rdir"] + "/integrated_cluster_DB/integdb.done")
     run:

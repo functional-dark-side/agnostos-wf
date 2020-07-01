@@ -26,14 +26,8 @@ rule cluster_category_database:
     benchmark:
         "benchmarks/cluster_category_DB/catdb.tsv"
     output:
-        eu_cons = config["rdir"] + "/cluster_category_DB/eu_cons.index",
-        eu_hmm = config["rdir"] + "/cluster_category_DB/eu_hhm_db.index",
         k_cons = config["rdir"] + "/cluster_category_DB/k_cons.index",
         k_hmm = config["rdir"] + "/cluster_category_DB/k_hhm_db.index",
-        gu_cons = config["rdir"] + "/cluster_category_DB/gu_cons.index",
-        gu_hmm = config["rdir"] + "/cluster_category_DB/gu_hhm_db.index",
-        kwp_cons = config["rdir"] + "/cluster_category_DB/kwp_cons.index",
-        kwp_hmm = config["rdir"] + "/cluster_category_DB/kwp_hhm_db.index",
         clu_hmm = config["rdir"] + "/cluster_category_DB/clu_hmm_db"
     shell:
         """
@@ -69,14 +63,8 @@ rule cluster_category_database:
 
 rule cluster_categ_db_done:
     input:
-        eu_cons = config["rdir"] + "/cluster_category_DB/eu_cons.index",
-        eu_hmm = config["rdir"] + "/cluster_category_DB/eu_hhm_db.index",
         k_cons = config["rdir"] + "/cluster_category_DB/k_cons.index",
         k_hmm = config["rdir"] + "/cluster_category_DB/k_hhm_db.index",
-        gu_cons = config["rdir"] + "/cluster_category_DB/gu_cons.index",
-        gu_hmm = config["rdir"] + "/cluster_category_DB/gu_hhm_db.index",
-        kwp_cons = config["rdir"] + "/cluster_category_DB/kwp_cons.index",
-        kwp_hmm = config["rdir"] + "/cluster_category_DB/kwp_hhm_db.index",
         clu_hmm = config["rdir"] + "/cluster_category_DB/clu_hmm_db"
     output:
         cat_db_done = touch(config["rdir"] + "/cluster_category_DB/cat_db.done")

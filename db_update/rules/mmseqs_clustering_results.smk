@@ -146,7 +146,7 @@ rule mmseqs_clustering_results:
         join -11 -22 <(awk '{{print $1}}' {params.info2} | sort -k1,1 ) \
         <(sort -k2,2 {params.index}) > {params.tmp}
 
-        awk -vOFS='\\t' '{{print $2,$1}}' {params.tmp} > {output.new_index}
+        awk -vOFS='\\t' '!seen[$1,$2]++{{print $2,$1}}' {params.tmp} > {output.new_index}
 
         # And then subset the cluseqDB:
         if [ -s {params.cluseqdb} ]; then

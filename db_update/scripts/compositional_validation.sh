@@ -1,7 +1,7 @@
 #!/bin/bash
 
 set -o nounset
-set -x 
+set -x
 
 usage() {
   echo -e "Usage: $(basename "$0") [OPTIONS...]
@@ -16,12 +16,12 @@ Options:
 --datap    data processing tool (datamash)
 --stats    script to get the SSN stats
 --index    cluster name-index file
---out      output directory
+--outdir   output directory
 --threads  number of threads to use" 1>&2
   exit 1
 }
 
-OPT_LIST="derep:,msa:,msaeval:,ssn:,gfilter:,gconnect:,seqp:,datap:,stats:,index:,outdb:,outdir:,threads:"
+OPT_LIST="derep:,msa:,msaeval:,ssn:,gfilter:,gconnect:,seqp:,datap:,stats:,index:,outdir:,threads:"
 
 eval set -- "$(getopt -o '' --long "${OPT_LIST}" -- "$@")"
 while true; do
@@ -139,6 +139,10 @@ function create_destdirs() {
   if [[ ! -d "${STATSDIR}" ]]; then
     mkdir -p "${STATSDIR}"
   fi
+  SSNDIR="${RES}"/SSN
+  if [[ ! -d "${SSNDIR}" ]]; then
+    mkdir -p "${SSNDIR}"
+  fi
 }
 
 function get_length() {
@@ -210,13 +214,13 @@ function get_SSN_para() {
   # Identity scores from the MSA
   ID="${N}"_id
   # the 5th column has the identity score
-  "${PARASAIL_BIN}" -a sg_stats_scan_16 -f "${DEDUP}" -g ssn.out -t 7 -c 1 -x &>/dev/null
-  awk 'BEGIN{FS=","}{print $1" "$2" "$9/$10}' ssn.out >"${ID}"
+  "${PARASAIL_BIN}" -a sg_stats_scan_16 -f "${DEDUP}" -g "${N}"_ssn.out -t 7 -c 1 -x &>/dev/null
+  awk 'BEGIN{FS=","}{print $1" "$2" "$9/$10}' "${N}"_ssn.out > "${ID}"
   # Get statistics from the raw SSN
   SSN_RAW_STATS="${N}"_SSN_raw_stats.tsv
   RSTATS=$("${STATS}" "${ID}")
   echo "${RSTATS}" | awk -vN="${N}" -vS="${NSEQS}" 'BEGIN{OFS="\t"}{print N,S,$1,$3,$4,$6}' >"${SSN_RAW_STATS}"
-  rm ssn.out
+  rm "${N}"_ssn.out
 }
 
 function filter_SSN() {
@@ -263,7 +267,9 @@ function filter_SSN() {
     COM=$(grep Num_components "${SSN}" | cut -f2)
     CON=$(grep Connected "${SSN}" | cut -f2)
 
-    "${STATS}" trimmed_graph.ncol |
+    mv trimmed_graph.ncol "${N}"_trimmed_graph.ncol
+
+    "${STATS}" "${N}"_trimmed_graph.ncol |
       awk -vN="${N}" -vV="${NVX}" -vR="${REP}" -vD="${DEN}" -vE="${NED}" -vC="${CW}" \
         -vRMIN="${RMINW}" -vRMEA="${RMEAW}" -vRMED="${RMEDW}" -vRMAX="${RMAXW}" \
         -vCON="${CON}" -vCOM="${COM}" \
@@ -271,7 +277,7 @@ function filter_SSN() {
         -vL="${LEN_STATS}" -vNS="${NSEQS}" \
         'BEGIN{OFS="\t"}{print N,R,NS,V,E,D,C,CON,COM,$1,$3,$4,$6,RMIN,RMEA,RMED,RMAX,L,REJ,COR,REJ/NS}' >"${SSN_FILT_STATS}"
 
-    "${STATS}" trimmed_graph.ncol |
+    "${STATS}" "${N}"_trimmed_graph.ncol |
       awk -vN="${N}" -vV="${NVX}" -vR="${REP}" -vD="${DEN}" -vE="${NED}" -vC="${CW}" \
         -vRMIN="${RMINW}" -vRMEA="${RMEAW}" -vRMED="${RMEDW}" -vRMAX="${RMAXW}" \
         -vCON="${CON}" -vCOM="${COM}" \
@@ -279,6 +285,7 @@ function filter_SSN() {
         -vL="${LEN_STATS}" -vNS="${NSEQS}" \
         'BEGIN{OFS="\t"}{print N,R,NS,V,E,D,C,CON,COM,$1,$3,$4,$6,RMIN,RMEA,RMED,RMAX,L,REJ,COR,REJ/NS}' |
       grep --line-buffered '^' >>"${GLOBAL_OUT}"
+    gzip "${N}"_trimmed_graph.ncol
   fi
 }
 
@@ -316,6 +323,8 @@ function mv_results() {
   rsync -Pauqx --append "${N}"_core.txt "${CORDIR}"/
   rsync -Pauqx --append "${SSN_FILT_STATS}" "${STATSDIR}"/
   rsync -Pauqx --append "${SSN_RAW_STATS}" "${STATSDIR}"/
+  rsync -Pauqx --append "${ID}" "${SSNDIR}"/
+  rsync -Pauvx --append "${N}"_trimmed_graph.ncol.gz "${SSNDIR}"/
 }
 
 main() {
@@ -330,12 +339,12 @@ main() {
   I="${MMSEQS_ENTRY_NAME}"
   # Need to join with the cluster name-index file
   N=$(awk -v Indx="${I}" '$1==Indx{print $2}' "${INDEX}")
-  
+
   export log="${LOG}"/"${N}".log
   touch "${log}"
   OUTDIR="${RES}"/temp/"${N}"
   GLOBAL_OUT="${RES}"/compositional_validation_filt_stats.tsv
-  
+
   # Get sequences from cluster
   SEQS=$(perl -ne 'print $_')
   NSEQS=$(grep -c '>' <(echo "${SEQS}"))

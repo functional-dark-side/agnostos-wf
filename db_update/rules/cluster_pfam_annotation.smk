@@ -31,6 +31,10 @@ rule cluster_pfam_annotation:
         set -x
 
         ## 1. Pfam-clan info and multi-domain format for the ORF Pfam annotations
+        # Download original dataset Pfam annotations
+        if [[ ! -s {params.or_multi_annot} ]]; then
+            wget https://ndownloader.figshare.com/files/23067146 -O {params.or_multi_annot}
+        fi
 
         # Add Pfam clan info to the Pfam annotation results
         join -11 -21 <( awk '{{print $1,$3,$8,$9}}' {input.annot} | sort -k1,1) \
@@ -53,6 +57,12 @@ rule cluster_pfam_annotation:
         zcat {params.or_multi_annot} >> {params.multi_annot}
 
         # Gene completeness information combined
+        # Download original dataset gene completion information
+        if [[ ! -s {params.or_partial} ]]; then
+            wget https://ndownloader.figshare.com/files/23067005 -O {params.or_partial}
+        fi
+
+        # Combine with new completion info
         join -11 -21 <(cat {input.partial} <(zcat {params.or_partial}) \
         | sort -k1,1 --parallel={threads} -T {params.local_tmp}) \
         <( awk '{{print $3}}' {input.clu} | sort -k1,1 --parallel={threads}) > {params.partial}
@@ -75,7 +85,7 @@ rule cluster_pfam_annotation:
         <(sort -k1,1 --parallel={threads} -T {params.local_tmp} {params.multi_annot}) > {params.s_annot}
 
         gzip {params.multi_annot}
-
+        rm {params.or_multi_annot}
         """
 
 rule cluster_pfam_annotation_done:

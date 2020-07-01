@@ -1,6 +1,6 @@
 rule cluster_category_stats:
     input:
-        eu_db = config["rdir"] + "/cluster_category_DB/eu_cons.index",
+        k_db = config["rdir"] + "/cluster_category_DB/k_cons.index",
         cl_cat = config["rdir"] + "/cluster_categories/cluster_ids_categ.tsv",
     threads: 28
     params:

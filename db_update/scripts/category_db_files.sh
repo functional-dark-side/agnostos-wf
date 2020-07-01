@@ -105,6 +105,12 @@ if [[ ${STEP} = "known refinement" ]]; then
     CATEG=$(echo -e "kwp")
 elif [[ ${STEP} = "unknown refinement" ]]; then
     CATEG=$(echo -e "eu")
+elif [[ ! -s "${IDIR}"/eu_ids.txt ]]; then
+    CATEG=$(echo -e "gu\nkwp\nk")
+elif [[ ! -s "${IDIR}"/gu_ids.txt ]]; then
+    CATEG=$(echo -e "eu\nkwp\nk")
+elif [[ ! -s "${IDIR}"/kwp_ids.txt ]]; then
+    CATEG=$(echo -e "eu\ngu\nk")
 else
     CATEG=$(echo -e "eu\ngu\nkwp\nk")
 fi
@@ -175,13 +181,20 @@ fi
 
 if [[ ${STEP} = "category database" ]]; then
 
-  "${MMSEQS_BIN}" concatdbs "${RES}"/eu_hhm_db "${RES}"/gu_hhm_db "${RES}"/tmp_hhm_db --threads 1
+  if [[ ! -s "${IDIR}"/eu_ids.txt ]]; then
+    "${MMSEQS_BIN}" concatdbs "${RES}"/k_hhm_db "${RES}"/kwp_hhm_db "${RES}"/tmp_hhm_db --threads 1
 
-  "${MMSEQS_BIN}" concatdbs "${RES}"/k_hhm_db "${RES}"/kwp_hhm_db "${RES}"/tmp1_hhm_db --threads 1
+    "${MMSEQS_BIN}" concatdbs "${RES}"/gu_hhm_db "${RES}"/tmp_hhm_db "${RES}"/clu_hhm_db --threads 1
 
-  "${MMSEQS_BIN}" concatdbs "${RES}"/tmp_hhm_db "${RES}"/tmp1_hhm_db "${RES}"/clu_hhm_db --threads 1
+    rm "${RES}"/tmp_hhm_db* "${RES}"/"${NAM}"*
+  else
+    "${MMSEQS_BIN}" concatdbs "${RES}"/eu_hhm_db "${RES}"/gu_hhm_db "${RES}"/tmp_hhm_db --threads 1
 
-  rm "${RES}"/tmp_hhm_db* "${RES}"/tmp1_hhm_db* "${RES}"/"${NAM}"*
+    "${MMSEQS_BIN}" concatdbs "${RES}"/k_hhm_db "${RES}"/kwp_hhm_db "${RES}"/tmp1_hhm_db --threads 1
 
+    "${MMSEQS_BIN}" concatdbs "${RES}"/tmp_hhm_db "${RES}"/tmp1_hhm_db "${RES}"/clu_hhm_db --threads 1
+
+    rm "${RES}"/tmp_hhm_db* "${RES}"/tmp1_hhm_db* "${RES}"/"${NAM}"*
+  fi
   echo "Done building clusters hmm databases"
 fi

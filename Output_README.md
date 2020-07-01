@@ -127,13 +127,14 @@ The results structure is the same as the creation-mode one (the clusters process
     -   cluster_ids_categ_genes.tsv.gz  - table with refined cluster names, categories and genes.
     -   cluster_communities.tsv - summary table containing the correspondence cluster-community.
     -   cluster_category_summary_stats.tsv - summary table containing various information about the clusters.
-    -   pfam_name_acc_clan_multi.tsv - all genes Pfam annotations.
+    -   pfam_name_acc_clan_multi.tsv.gz - all genes Pfam annotations.
     -   K/KWP/GU/EU_annotations.tsv.gz - category annotations.
     -   orf_partial_info.tsv.gz - list of gene headers and their level of completness, based on the Prodigal prediction results.
     -   HQ_clusters.tsv - set of high quality clusters (clusters with high percentage of complete genes).
-    -   spurious_shadow_info.tsv - summary table with gene quality information.
-    -   cluster_category_DB/
+    -   spurious_shadow_info.tsv.gz - summary table with gene quality information.
+    -   mmseqs_profiles/
         -   clu_hmm_db - cluster HMM profiles MMseqs2 database (for profile searches).
+    -   mmseqs_cluseqdb/
         -   clu_seqDB - cluster sequences MMseqs2 database.
 
 The cluster-update results in the form of MMseqs2 databases are stored in the "mmseqs_clustering/" folder.

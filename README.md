@@ -34,7 +34,7 @@ When everything is set...
 snakemake --use-conda -j 100 --cluster-config config/cluster.yaml --cluster "sbatch --export=ALL -t {cluster.time} -c {threads} --ntasks-per-node {cluster.ntasks_per_node} --nodes {cluster.nodes} --cpus-per-task {cluster.cpus_per_task} --job-name {rulename}.{jobid} --partition {cluster.partition}" -R --until workflow_report
 ```
 
-**2.  DB-Update module**: Add your genomic/metagenomic contigs or genes to the agnostosDB cluster database, dowloadable from [here](). A description of the agnostosDB files can be found in the [AgnostosDB_README.md](AgnostosDB_README.md).
+**2.  DB-Update module**: Add your genomic/metagenomic contigs or genes to the agnostosDB dataset is stored in Figshare (https://doi.org/10.6084/m9.figshare.12459056) and publicy available for download. In case you cannot download the whole dataset, seen to the large size of many of the files, the workflow will download the necessary files for each step and it will then remove them. A description of the agnostosDB files can be found in the [AgnostosDB_README.md](AgnostosDB_README.md).
 
 -   The DB-update workflow is in the [db_update/](db_update) folder. To run it, you just need to enter the folder, modify the [config.yaml](db_update/config/config.yaml) and [config_communities.yaml](db_update/config/config_communities.yaml) files specifying your input data and the output paths, and then run the command:
 
@@ -50,7 +50,7 @@ The output of these 2 modules is described in the [Output_README.md](Output_READ
 
 <br>
 
-**Profile-search**: the profile-search vs the AgnostosDB cluster HMM profiles database is not part of the Snakemake workflow. However, if you want to search your set of genes against our profiles you just need to dowload the profile DB from [here](), or the full DB, including contextual data, from [here]() (in this second case you can find the profile DB in "cluster_category_DB/clu_hmm_db").
+**Profile-search**: the profile-search vs the AgnostosDB cluster HMM profiles database is not part of the Snakemake workflow. However, if you want to search your set of genes against our profiles you just need to dowload the profile DB from [here](https://ndownloader.figshare.com/files/23066963).
 The scripts can be found in the [Profile_search/](Profile_search) folder.
 To run the search you just need the following command:
 
@@ -72,4 +72,6 @@ To lern more about what we are doing check out our website  [dark.metagenomics.e
 
 #### Citation:
 
-Vanni, C., Schechter M., Delmont, T.O., Buttigieg P.L., Acinas S., Barberan A., Casamayor E.O., Siren K., Steinegger M., Eren M. A., Glöckner F.O and Fernandez-Guerra A.. (2020). Light into the darkness: Unifying the known and unknown coding sequence space in microbiome analyses. In preparation.
+**Light into the darkness: Unifying the known and unknown coding sequence space in microbiome analyses**
+Chiara Vanni, Matthew Schechter, Silvia Acinas, Albert Barberán, Pier Luigi Buttigieg, Emilio O Casamayor, Tom O Delmont, Carlos M Duarte, A Murat Eren, Rob Finn, Alex Mitchell, Pablo Sanchez, Kimmo Siren, Martin Steinegger, Frank Oliver Glöckner, Antonio Fernandez-Guerra
+bioRxiv 2020.06.30.180448; doi: https://doi.org/10.1101/2020.06.30.180448

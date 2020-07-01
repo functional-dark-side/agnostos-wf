@@ -10,9 +10,6 @@ data: "/vol/cloud/data"
 update: "TRUE"
 # Path to original cluster DB (sequence and cluster DBs)
 ordir: "/vol/cloud/agnostosDB"
-mmseqs_clu_dir: "/vol/cloud/agnostosDB/agnostosDB_dbf02445-20200519_mmseqs_clustering"
-profile_dir: "/vol/cloud/agnostosDB/agnostosDB_dbf02445-20200519_mmseqs_profiles"
-cluseqdb_dir: "/vol/cloud/agnostosDB/agnostosDB_dbf02445-20200519_mmseqs_cluseqdb"
 # Path to the sequences that need to be integrated
 # Formats: name_contigs.fasta or name_genes.fasta
 new_data: "/vol/cloud/data/new_genes.fasta"

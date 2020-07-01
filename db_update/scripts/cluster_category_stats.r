@@ -99,6 +99,7 @@ ref_clu <- ref_clu %>% dt_inner_join(category)
 # cluster ORF length stats
 clu_stats <- ref_clu %>%
   group_by(cl_name) %>%
+  mutate(size=max(size)) %>% 
   mutate(
     min_len = min(length), mean_len = mean(length),
     median_len = median(length), max_len = max(length), sd_len = sd(length)

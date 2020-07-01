@@ -1,6 +1,5 @@
 rule mmseqs_clustering_update:
     input:
-        or_clu = config["ordir"] + "/mmseqs_clustering/cluDB.index",
         new_seqs = config["rdir"] + "/gene_prediction/orf_seqs.fasta",
         annot = config["rdir"] + "/pfam_annotation/pfam_annot_parsed.tsv"
     params:
@@ -12,8 +11,9 @@ rule mmseqs_clustering_update:
         mmseqs_cov_mode = 0,
         mmseqs_ens = 5,
         mmseqs_split_mem = config["mmseqs_split_mem"],
-        or_cludb = config["mmseqs_clu_dir"] + "/cluDB",
-        or_seqdb = config["mmseqs_clu_dir"] + "/seqDB",
+        or_dir = config["ordir"],
+        or_cludb = config["ordir"] + "/mmseqs_clustering/cluDB",
+        or_seqdb = config["ordir"] + "/mmseqs_clustering/seqDB",
         new_seqdb = config["rdir"] + "/mmseqs_clustering/new_seqDB",
         conc_seqdb = config["rdir"] + "/mmseqs_clustering/concat_seqDB",
         updt_seqdb = config["rdir"] + "/mmseqs_clustering/seqDB",
@@ -37,6 +37,15 @@ rule mmseqs_clustering_update:
         export OMP_NUM_THREADS={threads}
         export OMP_PROC_BIND=FALSE
 
+        # Create directory for original data to be integrated
+        mkdir -p {params.or_dir}
+
+        # Download original mmseqs clustering that you want to use for the integration
+        if [[ ! -s {params.or_cludb} ]]; then
+            wget https://ndownloader.figshare.com/files/23066651 -O {params.or_dir}/mmseqs_clustering.tar.gz
+            tar -C {params.or_dir} -zxvf {params.or_dir}/mmseqs_clustering.tar.gz
+            rm {params.or_dir}/mmseqs_clustering.tar.gz
+        fi
         {params.mmseqs_bin} createdb {input.new_seqs} {params.new_seqdb} 2>{log.err} 1>{log.out}
 
         # Create symbolic link between original cluDB and seqDB (required by mmeseqs to run the update)
@@ -76,6 +85,10 @@ rule mmseqs_clustering_update:
           {params.updt_cludb} \
           {output.updt_clu} \
           --threads {threads} 2>>{log.err} 1>>{log.out}
+
+        # Release some space removing not necessary files
+        rm {params.or_cludb} {params.or_cludb}.index {params.or_cludb}_h {params.or_cludb}_h.index {params.or_cludb}.dbtype {params.or_cludb}_h.dbtype {params.or_cludb}.lookup
+        rm {params.or_seqdb} {params.or_seqdb}.index {params.or_seqdb}_h {params.or_seqdb}_h.index {params.or_seqdb}.dbtype {params.or_seqdb}_h.dbtype {params.or_seqdb}.lookup
 
         """
 

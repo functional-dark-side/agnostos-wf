@@ -104,9 +104,13 @@ rule spurious_shadow:
         awk -vOFS='\\t' '{{ for(i=1; i<=7; i++) if($i ~ /^ *$/) $i = 0 }};1' {params.tmp2} | \
             awk -vOFS='\\t' '{{print $2,$3,$1,$4,$7,$5,$6}}' > {output.sp_sh}
 
+        # Download original dataset spurious and shadow info and combine with the new dataset
+        if [[ ! -s {params.or_sp_sh} ]]; then
+            wget https://ndownloader.figshare.com/files/23067131 -O {params.or_sp_sh}
+        fi
         zcat {params.or_sp_sh} >> {output.sp_sh}
 
-        rm {params.tmp1} {params.tmp2}
+        rm {params.tmp1} {params.tmp2} {params.or_sp_sh}
         """
 
 rule spurious_shadow_done:
