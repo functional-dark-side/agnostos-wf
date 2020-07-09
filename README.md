@@ -18,11 +18,13 @@ The cluster was build using BiBiGrid and it is using SLURM as Grid Batch Schedul
 
 #### Before running it:
 
-1.  Run the installation script [installation_script.sh](util/installation_script.sh).
+1.  Clone the repository: `git clone https://github.com/functional-dark-side/agnostos-wf` and `cd agnostos-wf/`
 
-2.  Check the config files in the [config/](config) folder. Change the programs (binaries) and output paths to your designated folders.
+2.  Run the installation script [installation_script.sh](util/installation_script.sh) (`sh installation_script.sh`).
 
-3.  Check that you have the required external DBs listed in the [config.yaml](config/config.yaml) file (in the "databases/" folder). In case you miss some of them, you can find the instructions for the dowload in [download_DBs.sh](util/download_DBs.sh)
+3.  Check the config files in the [config/](config) folder. Change the programs (binaries) and output paths to your designated folders.
+
+4.  Check that you have the required external DBs listed in the [config.yaml](config/config.yaml) file (in the "databases/" folder). In case you miss some of them, you can find the instructions for the dowload in [download_DBs.sh](util/download_DBs.sh). If you want to download all needed databases simply run `sh download_DBs.sh`.
 
 When everything is set...
 
