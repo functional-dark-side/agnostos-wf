@@ -19,12 +19,7 @@ mkdir -p programs
 cd programs
 
 # FAMSA (multiple sequence alignments)
-OPS=$(uname -s)
-if [[ "$OPS" == "Linux" ]]; then
-  wget https://github.com/refresh-bio/FAMSA/releases/download/v1.2.1/famsa-1.2.1-linux -O "${WD}"/bin/famsa
-elif [[ "$OPS" == "Darwin" ]]; then
-  wget https://github.com/refresh-bio/FAMSA/releases/download/v1.2.1/famsa-1.2.1-osx -O "${WD}"/bin/famsa
-fi
+wget https://github.com/refresh-bio/FAMSA/releases/download/v1.2.1/famsa-1.2.1-linux -O "${WD}"/bin/famsa
 chmod +x "${WD}"/bin/famsa
 ###############################################################################
 
