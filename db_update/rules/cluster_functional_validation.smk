@@ -1,6 +1,7 @@
 rule cluster_functional_validation:
     input:
-        cl_annot = config["rdir"] + "/annot_and_clust/annotated_clusters.tsv"
+        cl_annot = config["rdir"] + "/annot_and_clust/annotated_clusters.tsv",
+        sp_sh = config["rdir"] + "/spurious_shadow/spurious_shadow_info.tsv"
     threads: 28
     conda:
         "../envs/workflow.yml"

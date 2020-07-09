@@ -20,7 +20,7 @@ dependencies:
   - ripgrep
   - mcl
   - pandoc
-  - r
+  - r-base=3.6.3
   - r-rcpp
   - r-dplyr
   - r-dbi
