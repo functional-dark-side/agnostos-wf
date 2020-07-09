@@ -29,7 +29,7 @@ pfam_clan: "/vol/cloud/databases/Pfam-A.clans.tsv.gz"
 antifam_db: "/vol/cloud/databases/AntiFam.hmm"
 uniref90_db: "/vol/cloud/databases/uniref90.fasta.gz"
 nr_db: "/vol/cloud/databases/nr.fasta.gz"
-uniclust_db: "/vol/scratch/DBs/uniclust30_2017_10/uniclust30_2017_10"
+uniclust_db: "/vol/cloud/databases/uniclust30_2018_08/uniclust30_2018_08"
 uniprot_db: "/vol/cloud/databases/uniprotKB.fasta.gz"
 pfam_hh_db: "/vol/cloud/databases/pfam"
 DPD: "/vol/cloud/databases/dpd_uniprot_sprot.fasta"
@@ -38,7 +38,7 @@ taxdb: "UniProtKB"
 
 # Files retrieved from the databases
 # List of shared reduced Pfam domain names (dowloadable from Figshare..)
-pfam_shared_terms: "/vol/cloud/databases/pfam_files/Pfam-31_names_mod_01122019.tsv"
+pfam_shared_terms: "/vol/cloud/databases/Pfam-31_names_mod_01122019.tsv"
 # Created using the protein accessions and the descriptions found on the fasta headers
 uniref90_prot: "/vol/cloud/databases/uniref90.proteins.tsv.gz"
 nr_prot: "/vol/cloud/databases/nr.proteins.tsv.gz"

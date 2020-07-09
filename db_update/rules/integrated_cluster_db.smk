@@ -32,10 +32,10 @@ rule integrated_cluster_db:
         or_clu_com = config["ordir"] + "/cluster_communities.tsv.gz",
         or_clu_stats = config["ordir"] + "/cluster_category_summary_stats.tsv.gz",
         or_hq_clu = config["ordir"] + "/HQ_clusters.tsv.gz",
-        or_profiles = config["ordir"] + "/mmseqs_profiles",
-        or_clu_hmm = config["ordir"] + "/*mmseqs-profiles/clu_hmm_db",
-        or_cluseqdb = config["ordir"] + "/mmseqs_cluseqdb",
-        or_clu_seq = config["ordir"] + "/*mmseqs-cluseqdb/clu_seqDB",
+        or_profiles = config["ordir"] + "/mmseqs-profiles",
+        or_clu_hmm = config["ordir"] + "/mmseqs-profiles/clu_hmm_db",
+        or_cluseqdb = config["ordir"] + "/mmseqs-cluseqdb",
+        or_clu_seq = config["ordir"] + "/mmseqs-cluseqdb/clu_seqDB",
         or_partial = config["ordir"] + "/orf_partial_info.tsv.gz"
     log:
         out = "logs/integ_stdout.log",
@@ -47,8 +47,8 @@ rule integrated_cluster_db:
         iclu_com = config["rdir"] + "/integrated_cluster_DB/cluster_communities.tsv",
         iclu_stats = config["rdir"] + "/integrated_cluster_DB/cluster_category_summary_stats.tsv",
         ihq_clu = config["rdir"] + "/integrated_cluster_DB/HQ_clusters.tsv",
-        iclu_hmm = config["rdir"] + "/integrated_cluster_DB/mmseqs_profiles/clu_hmm_db",
-        iclu_seq = config["rdir"] + "/integrated_cluster_DB/mmseqs_cluseqdb/clu_seqDB"
+        iclu_hmm = config["rdir"] + "/integrated_cluster_DB/mmseqs-profiles/clu_hmm_db",
+        iclu_seq = config["rdir"] + "/integrated_cluster_DB/mmseqs-cluseqdb/clu_seqDB"
     shell:
         """
 
@@ -157,8 +157,8 @@ rule integrated_cludb_done:
         iclu_com = config["rdir"] + "/integrated_cluster_DB/cluster_communities.tsv",
         iclu_stats = config["rdir"] + "/integrated_cluster_DB/cluster_category_summary_stats.tsv",
         ihq_clu = config["rdir"] + "/integrated_cluster_DB/HQ_clusters.tsv",
-        iclu_hmm = config["rdir"] + "/integrated_cluster_DB/mmseqs_profiles/clu_hmm_db",
-        iclu_seq = config["rdir"] + "/integrated_cluster_DB/mmseqs_cluseqdb/clu_seqDB"
+        iclu_hmm = config["rdir"] + "/integrated_cluster_DB/mmseqs-profiles/clu_hmm_db",
+        iclu_seq = config["rdir"] + "/integrated_cluster_DB/mmseqs-cluseqdb/clu_seqDB"
     output:
         integdb_done = touch(config["rdir"] + "/integrated_cluster_DB/integdb.done")
     run:

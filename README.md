@@ -36,7 +36,7 @@ snakemake --use-conda -j 100 --cluster-config config/cluster.yaml --cluster "sba
 
 **2.  DB-Update module**: Add your genomic/metagenomic contigs or genes to the agnostosDB dataset is stored in Figshare (https://doi.org/10.6084/m9.figshare.12459056) and publicy available for download. In case you cannot download the whole dataset, seen to the large size of many of the files, the workflow will download the necessary files for each step and it will then remove them. A description of the agnostosDB files can be found in the [AgnostosDB_README.md](AgnostosDB_README.md).
 
--   The DB-update workflow is in the [db_update/](db_update) folder. To run it, you just need to enter the folder, modify the [config.yaml](db_update/config/config.yaml) and [config_communities.yaml](db_update/config/config_communities.yaml) files specifying your input data and the output paths, and then run the command:
+-   The DB-update workflow is in the [db_update/](db_update) folder. To run it, you just need to enter the folder, modify the [config.yaml](db_update/config/config.yaml) and [config_communities.yml](db_update/config/config_communities.yml) files specifying your input data and the output paths, and then run the command:
 
 ```{bash}
 snakemake -s Snakefile --use-conda -j 100 --cluster-config config/cluster.yaml --cluster "sbatch --export=ALL -t {cluster.time} -c {threads} --ntasks-per-node {cluster.ntasks_per_node} --nodes {cluster.nodes} --cpus-per-task {cluster.cpus_per_task} --job-name {rulename}.{jobid} --partition {cluster.partition}" -R --until workflow_report
@@ -72,6 +72,4 @@ To lern more about what we are doing check out our website  [dark.metagenomics.e
 
 #### Citation:
 
-**Light into the darkness: Unifying the known and unknown coding sequence space in microbiome analyses**
-Chiara Vanni, Matthew Schechter, Silvia Acinas, Albert Barberán, Pier Luigi Buttigieg, Emilio O Casamayor, Tom O Delmont, Carlos M Duarte, A Murat Eren, Rob Finn, Alex Mitchell, Pablo Sanchez, Kimmo Siren, Martin Steinegger, Frank Oliver Glöckner, Antonio Fernandez-Guerra
-bioRxiv 2020.06.30.180448; doi: https://doi.org/10.1101/2020.06.30.180448
+Vanni, C., Schechter, M., Acinas, S., Barberán, A., Buttigieg, P. L., Casamayor, E. O., Delmont, T. O., Duarte, C. M., Murat Eren, A., Finn, R., Mitchell, A., Sanchez, P., Siren, K., Steinegger, M., Glöckner, F. O., & Fernandez-Guerra, A. (2020). Light into the darkness: Unifying the known and unknown coding sequence space in microbiome analyses. In bioRxiv (p. 2020.06.30.180448). [https://doi.org/10.1101/2020.06.30.180448](https://doi.org/10.1101/2020.06.30.180448)

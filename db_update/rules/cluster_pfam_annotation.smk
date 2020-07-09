@@ -54,7 +54,7 @@ rule cluster_pfam_annotation:
 
         mv {params.tmp} {params.multi_annot}
 
-        zcat {params.or_multi_annot} >> {params.multi_annot}
+        zcat {params.or_multi_annot} | sed 's/ /\\t/g' >> {params.multi_annot}
 
         # Gene completeness information combined
         # Download original dataset gene completion information
