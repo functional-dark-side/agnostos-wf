@@ -25,10 +25,15 @@ tar xvfz Antifam.tar.gz
 
 # Uniref90
 wget ftp://ftp.uniprot.org/pub/databases/uniprot/uniref/uniref90/uniref90.fasta.gz
+# Create the protein description file:
+zcat uniref90.fasta.gz | grep '^>' | sed 's/^>//' | sed 's/ /\t/' | sed 's/ /_/g' | gzip > uniref90.proteins.tsv.gz
+
 
 # NCBI nr
 wget ftp://ftp.ncbi.nih.gov/blast/db/FASTA/nr.gz
 mv nr.gz nr.fasta.gz
+# Create the protein description file:
+zcat nr.fasta.gz | grep '^>' | sed 's/^>//' | sed 's/ /\t/' | sed 's/ /_/g' | gzip > nr.proteins.tsv.gz
 
 # Uniclust HHBLITS DB
 wget http://wwwuser.gwdg.de/~compbiol/uniclust/2018_08/uniclust30_2018_08.tar.gz
