@@ -16,7 +16,7 @@ default:
   graph_lib:            "/vol/cloud/agnostos-wf/db_update/scripts/communities_inference/graph_lib.R"
   cl_cat:               "/vol/cloud/db_update/cluster_categories/cluster_ids_categ.tsv"
   cl_comp:              "/vol/cloud/db_update/cluster_category_stats/cluster_category_completeness.tsv"
-  p_clan:               "/vol/cloud/databases/Pfam-A.clans.tsv.gz"
+  p_clan:               "/vol/cloud/agnostos-wf/databases/Pfam-A.clans.tsv.gz"
   p_doms:               "/vol/cloud/db_update/cluster_classification/cluster_pfam_domain_architectures.tsv"
   hhblits_results:      "/vol/cloud/db_update/cluster_communities/k_hhblits.tsv"
   # Files with results that can be loaded to skip time consuming steps, leave it empty to recalculate them

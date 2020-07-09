@@ -63,9 +63,9 @@ famsa_bin: "/vol/cloud/agnostos-wf/bin/famsa"
 odseq_bin: "/vol/cloud/agnostos-wf/bin/OD-seq"
 parasail_bin: "/vol/cloud/agnostos-wf/bin/parasail_aligner"
 parallel_bin: "parallel"
-get_stats: "/vol/cloud/agnostos-wf/scripts/get_stats.r"
-isconn: "/vol/cloud/agnostos-wf/scripts/is_connected"
-filterg: "/vol/cloud/agnostos-wf/scripts/filter_graph"
+get_stats: "/vol/cloud/agnostos-wf/db_creation/scripts/get_stats.r"
+isconn: "/vol/cloud/agnostos-wf/db_creation/scripts/is_connected"
+filterg: "/vol/cloud/agnostos-wf/db_creation/scripts/filter_graph"
 igraph_lib: "export LD_LIBRARY_PATH=/vol/cloud/agnostos-wf/bin/igraph/lib:${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
 
 # Cluster classification config
