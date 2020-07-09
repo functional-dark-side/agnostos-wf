@@ -10,13 +10,13 @@ if (!is.installed("RSQLite") || !is.installed("dbplyr") || !is.installed("cowplo
   cat("We will try to install the packages... (this will be only be done once)\n")
   Sys.sleep(5)
   if (!is.installed("RSQLite")){
-    suppressMessages(install.packages("RSQlite", repos = "http://cran.us.r-project.org"))
+    suppressMessages(install.packages("RSQlite", repos = "https://cloud.r-project.org/"))
   }
   if (!is.installed("dbplyr")){
-    suppressMessages(install.packages("dbplyr", repos = "http://cran.us.r-project.org"))
+    suppressMessages(install.packages("dbplyr", repos = "https://cloud.r-project.org/"))
   }
   if (!is.installed("cowplot")){
-    suppressMessages(install.packages("cowplot", repos = "http://cran.us.r-project.org"))
+    suppressMessages(install.packages("cowplot", repos = "https://cloud.r-project.org/"))
   }
 }
 
@@ -265,7 +265,8 @@ lag <- brStick(p_rej_cl)$thresh_by_bsm %>% enframe() %>% mutate(lag = round(valu
 if (length(lag)!=0){
   rej_threshold <- brStick(p_rej_cl)$thresh_by_bsm[lag - 1]
 } else {
-  rej_threshold <- brStick(p_rej_cl)$thresh_by_bsm[length(brStick(p_rej_cl)$thresh_by_bsm)]
+  rej_threshold <- brStick(p_rej_cl)$thresh_by_bsm %>% as_tibble %>% filter(value<0.9) %>% .$value %>% max()
+  #rej_threshold <- brStick(p_rej_cl)$thresh_by_bsm[length(brStick(p_rej_cl)$thresh_by_bsm)]
 }
 val_stats <- data.frame(total_clusters = dim(cl_val_df)[1],
                         total_orfs = sum(cl_val_df$n_orfs),
