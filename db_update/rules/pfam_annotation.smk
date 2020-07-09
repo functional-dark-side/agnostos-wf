@@ -8,7 +8,7 @@ rule pfam_annotation:
         hmmout = config["rdir"] + "/pfam_annotation/hmmsearch_pfam_annot.out",
         hmmlog = config["rdir"] + "/pfam_annotation/hmmsearch_pfam_annot.log"
     conda:
-        "../envs/workflow.yml"
+        config["conda_env"]
     output:
         annot=config["rdir"] + "/pfam_annotation/pfam_annotations.tsv"
     threads: 28

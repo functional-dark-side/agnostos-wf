@@ -5,7 +5,7 @@ rule spurious_shadow:
         clu_info = config["rdir"] + "/mmseqs_clustering/cluDB_info.tsv"
     threads: 16
     conda:
-        "../envs/workflow.yml"
+        config["conda_env"]
     params:
         hmmer_bin = config["hmmer_bin"],
         mpi_runner = config["mpi_runner"],

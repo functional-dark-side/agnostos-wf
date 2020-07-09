@@ -21,7 +21,7 @@ rule cluster_category_stats:
         compl = config["rdir"] + "/cluster_category_stats/cluster_category_completeness.tsv",
         outdir = config["rdir"] + "/cluster_category_stats"
     conda:
-        "../envs/workflow.yml"
+        config["conda_env"]
     output:
         HQ_clusters = config["rdir"] + "/cluster_category_stats/HQ_clusters.tsv",
         cat_stats = config["rdir"] + "/cluster_category_stats/cluster_category_summary_stats.tsv"

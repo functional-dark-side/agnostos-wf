@@ -20,7 +20,7 @@ rule mmseqs_clustering_results:
         naming = "scripts/cluster_naming.sh",
         namedb = config["rdir"] + "/mmseqs_clustering/cluDB_ids.db"
     conda:
-        "../envs/workflow.yml"
+        config["conda_env"]
     log:
         out = "logs/mmseqs_clustering_res_stdout.log",
         err = "logs/mmseqs_clustering_res_stderr.err"

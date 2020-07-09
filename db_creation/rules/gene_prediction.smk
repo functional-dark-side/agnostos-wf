@@ -10,7 +10,7 @@ rule gene_prediction:
         tmp = config["rdir"] + "/gene_prediction/{smp}_tmpl",
         outdir = config["rdir"] + "/gene_prediction"
     conda:
-        "../envs/workflow.yml"
+        config["conda_env"]
     output:
         fa = config["rdir"] + "/gene_prediction/{smp}_orfs.fasta",
         orfs = config["rdir"] + "/gene_prediction/{smp}_orfs.txt",

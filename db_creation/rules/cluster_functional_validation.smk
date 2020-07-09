@@ -4,7 +4,7 @@ rule cluster_functional_validation:
         sp_sh = config["rdir"] + "/spurious_shadow/spurious_shadow_info.tsv"
     threads: 28
     conda:
-        "../envs/workflow.yml"
+        config["conda_env"]
     params:
         funct_valr = "scripts/functional_validation.r",
         funct_val_fun = "scripts/funct_val_functions.r",

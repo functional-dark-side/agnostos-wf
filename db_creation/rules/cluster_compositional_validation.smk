@@ -24,7 +24,7 @@ rule cluster_compositional_validation:
         stat_dir = config["rdir"] + "/compositional_validation/stats",
         outdir = config["rdir"] + "/compositional_validation"
     conda:
-        "../envs/workflow.yml"
+        config["conda_env"]
     threads: 7
     output:
         cl_cval = config["rdir"] + \

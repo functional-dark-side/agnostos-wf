@@ -5,7 +5,7 @@ rule workflow_report:
         comm = config["rdir"] + "/cluster_communities/cluster_communities.tsv"
     threads: 28
     conda:
-        "../envs/workflow.yml"
+        config["conda_env"]
     params:
         basedir = config["rdir"],
         outdir = config["rdir"] + "/report/",

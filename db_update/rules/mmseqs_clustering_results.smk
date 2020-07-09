@@ -33,7 +33,7 @@ rule mmseqs_clustering_results:
         original = config["rdir"] + "/mmseqs_clustering/cluDB_original_name_rep_size.tsv",
         index = config["rdir"] + "/mmseqs_clustering/cluDB_name_index.txt"
     conda:
-        "../envs/workflow.yml"
+        config["conda_env"]
     log:
         out = "logs/mmseqs_clustering_res_stdout.log",
         err = "logs/mmseqs_clustering_res_stderr.err"

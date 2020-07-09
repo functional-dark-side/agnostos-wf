@@ -6,7 +6,7 @@ rule cluster_classification:
             "/cluster_refinement/refined_annotated_clusters.tsv"
     threads: 28
     conda:
-        "../envs/workflow.yml"
+        config["conda_env"]
     params:
         wd = config["wdir"],
         mmseqs_bin = config["mmseqs_bin"],
