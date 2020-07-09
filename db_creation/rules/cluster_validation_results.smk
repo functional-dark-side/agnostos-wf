@@ -3,7 +3,7 @@ rule cluster_validation_results:
         cval = config["rdir"] + "/compositional_validation/compositional_validation_results.tsv",
         fval = config["rdir"] + "/functional_validation/functional_val_results.tsv"
       threads: 28
-    conda:
+      conda:
         config["conda_env"]
       params:
         cl_annot = config["rdir"] + "/annot_and_clust/annotated_clusters.tsv",
