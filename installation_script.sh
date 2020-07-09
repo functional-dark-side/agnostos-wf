@@ -103,5 +103,7 @@ make check
 make install
 cd ../../
 
+export LD_LIBRARY_PATH=/vol/cloud/agnostos-wf/bin/igraph/lib:${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}
+
 gcc scripts/is_connected.c -o scripts/is_connected -Ibin/igraph/include -Lbin/igraph/lib -ligraph
 gcc scripts/filter_graph.c -o scripts/filter_graph -Ibin/igraph/include -Lbin/igraph/lib -ligraph
