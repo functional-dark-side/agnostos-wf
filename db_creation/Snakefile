@@ -31,6 +31,7 @@ rule all:
         cluster_categ_db_done = config["rdir"] + "/cluster_category_DB/cat_db.done",
         cluster_categ_stats_done = config["rdir"] + "/cluster_category_stats/cat_stats.done",
         cluster_comm_done = config["rdir"] + "/cluster_communities/comm.done",
+        cludb_res_done = config["rdir"] + "/clusterDB_results/cludb_res.done",
         report_done = config["rdir"] + "/report/workflow_report.html"
 
 include: "rules/gene_prediction.smk"
@@ -50,4 +51,5 @@ include: "rules/cluster_category_refinement.smk"
 include: "rules/cluster_category_database.smk"
 include: "rules/cluster_category_stats.smk"
 include: "rules/cluster_communities.smk"
+include: "rules/cluster_db_results.smk"
 include: "rules/workflow_report.smk"
