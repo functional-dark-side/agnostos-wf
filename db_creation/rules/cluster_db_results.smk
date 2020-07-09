@@ -13,7 +13,7 @@ rule cluster_db_results:
         or_clu_origin = config["rdir"] + "/mmseqs_clustering/cluDB_name_origin_size.tsv",
         or_sp_sh = config["rdir"] + "/spurious_shadow/spurious_shadow_info.tsv",
         or_multi_annot = config["rdir"] + "/annot_and_clust/pfam_name_acc_clan_multi.tsv.gz",
-        or_partial = config["rdir"] + "/gene_prediction/orf_partial_info.tsv",
+        or_partial = config["rdir"] + "/combine_samples/orf_partial_info.tsv",
         sp_sh = config["rdir"] + "/clusterDB_results/spurious_shadow_info.tsv.gz",
         multi_annot = config["rdir"] + "/clusterDB_results/pfam_name_acc_clan_multi.tsv.gz",
         partial = config["rdir"] + "/clusterDB_results/orf_partial_info.tsv.gz",
