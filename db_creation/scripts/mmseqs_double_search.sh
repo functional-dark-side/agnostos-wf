@@ -179,7 +179,7 @@ awk -v P="${E}" -f "${EFILTER}" <(sort -k1,1 -k11,11g "${RES}" | awk '!seen[$1,$
 
 # Retrive database protein information
 FP="${F}"_prot.tsv
-join -12 -21 <(sort -k2,2 "${F}") <(gzip -dc "${DB_PROT}" | sort -k1,1 --parallel="${NSLOTS}" -S25%) >"${FP}"
+join -12 -21 <(sort -k2,2 "${F}") <(zcat "${DB_PROT}" | sort -k1,1 --parallel="${NSLOTS}" -S25% -T "${LTMP}") > "${FP}"
 
 FOUT="${F}"_hypo_char
 LC_ALL=C "${PGREP}" -j 4 -i -f "${PATTERNS}" "${FP}" | awk '{print $0"\thypo"}' >"${FOUT}"

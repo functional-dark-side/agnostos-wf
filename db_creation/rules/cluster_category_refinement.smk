@@ -91,14 +91,14 @@ rule cluster_category_refinement:
             sed -e 's/\\x0//g' {params.tmp_eu} > {params.tmp_eu}_parsed.tsv
         fi
 
-        LC_ALL=C rg -j 4 -i -f {params.patterns} {params.tmp_eu}_parsed.tsv | \
+        if [[ -s {params.tmp_eu}_parsed.tsv ]]; then
+            LC_ALL=C rg -j 4 -i -f {params.patterns} {params.tmp_eu}_parsed.tsv | \
             awk '{{print $0"\thypo"}}' > {params.tmp_eu}_hypo_char
-        LC_ALL=C rg -j 4 -v -i -f {params.patterns} {params.tmp_eu}_parsed.tsv | \
+            LC_ALL=C rg -j 4 -v -i -f {params.patterns} {params.tmp_eu}_parsed.tsv | \
             awk '{{print $0"\tchar"}}' >> {params.tmp_eu}_hypo_char
 
-        sed -i 's/\\t\\t/\\t/g' {params.tmp_eu}_hypo_char
+            sed -i 's/\\t\\t/\\t/g' {params.tmp_eu}_hypo_char
 
-        if [ -s {params.tmp_eu}_hypo_char ]; then
             awk -vP={params.hypo_filt} -vFS='\\t' \
                 '{{a[$2][$16]++}}END{{for (i in a) {{N=a[i]["hypo"]/(a[i]["hypo"]+a[i]["char"]); if (N >= P){{print i}}}}}}' {params.tmp_eu}_hypo_char \
                 > {params.tmp_eu}_new_gu_ids.txt
