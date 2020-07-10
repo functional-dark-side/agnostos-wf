@@ -78,11 +78,11 @@ ref_annot <- fread(opt$ref_annot, stringsAsFactors = F, header = F, nThread = op
 clu_annot <- fread(opt$clu_annot,
   stringsAsFactors = F,
   header = F, nThread = opt$threads,
-  colClasses = c(V6 = "character")
+  colClasses = c(V7 = "character")
 ) %>%
-  setNames(c("orf", "cl_name", "pfam_name", "pfam_acc", "pfam_clan", "partial")) %>%
-  select(-cl_name,-pfam_acc)
-  
+  setNames(c("cl_name","old_rep","orf", "pfam_name", "pfam_acc", "pfam_clan", "partial")) %>%
+  select(-cl_name,-old_rep,-pfam_acc)
+
 new_rep <- fread(opt$good_cl, stringsAsFactors = F, header=T) %>%
  select(cl_name, new_repres) %>% rename(rep=new_repres)
 
