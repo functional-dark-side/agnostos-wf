@@ -45,8 +45,8 @@ if [ ! -s nr.fasta.gz ]; then
 fi
 # Uniclust HHBLITS DB
 if [ ! -s uniclust30_2018_08/uniclust30_2018_08_a3m.ffdata ]; then
-  aria2c --file-allocation=none -c -x 10 -s 10 http://wwwuser.gwdg.de/~compbiol/uniclust/2018_08/uniclust30_2018_08.tar.gz
-  tar xvfz uniclust30_2018_08.tar.gz
+  aria2c --file-allocation=none -c -x 10 -s 10 http://wwwuser.gwdg.de/~compbiol/uniclust/2018_08/uniclust30_2018_08_hhsuite.tar.gz
+  tar xvfz uniclust30_2018_08_hhsuite.tar.gz
 fi
 
 # DPD and info
