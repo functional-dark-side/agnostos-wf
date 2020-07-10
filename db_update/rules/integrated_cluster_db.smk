@@ -59,6 +59,9 @@ rule integrated_cluster_db:
 
         mkdir -p ${{DIR}}
 
+        if [[ ! -s {params.or_clu_orig} ]]; then
+        wget https://ndownloader.figshare.com/files/23066966 -O {params.or_clu_orig}
+        fi
         # Summary table with cluster db origin (original/shared/new)
         join -11 -21 <(zcat {params.or_clu_orig} | awk '{{print $1,$2}}' | sort -k1,1 --parallel={threads} ) \
             <(awk '{{print $1,$3}}' {params.original} | sort -k1,1) > {params.clu_origin}
