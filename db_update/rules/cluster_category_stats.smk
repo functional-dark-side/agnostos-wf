@@ -13,7 +13,7 @@ rule cluster_category_stats:
         stats = "scripts/cluster_category_stats.r",
         ref = config["rdir"] + "/cluster_refinement/refined_clusters.tsv",
         refdb = config["rdir"] + "/cluster_refinement/refined_clusterDB",
-        cl_cat_genes = config["rdir"] + "/cluster_categories/cluster_ids_categ_genes.tsv",
+        cl_cat_genes = config["rdir"] + "/cluster_categories/cluster_ids_categ_genes.tsv.gz",
         tax_dir = config["rdir"] + "/cluster_category_stats/taxonomy",
         tax = config["rdir"] + "/cluster_category_stats/taxonomy/cluster_category_taxonomy.tsv",
         dark = config["rdir"] + "/cluster_category_stats/darkness/cluster_category_darkness.tsv",

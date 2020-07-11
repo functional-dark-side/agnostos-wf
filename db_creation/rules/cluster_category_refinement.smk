@@ -15,7 +15,8 @@ rule cluster_category_refinement:
         hhblits_bin = config["hhblits_bin"],
         uniclust_db = config["uniclust_db"],
         pfam_db = config["pfam_hh_db"],
-        index = config["rdir"] + "/mmseqs_clustering/cluDB_name_index.txt",
+        cluseqdb = config["rdir"] + "/cluster_refinement/refined_clusterDB",
+        index = config["rdir"] + "/mmseqs_clustering/new_cluDB_name_index.txt",
         hh_parser = "scripts/hh_parser.sh",
         hh_reader = "scripts/hh_reader.py",
         hhpfam = "scripts/hhpfam_search.sh",
@@ -30,10 +31,9 @@ rule cluster_category_refinement:
         concat = "scripts/concat_multi_annot.awk",
         new_da = "scripts/categ_ref_new_domain_archit.r",
         hypo_filt = config["hypo_filt"],
-        cluseqdb = config["rdir"] + "/cluster_refinement/refined_clusterDB",
         ref_clu = config["rdir"] + "/cluster_refinement/refined_clusters.tsv",
         categ_orfs = config["rdir"] + \
-            "/cluster_categories/cluster_ids_categ_orfs.tsv",
+            "/cluster_categories/cluster_ids_categ_genes.tsv",
         outdir = config["rdir"] + "/cluster_categories",
         hmm_eu = config["rdir"] + "/cluster_categories/eu_hhm_db",
         hmm_kwp = config["rdir"] + "/cluster_categories/kwp_hhm_db",
@@ -91,14 +91,14 @@ rule cluster_category_refinement:
             sed -e 's/\\x0//g' {params.tmp_eu} > {params.tmp_eu}_parsed.tsv
         fi
 
-        if [[ -s {params.tmp_eu}_parsed.tsv ]]; then
-            LC_ALL=C rg -j 4 -i -f {params.patterns} {params.tmp_eu}_parsed.tsv | \
+        LC_ALL=C rg -j 4 -i -f {params.patterns} {params.tmp_eu}_parsed.tsv | \
             awk '{{print $0"\thypo"}}' > {params.tmp_eu}_hypo_char
-            LC_ALL=C rg -j 4 -v -i -f {params.patterns} {params.tmp_eu}_parsed.tsv | \
+        LC_ALL=C rg -j 4 -v -i -f {params.patterns} {params.tmp_eu}_parsed.tsv | \
             awk '{{print $0"\tchar"}}' >> {params.tmp_eu}_hypo_char
 
-            sed -i 's/\\t\\t/\\t/g' {params.tmp_eu}_hypo_char
+        sed -i 's/\\t\\t/\\t/g' {params.tmp_eu}_hypo_char
 
+        if [ -s {params.tmp_eu}_hypo_char ]; then
             awk -vP={params.hypo_filt} -vFS='\\t' \
                 '{{a[$2][$16]++}}END{{for (i in a) {{N=a[i]["hypo"]/(a[i]["hypo"]+a[i]["char"]); if (N >= P){{print i}}}}}}' {params.tmp_eu}_hypo_char \
                 > {params.tmp_eu}_new_gu_ids.txt
@@ -215,6 +215,8 @@ rule cluster_category_refinement:
         join -11 -21 <(sort -k1,1 {output.categ}) \
             <(awk '{{print $1,$3}}' {params.ref_clu} | sort -k1,1) \
             > {params.categ_orfs}
+
+        gzip {params.categ_orfs}
 
         # Gather cluster annotations obtained from the classification and the two refinement steps
         class=$(dirname {input.k})
