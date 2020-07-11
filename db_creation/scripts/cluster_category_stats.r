@@ -99,6 +99,7 @@ ref_clu <- ref_clu %>% dt_inner_join(category)
 # cluster ORF length stats
 clu_stats <- ref_clu %>%
   group_by(cl_name) %>%
+  mutate(size=max(size)) %>%
   mutate(
     min_len = min(length), mean_len = mean(length),
     median_len = median(length), max_len = max(length), sd_len = sd(length)
@@ -230,8 +231,7 @@ cat_compl <- cat_stats %>%
 
 # Cluster taxonomy stats
 cl_tax <- fread(opt$clu_tax,
-  stringsAsFactors = F, header = F, fill = T
-) %>%
+  stringsAsFactors = F, header = F, fill = T, sep="\t") %>%
   setNames(c("orf", "cl_name", "category", "taxid", "rank", "classific", "lineage"))
 # Filter out the unclassified ones and split the taxonomic levels in the lineage
 cl_tax <- cl_tax %>%
@@ -245,7 +245,12 @@ cl_tax <- cl_tax %>%
     family = str_match(lineage, ";f_(.*?);.*")[, 2],
     genus = str_match(lineage, ";g_(.*?);.*")[, 2],
     species = str_match(lineage, ";s_(.*?)$")[, 2]
-  )
+  )  %>%
+  mutate(domain=case_when(classific=="Bacteria" ~ "Bacteria",
+                          classific=="Archaea" ~ "Archaea",
+                          classific=="Eukaryota" ~ "Eukaryota",
+                          classific=="Viruses" ~ "Viruses",
+                          TRUE ~ domain))
 
 # Taxonomic homogeneity
 homo_tax <- cl_tax %>%
@@ -298,6 +303,14 @@ taxp <- ggplot(plot_tax %>% filter(n <= 50 & n > 0), aes(y = category, x = n, fi
 save(taxp, file = paste0(opt$output, "/cluster_category_taxonomy_plot.rda"))
 
 # Calculate cluster taxonomic entropy
+d <- cl_tax %>%
+  group_by(cl_name, category, domain) %>%
+  summarise(n = n()) %>%
+  mutate(df = n / sum(n)) %>%
+  group_by(cl_name, category) %>%
+  mutate(de = entropy.empirical(df, unit = "log2")) %>%
+  select(1, 2, 6) %>%
+  distinct()
 p <- cl_tax %>%
   group_by(cl_name, category, phylum) %>%
   summarise(n = n()) %>%
@@ -346,13 +359,14 @@ s <- cl_tax %>%
   mutate(se = entropy.empirical(sf, unit = "log2")) %>%
   select(1, 2, 6) %>%
   distinct()
-tax_entropy <- p %>%
+tax_entropy <- d %>%
+  left_join(p) %>%
   left_join(c) %>%
   left_join(o) %>%
   left_join(f) %>%
   left_join(g) %>%
   left_join(s)
-rm(p, c, o, f, g, s)
+rm(d,p, c, o, f, g, s)
 write_tsv(tax_entropy, path = paste0(opt$output, "/cluster_category_taxonomy_entropy.tsv"), col_names = TRUE)
 
 ## Retrieve the prevalent taxa for each cluster
@@ -398,7 +412,7 @@ clu_stats <- clu_stats %>% select(-rep_compl) %>%
   dt_left_join(tax_entropy %>% ungroup() %>% mutate(cl_name = as.character(cl_name))) %>%
   dt_left_join(prev_tax %>% ungroup() %>% mutate(cl_name = as.character(cl_name))) %>%
   dt_left_join(cl_dark %>% ungroup() %>% mutate(cl_name = as.character(cl_name))) %>%
-  dt_left_join(HQ_clusters %>% mutate(is.HQ = TRUE))
+  dt_left_join(HQ_clusters %>% mutate(is.HQ = TRUE)) %>% distinct()
 write_tsv(clu_stats, path = opt$summ_stats, col_names = TRUE)
 
 ## Category general stats
@@ -408,4 +422,4 @@ cat_stats <- cat_stats %>%
   distinct() %>%
   dt_left_join(tax_entropy %>% ungroup() %>% select(-cl_name) %>% group_by(category) %>% summarise_all(sum)) %>%
   dt_left_join(cat_dark)
-write_tsv(clu_stats, path = paste0(opt$output, "/only_category_summary_stats.tsv"), col_names = TRUE)
+write_tsv(cat_stats, path = paste0(opt$output, "/only_category_summary_stats.tsv"), col_names = TRUE)
