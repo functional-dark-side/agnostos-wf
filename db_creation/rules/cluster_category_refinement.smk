@@ -16,7 +16,7 @@ rule cluster_category_refinement:
         uniclust_db = config["uniclust_db"],
         pfam_db = config["pfam_hh_db"],
         cluseqdb = config["rdir"] + "/cluster_refinement/refined_clusterDB",
-        index = config["rdir"] + "/mmseqs_clustering/new_cluDB_name_index.txt",
+        index = config["rdir"] + "/mmseqs_clustering/cluDB_name_index.txt",
         hh_parser = "scripts/hh_parser.sh",
         hh_reader = "scripts/hh_reader.py",
         hhpfam = "scripts/hhpfam_search.sh",
