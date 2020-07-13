@@ -4,6 +4,8 @@
 wdir: "/vol/cloud/agnostos-wf/db_update"
 rdir: "/vol/cloud/db_update"
 data: "/vol/cloud/data"
+# choose a name for your dataset
+new_data_name: "tara_038"
 
 conda_env: "/vol/cloud/agnostos-wf/envs/workflow.yml"
 # Cluster update configuration

@@ -11,6 +11,7 @@ rule integrated_cluster_db:
         mmseqs_tmp = config["mmseqs_tmp"],
         local_tmp   = config["mmseqs_local_tmp"],
         idir = config["rdir"] + "/integrated_cluster_DB",
+        data_name = config["new_data_name"],
         original = config["rdir"] + "/mmseqs_clustering/cluDB_original_name_rep_size.tsv",
         shared = config["rdir"] + "/mmseqs_clustering/cluDB_shared_name_rep_size.tsv",
         new = config["rdir"] + "/mmseqs_clustering/cluDB_new_name_rep_size.tsv",
@@ -67,8 +68,8 @@ rule integrated_cluster_db:
             <(awk '{{print $1,$3}}' {params.original} | sort -k1,1) > {params.clu_origin}
         join -11 -21 <(zcat {params.or_clu_orig} | awk '{{print $1,$2}}' |  sort -k1,1 --parallel={threads} ) \
             <(awk '{{print $1,$3}}' {params.shared} | sort -k1,1) > {params.clu_origin}.temp
-        awk '{{print $1,$2"_new",$3}}' {params.clu_origin}.temp >> {params.clu_origin}
-        awk '{{print $1,"new",$3}}' {params.new} >> {params.clu_origin}
+        awk -vN={params.data_name} '{{print $1,$2"_"N,$3}}' {params.clu_origin}.temp >> {params.clu_origin}
+        awk -vN={params.data_name} '{{print $1,N,$3}}' {params.new} >> {params.clu_origin}
         rm {params.clu_origin}.temp
         sed -i 's/ /\t/g' {params.clu_origin}
 
