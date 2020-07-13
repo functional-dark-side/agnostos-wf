@@ -411,8 +411,9 @@ if (cfg$da_dist != ""){
   n_comp <- (nrow(d)*(nrow(d) - 1))/2
 
   msg(paste("Calculating", scales::comma(n_comp),"pairwise domain architectures", "distances using", red("cosine"), "distance with a", red("q-gram of 3...")))
-  lo_env$da_dist <- stringdist::stringdistmatrix(d$exp_rep, useNames = TRUE, method = "cosine", q = 3, nthread = cfg$dt_cores) %>%
-    melt(as.matrix(da_dist), varnames = c("item1", "item2")) %>% rename(distance=value) %>% filter(distance!=0)
+  lo_env$da_dist <- stringdist::stringdistmatrix(d$exp_rep, useNames = TRUE, method = "cosine", q = 3, nthread = cfg$dt_cores)
+  lo_env$da_dist <- melt(as.matrix(lo_env$da_dist), varnames = c("item1", "item2")) %>%
+   rename(distance=value) %>% filter(distance!=0)
     #broom::tidy() %>%
     #as.data.table()
   cat(" done\n")
