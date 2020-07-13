@@ -52,7 +52,7 @@ tibble(Contigs=contig_seqs,Genes=genes) %>% kable(digits=3, format.args = list(b
 We functionally annotated the predicted genes using the Pfam database of protein domain families (version 30.0) [[2]](#2), with the hmmsearch program from the HMMER package (version: 3.1b2) [[3]](#3). We only accepted those hits with an e-value < 1e-5 and a coverage > 0.4.
 
 ```{r,echo=FALSE}
-pfam_annot <- fread(paste0(dir,"/annot_and_clust/pfam_name_acc_clan_multi.tsv"),stringsAsFactors = F,header = F)
+pfam_annot <- fread(paste0(dir,"/annot_and_clust/pfam_multi_annot_name_acc_clan.tsv"),stringsAsFactors = F,header = F)
 genes <- as.numeric(genes)
 tibble(Type=c("Number of genes","Percentage of genes"),
        Annotated_genes=c(length(unique(pfam_annot$V1)),length(unique(pfam_annot$V1))/genes*100),
