@@ -363,7 +363,7 @@ k_gc_entropy_summary <- map_df(k_gc_entropy, function(X){
 }, .id = "inflation")
 cat(" done\n")
 
-# Calculate nter and intra score modes
+# Calculate inter and intra score modes
 msg("Calculating inter/intra MCL communities score-per-column mode values...\n")
 
 k_hh_g_dt <- k_hh_g %>%
@@ -656,6 +656,9 @@ best_inflation <- k_partition_stats_eval %>%
   top_n(n = 1, wt = total) %>%
   .$grp
 
+if (length(best_inflation >1 )) {
+    best_inflation <- max(best_inflation)
+}
 msg(paste0("\nOptimal inflation value identified at ", red(best_inflation), "\n\n"))
 
 
@@ -800,7 +803,7 @@ if(k_correct){
   #msg("Something went wrong... quitting\n!")
   #quit()
   k_max_com <- max(k_communities$com)
-  missing_final <- cl_cat %>% dt_filter(category == "K") %>%  mutate(cl_name=as.character(cl_name)) %>%
+  missing_final <- cl_cat %>% dt_filter(category == "K") %>% mutate(cl_name=as.character(cl_name)) %>%
    filter(!cl_name %in% k_communities$cl_name) %>% mutate(com=k_max_com + row_number())
   k_communities <- bind_rows(k_communities,missing_final)
   k_n_comp <- k_communities$com %>% unique() %>% length()
@@ -854,18 +857,18 @@ lo_env$kwp_hhblits_missing <- lo_env$kwp_hhblits_all %>%
   as_tibble() %>% mutate(score_col = Score/Cols)
 cat(paste0("Found ", scales::comma(length(kwp_missing_ids))), "clusters missing\n")
 
-
-# Let's create a graph
-msg("Inferring graph from HHBLITS results...")
-lo_env$kwp_hhb_bh <- lo_env$kwp_hhblits %>%
-  as_tibble() %>%
-  mutate(cl_name1 = as.character(cl_name1),
+if(dim(lo_env$kwp_hhblits)[1]!= 0){
+  # Let's create a graph
+  msg("Inferring graph from HHBLITS results...")
+  lo_env$kwp_hhb_bh <- lo_env$kwp_hhblits %>%
+    as_tibble() %>%
+    mutate(cl_name1 = as.character(cl_name1),
          cl_name2 = as.character(cl_name2)) %>%
-  mutate(score_col = Score/Cols)
+         mutate(score_col = Score/Cols)
 
-kwp_hh_g <- lo_env$kwp_hhb_bh %>%
-  select(cl_name1, cl_name2, score_col) %>%
-  rename(weight = score_col) %>%
+  kwp_hh_g <- lo_env$kwp_hhb_bh %>%
+    select(cl_name1, cl_name2, score_col) %>%
+    rename(weight = score_col) %>%
   igraph::graph_from_data_frame(directed = FALSE) %>%
   igraph::simplify(remove.multiple = TRUE, remove.loops = TRUE, edge.attr.comb = list("max")) %>%
   as_tbl_graph()
@@ -1113,7 +1116,12 @@ if (kwp_mids_l > 0){
   kwp_n_comp <- kwp_communities$com %>% unique() %>% length()
   kwp_n_clus <-  kwp_communities$cl_name %>% unique() %>% length()
 }
-
+} else {
+  kwp_communities <- kwp_missing_ids %>% tibble::enframe(name = NULL) %>%
+   rename(cl_name=value) %>% mutate(com=row_number(), cl_name=as.character(cl_name))
+  kwp_n_comp <- kwp_communities$com %>% unique() %>% length()
+  kwp_n_clus <-  kwp_communities$cl_name %>% unique() %>% length()
+}
 msg(paste0("We have been obtained ", scales::comma(kwp_n_comp), " from ", scales::comma(kwp_n_clus), " clusters\n"))
 
 # Do we have all communities
@@ -1166,16 +1174,16 @@ lo_env$gu_hhblits_missing <- lo_env$gu_hhblits_all %>%
   as_tibble() %>% mutate(score_col = Score/Cols)
 cat(paste0("Found ", scales::comma(length(gu_missing_ids))), "clusters missing\n")
 
-
-# Let's create a graph
-msg("Inferring graph from HHBLITS results...")
-lo_env$gu_hhb_bh <- lo_env$gu_hhblits %>%
-  as_tibble() %>%
-  mutate(cl_name1 = as.character(cl_name1),
+if(dim(lo_env$gu_hhblits)[1]!= 0){
+  # Let's create a graph
+  msg("Inferring graph from HHBLITS results...")
+  lo_env$gu_hhb_bh <- lo_env$gu_hhblits %>%
+    as_tibble() %>%
+    mutate(cl_name1 = as.character(cl_name1),
          cl_name2 = as.character(cl_name2)) %>%
-  mutate(score_col = Score/Cols)
+    mutate(score_col = Score/Cols)
 
-gu_hh_g <- lo_env$gu_hhb_bh %>%
+  gu_hh_g <- lo_env$gu_hhb_bh %>%
   select(cl_name1, cl_name2, score_col) %>%
   rename(weight = score_col) %>%
   igraph::graph_from_data_frame(directed = FALSE) %>%
@@ -1423,6 +1431,12 @@ if (gu_mids_l > 0){
   gu_n_clus <-  gu_communities$cl_name %>% unique() %>% length()
   cat(" done\n")
 }
+} else {
+  gu_communities <- gu_missing_ids %>% tibble::enframe(name = NULL) %>%
+   rename(cl_name=value) %>% mutate(com=row_number(), cl_name=as.character(cl_name))
+  gu_n_comp <- gu_communities$com %>% unique() %>% length()
+  gu_n_clus <-  gu_communities$cl_name %>% unique() %>% length()
+}
 
 msg(paste0("We have been obtained ", scales::comma(gu_n_comp), " from ", scales::comma(gu_n_clus), " clusters\n"))
 
@@ -1447,330 +1461,347 @@ msg(paste0("GU component inference ", green("DONE"), "\n\n"))
 ###########################################################################
 # Get communities for the EU ----------------------------------------------
 ###########################################################################
-msg(paste0("Starting EU component inference\n\n"))
+if(file.exists(cfg$eu_hhblits_results)){
 
-msg("Reading EU HHBLITS all-vs-all results...")
-lo_env$eu_hhblits_all <- fread(input = cfg$eu_hhblits_results,
-                               header = FALSE, verbose = cfg$dt_verbose, nThread = cfg$dt_cores)
-names(lo_env$eu_hhblits_all) <- c("cl_name1", "cl_name2", "probability", "e-value", "Score",
-                                  "Cols", "q_start", "q_stop", "t_start", "t_stop", "q_len", "t_len", "q_cov",
-                                  "t_cov")
-cat(paste(" Read", green(scales::comma(nrow(lo_env$eu_hhblits_all))), "entries\n"))
+  msg(paste0("Starting EU component inference\n\n"))
 
-msg("Filtering EU HHBLITS all-vs-all results with P>=50 and cov > 0.6...")
-lo_env$eu_hhblits <- lo_env$eu_hhblits_all %>% dt_filter(probability > 50, q_cov >= 0.6, t_cov >= 0.6)
-lo_env$eu_hhblits <- lo_env$eu_hhblits %>% dt_filter(cl_name1 != cl_name2)
+  msg("Reading EU HHBLITS all-vs-all results...")
+  lo_env$eu_hhblits_all <- fread(input = cfg$eu_hhblits_results,
+    header = FALSE, verbose = cfg$dt_verbose, nThread = cfg$dt_cores)
+    names(lo_env$eu_hhblits_all) <- c("cl_name1", "cl_name2", "probability", "e-value", "Score",
+    "Cols", "q_start", "q_stop", "t_start", "t_stop", "q_len", "t_len", "q_cov",
+    "t_cov")
+    cat(paste(" Read", green(scales::comma(nrow(lo_env$eu_hhblits_all))), "entries\n"))
 
-# How many clusters do we have (removed self-hits)
-# 522,765 p50;c0.6
-eu_unique_hhblits_cl <- c(lo_env$eu_hhblits$cl_name1, lo_env$eu_hhblits$cl_name2) %>% unique()
-cat(paste0(" Found ", scales::comma(length(eu_unique_hhblits_cl)), " clusters\n"))
+    msg("Filtering EU HHBLITS all-vs-all results with P>=50 and cov > 0.6...")
+    lo_env$eu_hhblits <- lo_env$eu_hhblits_all %>% dt_filter(probability > 50, q_cov >= 0.6, t_cov >= 0.6)
+    lo_env$eu_hhblits <- lo_env$eu_hhblits %>% dt_filter(cl_name1 != cl_name2)
 
-
-# Missing clusters
-# Num: 27,244
-msg("Identifying missing clusters...")
-eu_missing_ids <- setdiff(cl_cat %>% dt_filter(category == "EU") %>% .$cl_name, eu_unique_hhblits_cl)
-lo_env$eu_hhblits_missing <- lo_env$eu_hhblits_all %>%
-  dt_mutate(cl_name1 = as.character(cl_name1), cl_name2 = as.character(cl_name2)) %>%
-  dt_filter(cl_name1 %in% eu_missing_ids | cl_name2 %in% eu_missing_ids) %>%
-  as_tibble() %>% mutate(score_col = Score/Cols)
-cat(paste0("Found ", scales::comma(length(eu_missing_ids))), "clusters missing\n")
+    # How many clusters do we have (removed self-hits)
+    # 522,765 p50;c0.6
+    eu_unique_hhblits_cl <- c(lo_env$eu_hhblits$cl_name1, lo_env$eu_hhblits$cl_name2) %>% unique()
+    cat(paste0(" Found ", scales::comma(length(eu_unique_hhblits_cl)), " clusters\n"))
 
 
-# Let's create a graph
-msg("Inferring graph from HHBLITS results...")
-lo_env$eu_hhb_bh <- lo_env$eu_hhblits %>%
-  as_tibble() %>%
-  mutate(cl_name1 = as.character(cl_name1),
-         cl_name2 = as.character(cl_name2)) %>%
-  mutate(score_col = Score/Cols)
+    # Missing clusters
+    # Num: 27,244
+    msg("Identifying missing clusters...")
+    eu_missing_ids <- setdiff(cl_cat %>% dt_filter(category == "EU") %>% .$cl_name, eu_unique_hhblits_cl)
+    lo_env$eu_hhblits_missing <- lo_env$eu_hhblits_all %>%
+    dt_mutate(cl_name1 = as.character(cl_name1), cl_name2 = as.character(cl_name2)) %>%
+    dt_filter(cl_name1 %in% eu_missing_ids | cl_name2 %in% eu_missing_ids) %>%
+    as_tibble() %>% mutate(score_col = Score/Cols)
+    cat(paste0("Found ", scales::comma(length(eu_missing_ids))), "clusters missing\n")
 
-eu_hh_g <- lo_env$eu_hhb_bh %>%
-  select(cl_name1, cl_name2, score_col) %>%
-  rename(weight = score_col) %>%
-  igraph::graph_from_data_frame(directed = FALSE) %>%
-  igraph::simplify(remove.multiple = TRUE, remove.loops = TRUE, edge.attr.comb = list("max")) %>%
-  as_tbl_graph()
+    if(dim(lo_env$eu_hhblits)[1]!= 0){
+      # Let's create a graph
+      msg("Inferring graph from HHBLITS results...")
+      lo_env$eu_hhb_bh <- lo_env$eu_hhblits %>%
+      as_tibble() %>%
+      mutate(cl_name1 = as.character(cl_name1),
+      cl_name2 = as.character(cl_name2)) %>%
+      mutate(score_col = Score/Cols)
 
-cat(paste0(" Graph contains ", scales::comma(vcount(eu_hh_g)), " vertices and ", scales::comma(ecount(eu_hh_g)), " edges\n"))
+      eu_hh_g <- lo_env$eu_hhb_bh %>%
+      select(cl_name1, cl_name2, score_col) %>%
+      rename(weight = score_col) %>%
+      igraph::graph_from_data_frame(directed = FALSE) %>%
+      igraph::simplify(remove.multiple = TRUE, remove.loops = TRUE, edge.attr.comb = list("max")) %>%
+      as_tbl_graph()
 
-if (cfg$eu_g_mcl_list != ""){
-  msg("Loading already computed MCL clusters...")
-  load(cfg$eu_g_mcl_list)
-  inflation_list <- seq(cfg$mcl_inflation_min, cfg$mcl_inflation_max, cfg$mcl_inflation_step)
-  cat(" done\n")
-}else{
-  msg("Preparing graph for MCL clustering...")
-  gx <- eu_hh_g
+      cat(paste0(" Graph contains ", scales::comma(vcount(eu_hh_g)), " vertices and ", scales::comma(ecount(eu_hh_g)), " edges\n"))
 
-  w <- E(gx)$weight
-  w <- w - min(w) + 0.001
+      if (cfg$eu_g_mcl_list != ""){
+        msg("Loading already computed MCL clusters...")
+        load(cfg$eu_g_mcl_list)
+        inflation_list <- seq(cfg$mcl_inflation_min, cfg$mcl_inflation_max, cfg$mcl_inflation_step)
+        cat(" done\n")
+      }else{
+        msg("Preparing graph for MCL clustering...")
+        gx <- eu_hh_g
 
-  E(gx)$weight <- w
-  cat(" done\n")
+        w <- E(gx)$weight
+        w <- w - min(w) + 0.001
 
-  msg(paste0("Running MCL clustering with inflation values from ", cfg$mcl_inflation_min, " to ", cfg$mcl_inflation_max, " with ", cfg$mcl_inflation_step, " steps...\n"))
-  inflation_list <- seq(cfg$mcl_inflation_min, cfg$mcl_inflation_max, cfg$mcl_inflation_step)
-  mcl_bin <- cfg$mcl_bin
-  eu_g_mcl_list <- parallel::mclapply(inflation_list,
-                                         optimal_mcl,
-                                         G = eu_hh_g,
-                                         mcl_cores = cfg$mcl_cores,
-                                         #ignore.interactive = TRUE,
-                                         Gx = gx,
-                                         #max.vector.size = 1e+07,
-                                         mc.cores = cfg$mcl_jobs,
-                                         mc.cleanup = TRUE,
-                                         mc.silent = TRUE,
-                                         tmp_dir = tmp)
+        E(gx)$weight <- w
+        cat(" done\n")
 
-  #k_g_mcl_list <- lapply(inflation_list, optimal_mcl, G = k_hh_g, Gx = gx, mcl_cores = cfg$mcl_cores, tmp_dir = tmp)
-  names(eu_g_mcl_list) <- inflation_list
+        msg(paste0("Running MCL clustering with inflation values from ", cfg$mcl_inflation_min, " to ", cfg$mcl_inflation_max, " with ", cfg$mcl_inflation_step, " steps...\n"))
+        inflation_list <- seq(cfg$mcl_inflation_min, cfg$mcl_inflation_max, cfg$mcl_inflation_step)
+        mcl_bin <- cfg$mcl_bin
+        eu_g_mcl_list <- parallel::mclapply(inflation_list,
+          optimal_mcl,
+          G = eu_hh_g,
+          mcl_cores = cfg$mcl_cores,
+          #ignore.interactive = TRUE,
+          Gx = gx,
+          #max.vector.size = 1e+07,
+          mc.cores = cfg$mcl_jobs,
+          mc.cleanup = TRUE,
+          mc.silent = TRUE,
+          tmp_dir = tmp)
 
-  eu_g_mcl_list_file <- file.path(results, paste0("eu_g_mcl_list_", time_string, ".Rda"))
-  msg(paste0("Saving computed MCL communities in ", eu_g_mcl_list_file, "..."))
-  save(eu_g_mcl_list, file = eu_g_mcl_list_file, compress = FALSE)
-  cat(" done\n")
+          #k_g_mcl_list <- lapply(inflation_list, optimal_mcl, G = k_hh_g, Gx = gx, mcl_cores = cfg$mcl_cores, tmp_dir = tmp)
+          names(eu_g_mcl_list) <- inflation_list
 
-
-}
-
-# We run mcl with different inflation parameters:
-if (cfg$eu_gc != ""){
-  msg("Loading already contracted MCL communities...")
-  load(cfg$eu_gc)
-  cat(" done\n")
-}else{
-  msg("Contracting MCL communities...\n")
-  eu_gc <- parallel::mclapply(eu_g_mcl_list,
-                                 contract_graphs,
-                                 G = eu_hh_g,
-                                 #max.vector.size = 3e+09,
-                                 mc.cores = cfg$max_gc_jobs,
-                                 mc.cleanup = TRUE,
-                                 mc.silent = TRUE)
-  names(eu_gc) <- inflation_list
-  msg("Contracting MCL communities... done\n")
-
-  eu_gc_file <- file.path(results, paste0("eu_gc_", time_string, ".Rda"))
-  msg(paste0("Saving contracted MCL communities results in ", eu_gc_file, "..."))
-  save(eu_gc, file = eu_gc_file, compress = FALSE)
-  cat(" done\n")
-}
-
-msg("Computing modularity for each MCL community result...")
-eu_hh_g_modularity <- map_df(eu_g_mcl_list, function(X){
-  vnames <- V(eu_hh_g)$name
-  tibble(modularity = modularity(eu_hh_g, X[match(vnames,X$vertex),]$com))
-}, .id = "inflation")
-cat(" done\n")
+          eu_g_mcl_list_file <- file.path(results, paste0("eu_g_mcl_list_", time_string, ".Rda"))
+          msg(paste0("Saving computed MCL communities in ", eu_g_mcl_list_file, "..."))
+          save(eu_g_mcl_list, file = eu_g_mcl_list_file, compress = FALSE)
+          cat(" done\n")
 
 
+        }
 
-# Inter and intra score modes
-# Calculate nter and intra score modes
-msg("Calculating inter/intra MCL communities score-per-column mode values...\n")
+        # We run mcl with different inflation parameters:
+        if (cfg$eu_gc != ""){
+          msg("Loading already contracted MCL communities...")
+          load(cfg$eu_gc)
+          cat(" done\n")
+        }else{
+          msg("Contracting MCL communities...\n")
+          eu_gc <- parallel::mclapply(eu_g_mcl_list,
+            contract_graphs,
+            G = eu_hh_g,
+            #max.vector.size = 3e+09,
+            mc.cores = cfg$max_gc_jobs,
+            mc.cleanup = TRUE,
+            mc.silent = TRUE)
+            names(eu_gc) <- inflation_list
+            msg("Contracting MCL communities... done\n")
 
-eu_hh_g_dt <- eu_hh_g %>%
-  igraph::as_data_frame(what="edges") %>%
-  rename(cl_name1 = from, cl_name2 = to, score_col = weight) %>%
-  as.data.table()
+            eu_gc_file <- file.path(results, paste0("eu_gc_", time_string, ".Rda"))
+            msg(paste0("Saving contracted MCL communities results in ", eu_gc_file, "..."))
+            save(eu_gc, file = eu_gc_file, compress = FALSE)
+            cat(" done\n")
+          }
 
-eu_orig_hh_mode <- parallel::mclapply(eu_g_mcl_list, function(X){
-  eu_hh_g_dt %>%
-    dt_left_join(X %>% dt_select(vertex, com) %>% dt_mutate(com = as.character(com), vertex = as.character(vertex)) %>% rename(cl_name1 = vertex) %>% unique() %>% as.data.table, by = "cl_name1") %>%
-    dt_left_join(X %>% dt_select(vertex, com) %>% dt_mutate(com = as.character(com), vertex = as.character(vertex)) %>% rename(cl_name2 = vertex) %>% unique() %>% as.data.table, by = "cl_name2") %>%
-    dt_filter(com.x == com.y) %>% mutate(com = com.x) %>% group_by(com) %>% summarise(mode = estimate_mode(score_col))
-}, mc.cores = cfg$max_gc_jobs, #max.vector.size = 3e+09,
- mc.cleanup = TRUE, mc.silent = TRUE)
-
-com_orig_intra_score <- map_df(eu_orig_hh_mode, function(X){tibble(mode = estimate_mode(X$mode))}, .id = "inflation")
-com_orig_inter_score <- map_df(eu_gc, function(X){tibble(mode = estimate_mode(E(X$graph)$weight))}, .id = "inflation")
-
-eu_orig_hh_mode_summary <- com_orig_intra_score %>%
-  mutate(class = "intra") %>%
-  bind_rows(com_orig_inter_score %>% mutate(class = "inter"))
-msg("Calculating inter/intra MCL communities score-per-column mode values... done\n")
-
-msg("Summarising MCL results...")
-eu_partition_stats <- map_df(eu_g_mcl_list, function(X) {
-  tibble(com_orig_n = length(unique(X$com)),
-         com_orig_1mem = X %>% group_by(com) %>% count() %>% filter(n == 1) %>% nrow())
-}, .id = "inflation") %>%
-  inner_join(com_orig_intra_score %>% dplyr::rename(com_orig_intra_score = mode), by = "inflation")
-cat(" done\n")
+          msg("Computing modularity for each MCL community result...")
+          eu_hh_g_modularity <- map_df(eu_g_mcl_list, function(X){
+            vnames <- V(eu_hh_g)$name
+            tibble(modularity = modularity(eu_hh_g, X[match(vnames,X$vertex),]$com))
+          }, .id = "inflation")
+          cat(" done\n")
 
 
-eu_partition_stats_file <- file.path(results, paste0("eu_partition_stats_", time_string, ".tsv"))
-msg("Saving MCL results stats...")
-write_tsv(eu_partition_stats, eu_partition_stats_file, col_names = TRUE)
-cat(" done\n\n")
+
+          # Inter and intra score modes
+          # Calculate nter and intra score modes
+          msg("Calculating inter/intra MCL communities score-per-column mode values...\n")
+
+          eu_hh_g_dt <- eu_hh_g %>%
+          igraph::as_data_frame(what="edges") %>%
+          rename(cl_name1 = from, cl_name2 = to, score_col = weight) %>%
+          as.data.table()
+
+          eu_orig_hh_mode <- parallel::mclapply(eu_g_mcl_list, function(X){
+            eu_hh_g_dt %>%
+            dt_left_join(X %>% dt_select(vertex, com) %>% dt_mutate(com = as.character(com), vertex = as.character(vertex)) %>% rename(cl_name1 = vertex) %>% unique() %>% as.data.table, by = "cl_name1") %>%
+            dt_left_join(X %>% dt_select(vertex, com) %>% dt_mutate(com = as.character(com), vertex = as.character(vertex)) %>% rename(cl_name2 = vertex) %>% unique() %>% as.data.table, by = "cl_name2") %>%
+            dt_filter(com.x == com.y) %>% mutate(com = com.x) %>% group_by(com) %>% summarise(mode = estimate_mode(score_col))
+          }, mc.cores = cfg$max_gc_jobs, #max.vector.size = 3e+09,
+          mc.cleanup = TRUE, mc.silent = TRUE)
+
+          com_orig_intra_score <- map_df(eu_orig_hh_mode, function(X){tibble(mode = estimate_mode(X$mode))}, .id = "inflation")
+          com_orig_inter_score <- map_df(eu_gc, function(X){tibble(mode = estimate_mode(E(X$graph)$weight))}, .id = "inflation")
+
+          eu_orig_hh_mode_summary <- com_orig_intra_score %>%
+          mutate(class = "intra") %>%
+          bind_rows(com_orig_inter_score %>% mutate(class = "inter"))
+          msg("Calculating inter/intra MCL communities score-per-column mode values... done\n")
+
+          msg("Summarising MCL results...")
+          eu_partition_stats <- map_df(eu_g_mcl_list, function(X) {
+            tibble(com_orig_n = length(unique(X$com)),
+            com_orig_1mem = X %>% group_by(com) %>% count() %>% filter(n == 1) %>% nrow())
+          }, .id = "inflation") %>%
+          inner_join(com_orig_intra_score %>% dplyr::rename(com_orig_intra_score = mode), by = "inflation")
+          cat(" done\n")
 
 
-# Add missing clusters to MCL communities ----------------------------------
-
-# Add the missing nodes to existing communities
-# Try to find the best hits for the missing nodes
-# Based on coverage/probability/score per position
-
-
-msg(paste0("Selecting MCL ", best_inflation, " value..."))
-eu_mcl_coms <- eu_g_mcl_list[[best_inflation]]
-eu_max_com <- max(eu_mcl_coms$com)
-cat(" done\n")
+          eu_partition_stats_file <- file.path(results, paste0("eu_partition_stats_", time_string, ".tsv"))
+          msg("Saving MCL results stats...")
+          write_tsv(eu_partition_stats, eu_partition_stats_file, col_names = TRUE)
+          cat(" done\n\n")
 
 
-eu_mids_l <- eu_missing_ids %>% length()
+          # Add missing clusters to MCL communities ----------------------------------
 
-if (eu_mids_l > 0){
-  msg(paste0("Trying to assign ", scales::comma(eu_mids_l), " missing clusters to existing communities...\n"))
-  eu_missing_dt <- lo_env$eu_hhblits_missing %>% ungroup()
+          # Add the missing nodes to existing communities
+          # Try to find the best hits for the missing nodes
+          # Based on coverage/probability/score per position
 
-  # missing_ids -> 7047
 
-  # Try to identify these cluster that can have some homology to existing
-  # We only take the queries for missing ids
-  # We check that the target is in the MCL communities
-  eu_missing_d <- eu_missing_dt %>%
-    as.data.table() %>%
-    dt_filter(cl_name1 %in% eu_missing_ids) %>%
-    dt_filter(cl_name2 %in% eu_mcl_coms$vertex) %>%
-    dt_left_join(eu_mcl_coms %>% mutate(vertex = as.character(vertex)) %>% rename(cl_name2 = vertex), by = "cl_name2")
+          msg(paste0("Selecting MCL ", best_inflation, " value..."))
+          eu_mcl_coms <- eu_g_mcl_list[[best_inflation]]
+          eu_max_com <- max(eu_mcl_coms$com)
+          cat(" done\n")
 
-  msg("First pass: Using more relaxed HHBLITS filtering thresholds (prob > 50 and cov >= 40)...")
-  # MCL clusters with more relaxed filters (p50 and cov >= 40)
-  # we just keep the best hit
-  eu_missing_d_pass <- eu_missing_d %>%
-    dt_filter(probability >= 50, (q_cov >= 0.4 | t_cov >= 0.4)) %>%
-    as_tibble() %>%
-    group_by(cl_name1) %>%
-    arrange(-probability, -q_cov, -t_cov) %>%
-    #mutate(com1 = majority_vote(com)$majority,
-    mutate(nhit = row_number()) %>%
-    arrange(cl_name1, nhit) %>%
-    ungroup() %>%
-    #filter(probability >= 30, nhit <= 3) %>%
-    filter(nhit == 1) %>%
-    select(cl_name1, cl_name2, score_col, com) %>%
-    rename(weight = score_col)
-  cat(" done\n")
-  # Find the ones we couldn't classify
-  # 299
-  eu_to_assign <- setdiff(eu_missing_ids, eu_missing_d_pass$cl_name1 %>% unique())
-  eu_assigned <- setdiff(eu_missing_ids, eu_to_assign)
 
-  # We need to check if any of the remaining no assigned clusters have any homology
-  # to the just classified using more relaxed parameters
+          eu_mids_l <- eu_missing_ids %>% length()
 
-  msg("Second pass: Find secondary relationships between the newly assigned clusters and missing clusters...")
-  eu_missing_d_pass_1 <- bind_rows(lo_env$eu_hhblits_missing %>%
-                                     dt_inner_join(eu_missing_d_pass %>% select(cl_name1, com), by = "cl_name1") %>%
-                                     dt_filter(cl_name2 %in% eu_to_assign) %>% dt_mutate(cl_name = cl_name2, com_f = com),
-                                   lo_env$eu_hhblits_missing %>%
-                                     dt_inner_join(eu_missing_d_pass %>% select(cl_name2, com), by = "cl_name2") %>%
-                                     dt_filter(cl_name1 %in% eu_to_assign) %>% dt_mutate(cl_name = cl_name1, com_f = com)) %>%
-    dt_filter(probability > 50, (q_cov > 0.4 | t_cov > 0.4)) %>%
-    group_by(cl_name) %>%
-    arrange(-probability, -q_cov, -t_cov) %>%
-    #mutate(com1 = majority_vote(com)$majority,
-    mutate(nhit = row_number()) %>%
-    arrange(cl_name, nhit) %>%
-    ungroup() %>%
-    #filter(probability >= 30, nhit <= 3) %>%
-    filter(nhit == 1) %>%
-    dt_select(cl_name, com_f) %>%
-    dplyr::rename(com = com_f) %>%
-    as_tibble()
-  cat(" done\n")
+          if (eu_mids_l > 0){
+            msg(paste0("Trying to assign ", scales::comma(eu_mids_l), " missing clusters to existing communities...\n"))
+            eu_missing_dt <- lo_env$eu_hhblits_missing %>% ungroup()
 
-  # The ones that cannot be assigned, we will try to find any existing connections between no classified
-  # and run MCL with the best inflation value and create new clusters
+            # missing_ids -> 7047
 
-  msg("Third pass: Non assigned clusters will create new MCL communities...")
-  eu_missing_d_pass_2 <- bind_rows(lo_env$eu_hhblits_missing %>%
-                                     dt_filter(cl_name1 %in% eu_to_assign, cl_name2 %in% eu_to_assign) %>%
-                                     dt_filter(probability > 50, (q_cov > 0.4 | t_cov > 0.4)) %>%
-                                     dt_inner_join(eu_missing_d_pass_1 %>% select(cl_name, com) %>% rename(cl_name1 = cl_name), by = "cl_name1") %>%
-                                     dt_mutate(cl_name = cl_name1, com_f = com),
-                                   lo_env$eu_hhblits_missing %>%
-                                     dt_filter(cl_name1 %in% eu_to_assign, cl_name2 %in% eu_to_assign) %>%
-                                     dt_filter(probability > 50, (q_cov > 0.4 | t_cov > 0.4)) %>%
-                                     dt_inner_join(eu_missing_d_pass_1 %>% select(cl_name, com) %>% rename(cl_name2 = cl_name), by = "cl_name2") %>%
-                                     dt_mutate(cl_name = cl_name2, com_f = com)) %>%
-    group_by(cl_name) %>%
-    arrange(-probability, -q_cov, -t_cov) %>%
-    #mutate(com1 = majority_vote(com)$majority,
-    mutate(nhit = row_number()) %>%
-    arrange(cl_name, nhit) %>%
-    ungroup() %>%
-    #filter(probability >= 30, nhit <= 3) %>%
-    filter(nhit == 1) %>%
-    dt_select(cl_name, com_f) %>%
-    dplyr::rename(com = com_f) %>%
-    as_tibble()
-  cat(" done\n")
+            # Try to identify these cluster that can have some homology to existing
+            # We only take the queries for missing ids
+            # We check that the target is in the MCL communities
+            eu_missing_d <- eu_missing_dt %>%
+            as.data.table() %>%
+            dt_filter(cl_name1 %in% eu_missing_ids) %>%
+            dt_filter(cl_name2 %in% eu_mcl_coms$vertex) %>%
+            dt_left_join(eu_mcl_coms %>% mutate(vertex = as.character(vertex)) %>% rename(cl_name2 = vertex), by = "cl_name2")
 
-  msg("Collecting and aggregating all communities...")
-  eu_missing_ids_1 <- setdiff(eu_missing_ids, c(eu_missing_d_pass$cl_name1 %>% unique, eu_missing_d_pass_1$cl_name, eu_missing_d_pass_2$cl_name))
+            msg("First pass: Using more relaxed HHBLITS filtering thresholds (prob > 50 and cov >= 40)...")
+            # MCL clusters with more relaxed filters (p50 and cov >= 40)
+            # we just keep the best hit
+            eu_missing_d_pass <- eu_missing_d %>%
+            dt_filter(probability >= 50, (q_cov >= 0.4 | t_cov >= 0.4)) %>%
+            as_tibble() %>%
+            group_by(cl_name1) %>%
+            arrange(-probability, -q_cov, -t_cov) %>%
+            #mutate(com1 = majority_vote(com)$majority,
+            mutate(nhit = row_number()) %>%
+            arrange(cl_name1, nhit) %>%
+            ungroup() %>%
+            #filter(probability >= 30, nhit <= 3) %>%
+            filter(nhit == 1) %>%
+            select(cl_name1, cl_name2, score_col, com) %>%
+            rename(weight = score_col)
+            cat(" done\n")
+            # Find the ones we couldn't classify
+            # 299
+            eu_to_assign <- setdiff(eu_missing_ids, eu_missing_d_pass$cl_name1 %>% unique())
+            eu_assigned <- setdiff(eu_missing_ids, eu_to_assign)
 
-  eu_missing_d_pass_3 <- tibble(cl_name = eu_missing_ids_1) %>% mutate(com = eu_max_com + row_number())
+            # We need to check if any of the remaining no assigned clusters have any homology
+            # to the just classified using more relaxed parameters
 
-  eu_communities <-  bind_rows(eu_missing_d_pass %>% select(cl_name1, com) %>% rename(cl_name = cl_name1),
-                              eu_missing_d_pass_1,
-                              eu_missing_d_pass_2,
-                              eu_missing_d_pass_3 %>% mutate(cl_name = as.character(cl_name)),
-                              eu_mcl_coms %>% rename(cl_name = vertex) %>% mutate(cl_name = as.character(cl_name)) %>% select(cl_name, com)) %>% unique()
-  eu_n_comp <- eu_communities$com %>% unique() %>% length()
-  eu_n_clus <-  eu_communities$cl_name %>% unique() %>% length()
-  cat(" done\n")
+            msg("Second pass: Find secondary relationships between the newly assigned clusters and missing clusters...")
+            eu_missing_d_pass_1 <- bind_rows(lo_env$eu_hhblits_missing %>%
+              dt_inner_join(eu_missing_d_pass %>% select(cl_name1, com), by = "cl_name1") %>%
+              dt_filter(cl_name2 %in% eu_to_assign) %>% dt_mutate(cl_name = cl_name2, com_f = com),
+              lo_env$eu_hhblits_missing %>%
+              dt_inner_join(eu_missing_d_pass %>% select(cl_name2, com), by = "cl_name2") %>%
+              dt_filter(cl_name1 %in% eu_to_assign) %>% dt_mutate(cl_name = cl_name1, com_f = com)) %>%
+              dt_filter(probability > 50, (q_cov > 0.4 | t_cov > 0.4)) %>%
+              group_by(cl_name) %>%
+              arrange(-probability, -q_cov, -t_cov) %>%
+              #mutate(com1 = majority_vote(com)$majority,
+              mutate(nhit = row_number()) %>%
+              arrange(cl_name, nhit) %>%
+              ungroup() %>%
+              #filter(probability >= 30, nhit <= 3) %>%
+              filter(nhit == 1) %>%
+              dt_select(cl_name, com_f) %>%
+              dplyr::rename(com = com_f) %>%
+              as_tibble()
+              cat(" done\n")
 
-}else{
-  msg(paste0("Trying to assign ",
-             scales::comma(eu_mids_l),
-             " missing clusters to existing communities...",
-             red("Skipped"), "\n"))
-  msg("All clusters already assigned to a component\n")
-  eu_communities <- eu_mcl_coms %>% rename(cl_name = vertex) %>% mutate(cl_name = as.character(cl_name)) %>% select(cl_name, com) %>% unique()
-  eu_n_comp <- eu_communities$com %>% unique() %>% length()
-  eu_n_clus <-  eu_communities$cl_name %>% unique() %>% length()
-}
+              # The ones that cannot be assigned, we will try to find any existing connections between no classified
+              # and run MCL with the best inflation value and create new clusters
 
-msg(paste0("We have been obtained ", scales::comma(eu_n_comp), " from ", scales::comma(eu_n_clus), " clusters\n"))
+              msg("Third pass: Non assigned clusters will create new MCL communities...")
+              eu_missing_d_pass_2 <- bind_rows(lo_env$eu_hhblits_missing %>%
+                dt_filter(cl_name1 %in% eu_to_assign, cl_name2 %in% eu_to_assign) %>%
+                dt_filter(probability > 50, (q_cov > 0.4 | t_cov > 0.4)) %>%
+                dt_inner_join(eu_missing_d_pass_1 %>% select(cl_name, com) %>% rename(cl_name1 = cl_name), by = "cl_name1") %>%
+                dt_mutate(cl_name = cl_name1, com_f = com),
+                lo_env$eu_hhblits_missing %>%
+                dt_filter(cl_name1 %in% eu_to_assign, cl_name2 %in% eu_to_assign) %>%
+                dt_filter(probability > 50, (q_cov > 0.4 | t_cov > 0.4)) %>%
+                dt_inner_join(eu_missing_d_pass_1 %>% select(cl_name, com) %>% rename(cl_name2 = cl_name), by = "cl_name2") %>%
+                dt_mutate(cl_name = cl_name2, com_f = com)) %>%
+                group_by(cl_name) %>%
+                arrange(-probability, -q_cov, -t_cov) %>%
+                #mutate(com1 = majority_vote(com)$majority,
+                mutate(nhit = row_number()) %>%
+                arrange(cl_name, nhit) %>%
+                ungroup() %>%
+                #filter(probability >= 30, nhit <= 3) %>%
+                filter(nhit == 1) %>%
+                dt_select(cl_name, com_f) %>%
+                dplyr::rename(com = com_f) %>%
+                as_tibble()
+                cat(" done\n")
 
-# Do we have all communities
-eu_correct <- length(cl_cat %>% dt_filter(category == "EU") %>% .$cl_name) == eu_n_clus
-if(eu_correct){
-  msg(paste0("All clusters assigned:", green(eu_correct), "\n"))
-}else{
-  msg(paste0("All clusters assigned:", red(eu_correct), "\n"))
-  msg("Something went wrong... quitting\n!")
-  quit()
-}
+                msg("Collecting and aggregating all communities...")
+                eu_missing_ids_1 <- setdiff(eu_missing_ids, c(eu_missing_d_pass$cl_name1 %>% unique, eu_missing_d_pass_1$cl_name, eu_missing_d_pass_2$cl_name))
 
-eu_comp_file <- file.path(results, paste0("eu_communities_", time_string, ".tsv"))
-msg(paste0("Saving communities results to ", eu_comp_file, "..."))
-readr::write_tsv(eu_communities, path = eu_comp_file, col_names = FALSE)
-cat(" done\n\n")
+                eu_missing_d_pass_3 <- tibble(cl_name = eu_missing_ids_1) %>% mutate(com = eu_max_com + row_number())
 
-msg(paste0("EU component inference ", green("DONE"), "\n\n"))
+                eu_communities <-  bind_rows(eu_missing_d_pass %>% select(cl_name1, com) %>% rename(cl_name = cl_name1),
+                eu_missing_d_pass_1,
+                eu_missing_d_pass_2,
+                eu_missing_d_pass_3 %>% mutate(cl_name = as.character(cl_name)),
+                eu_mcl_coms %>% rename(cl_name = vertex) %>% mutate(cl_name = as.character(cl_name)) %>% select(cl_name, com)) %>% unique()
+                eu_n_comp <- eu_communities$com %>% unique() %>% length()
+                eu_n_clus <-  eu_communities$cl_name %>% unique() %>% length()
+                cat(" done\n")
 
-all_comp_file <- file.path(results, paste0("all_communities_", time_string, ".tsv"))
-msg(paste0("Saving all communities results to ", all_comp_file, "..."))
-bind_rows(k_communities %>% mutate(com = paste0("k_c_", com), category = "k"),
+              }else{
+                msg(paste0("Trying to assign ",
+                scales::comma(eu_mids_l),
+                " missing clusters to existing communities...",
+                red("Skipped"), "\n"))
+                msg("All clusters already assigned to a component\n")
+                eu_communities <- eu_mcl_coms %>% rename(cl_name = vertex) %>% mutate(cl_name = as.character(cl_name)) %>% select(cl_name, com) %>% unique()
+                eu_n_comp <- eu_communities$com %>% unique() %>% length()
+                eu_n_clus <-  eu_communities$cl_name %>% unique() %>% length()
+              }
+            } else {
+              eu_communities <- eu_missing_ids %>% tibble::enframe(name = NULL) %>%
+              rename(cl_name=value) %>% mutate(com=row_number(), cl_name=as.character(cl_name))
+              eu_n_comp <- eu_communities$com %>% unique() %>% length()
+              eu_n_clus <-  eu_communities$cl_name %>% unique() %>% length()
+            }
+
+            msg(paste0("We have been obtained ", scales::comma(eu_n_comp), " from ", scales::comma(eu_n_clus), " clusters\n"))
+
+            # Do we have all communities
+            eu_correct <- length(cl_cat %>% dt_filter(category == "EU") %>% .$cl_name) == eu_n_clus
+            if(eu_correct){
+              msg(paste0("All clusters assigned:", green(eu_correct), "\n"))
+            }else{
+              msg(paste0("All clusters assigned:", red(eu_correct), "\n"))
+              msg("Something went wrong... quitting\n!")
+              quit()
+            }
+
+            eu_comp_file <- file.path(results, paste0("eu_communities_", time_string, ".tsv"))
+            msg(paste0("Saving communities results to ", eu_comp_file, "..."))
+            readr::write_tsv(eu_communities, path = eu_comp_file, col_names = FALSE)
+            cat(" done\n\n")
+
+            msg(paste0("EU component inference ", green("DONE"), "\n\n"))
+
+            all_comp_file <- file.path(results, paste0("all_communities_", time_string, ".tsv"))
+            msg(paste0("Saving all communities results to ", all_comp_file, "..."))
+            bind_rows(k_communities %>% mutate(com = paste0("k_c_", com), category = "k"),
+            kwp_communities %>% mutate(com = paste0("kwp_c_", com), category = "kwp"),
+            gu_communities %>% mutate(com = paste0("gu_c_", com), category = "gu"),
+            eu_communities %>% mutate(com = paste0("eu_c_", com), category = "eu")
+          ) %>%
+          write_tsv(path = all_comp_file, col_names = TRUE)
+          cat(" done\n")
+
+          all_comp_file1 <- file.path(dirname(results), paste0("cluster_communities.tsv"))
+          msg(paste0("Saving all communities results to ", all_comp_file1, "..."))
+          bind_rows(k_communities %>% mutate(com = paste0("k_c_", com), category = "k"),
           kwp_communities %>% mutate(com = paste0("kwp_c_", com), category = "kwp"),
           gu_communities %>% mutate(com = paste0("gu_c_", com), category = "gu"),
           eu_communities %>% mutate(com = paste0("eu_c_", com), category = "eu")
-) %>%
-  write_tsv(path = all_comp_file, col_names = TRUE)
-cat(" done\n")
+        ) %>%
+        write_tsv(path = all_comp_file1, col_names = TRUE)
+        cat(" done\n")
+}
 
 all_comp_file1 <- file.path(dirname(results), paste0("cluster_communities.tsv"))
 msg(paste0("Saving all communities results to ", all_comp_file1, "..."))
 bind_rows(k_communities %>% mutate(com = paste0("k_c_", com), category = "k"),
-          kwp_communities %>% mutate(com = paste0("kwp_c_", com), category = "kwp"),
-          gu_communities %>% mutate(com = paste0("gu_c_", com), category = "gu"),
-          eu_communities %>% mutate(com = paste0("eu_c_", com), category = "eu")
-) %>%
-  write_tsv(path = all_comp_file1, col_names = TRUE)
+kwp_communities %>% mutate(com = paste0("kwp_c_", com), category = "kwp"),
+gu_communities %>% mutate(com = paste0("gu_c_", com), category = "gu")) %>%
+write_tsv(path = all_comp_file1, col_names = TRUE)
 cat(" done\n")

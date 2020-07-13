@@ -4,7 +4,7 @@ rule cluster_communities:
       stats = config["rdir"] + "/cluster_category_stats/cluster_category_summary_stats.tsv"
     threads: 7
     conda:
-        config["conda_env"]
+      config["conda_env"]
     params:
       mmseqs_bin = config["mmseqs_bin"],
       mpi_runner = config["mpi_runner"],
@@ -48,6 +48,7 @@ rule cluster_communities:
       ./{params.get_comm} -c {params.comm_config} 1>{log.out} 2>{log.err}
 
       rm -rf ${{OUT}}/tmp
+
       """
 
 rule cluster_comm_done:
