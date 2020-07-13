@@ -31,7 +31,7 @@ cat("\nChecking if all packages are installed...\n\n")
 
 needed <- c("igraph", "tidyverse", "pbmcapply", "maditr", "data.table",
             "tidygraph", "bigreadr", "unixtools", "stringi", "foreach",
-            "doSNOW", "itertools", "parallel")
+            "doSNOW", "itertools", "parallel","reshape2")
 
 missing_package <- FALSE
 # For loop to run through each of the packages
@@ -412,8 +412,9 @@ if (cfg$da_dist != ""){
 
   msg(paste("Calculating", scales::comma(n_comp),"pairwise domain architectures", "distances using", red("cosine"), "distance with a", red("q-gram of 3...")))
   lo_env$da_dist <- stringdist::stringdistmatrix(d$exp_rep, useNames = TRUE, method = "cosine", q = 3, nthread = cfg$dt_cores) %>%
-    broom::tidy() %>%
-    as.data.table()
+    melt(as.matrix(da_dist), varnames = c("item1", "item2")) %>% rename(distance=value) %>% filter(distance!=0)
+    #broom::tidy() %>%
+    #as.data.table()
   cat(" done\n")
 
   da_dist_file <- file.path(results, paste0("da_dist_", time_string, ".tsv"))
