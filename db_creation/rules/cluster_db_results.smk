@@ -37,7 +37,7 @@ rule cluster_db_results:
         set -x
         set -e
 
-        DIR=$(dirname {output.iclu_hmm})
+        DIR=$(dirname {output.clu_cat})
 
         mkdir -p ${{DIR}}
 
