@@ -41,7 +41,7 @@ rule mmseqs_clustering_update:
         mkdir -p {params.or_dir}
 
         # Download original mmseqs clustering that you want to use for the integration
-        if [[ ! -s {params.or_cludb} ]]; then
+        if [[ ! -s {params.or_cludb}.index ]]; then
             wget https://ndownloader.figshare.com/files/23066651 -O {params.or_dir}/mmseqs_clustering.tar.gz
             tar -C {params.or_dir} -zxvf {params.or_dir}/mmseqs_clustering.tar.gz
             rm {params.or_dir}/mmseqs_clustering.tar.gz
