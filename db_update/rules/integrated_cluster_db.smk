@@ -103,7 +103,7 @@ rule integrated_cluster_db:
         if [[ ! -s {params.or_clu_cat} ]]; then
             wget https://ndownloader.figshare.com/files/23067140 -O {params.or_clu_cat}
         fi
-        cat <(zcat {input.clu_cat}) {params.or_clu_cat} > {output.iclu_cat}
+        cat {input.clu_cat} <(zcat {params.or_clu_cat}) > {output.iclu_cat}
 
         # and the cluster genes
         if [[ ! -s {params.or_clu_gene} ]]; then
