@@ -86,10 +86,6 @@ rule mmseqs_clustering_update:
           {output.updt_clu} \
           --threads {threads} 2>>{log.err} 1>>{log.out}
 
-        # Release some space removing not necessary files
-        rm {params.or_cludb} {params.or_cludb}.index {params.or_cludb}_h {params.or_cludb}_h.index {params.or_cludb}.dbtype {params.or_cludb}_h.dbtype {params.or_cludb}.lookup
-        rm {params.or_seqdb} {params.or_seqdb}.index {params.or_seqdb}_h {params.or_seqdb}_h.index {params.or_seqdb}.dbtype {params.or_seqdb}_h.dbtype {params.or_seqdb}.lookup
-
         """
 
 rule mmseqs_cluster_update_done:

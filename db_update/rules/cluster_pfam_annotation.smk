@@ -85,7 +85,6 @@ rule cluster_pfam_annotation:
         <(sort -k1,1 --parallel={threads} -T {params.local_tmp} {params.multi_annot}) > {params.s_annot}
 
         gzip {params.multi_annot}
-        rm {params.or_multi_annot}
         """
 
 rule cluster_pfam_annotation_done:

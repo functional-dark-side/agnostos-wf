@@ -110,7 +110,7 @@ rule spurious_shadow:
         fi
         zcat {params.or_sp_sh} >> {output.sp_sh}
 
-        rm {params.tmp1} {params.tmp2} {params.or_sp_sh}
+        rm {params.tmp1} {params.tmp2}
         """
 
 rule spurious_shadow_done:

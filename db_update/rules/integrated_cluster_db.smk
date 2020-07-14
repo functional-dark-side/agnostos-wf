@@ -152,7 +152,7 @@ rule integrated_cluster_db:
         {params.mmseqs_bin} concatdbs {params.clu_seq} {params.or_clu_seq} {output.iclu_seq} --threads 1 2>{log.err}
 
         # Remove original dataset files and directory
-        rm -rf {params.or_dir}
+        # rm -rf {params.or_dir}
         """
 
 rule integrated_cludb_done:
