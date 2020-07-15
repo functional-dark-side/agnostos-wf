@@ -72,6 +72,7 @@ rule integrated_cluster_db:
         awk -vN={params.data_name} '{{print $1,N,$3}}' {params.new} >> {params.clu_origin}
         rm {params.clu_origin}.temp
         sed -i 's/ /\t/g' {params.clu_origin}
+        gzip {params.clu_origin}
 
         # All gene headers and partiality information
         cat {params.partial} <(zcat {params.or_partial}) | gzip > {params.ipartial}
