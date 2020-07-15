@@ -107,7 +107,7 @@ rule integrated_cluster_db:
 
         # and the cluster genes
         # join cluster_ids_categ with cluDB_info to get all genes (new ones as well)
-        # join -11 -21 <(zcat {output.iclu_cat} | sort -k1,1) \
+        join -11 -21 <(zcat {output.iclu_cat} | sort -k1,1) \
          <(awk '{{print $1,$3}}' {params.clu_info} | sort -k1,1 --parallel={threads} -T {params.local_tmp} ) > {params.tmpl}
 
          sed 's/ /\\t/g' {params.tmpl} | gzip > {params.iclu_gene}
