@@ -44,10 +44,10 @@ rule integrated_cluster_db:
     benchmark:
         "benchmarks/integrated_cluster_DB/integdb.tsv"
     output:
-        iclu_cat = config["rdir"] + "/integrated_cluster_DB/cluster_ids_categ.tsv",
-        iclu_com = config["rdir"] + "/integrated_cluster_DB/cluster_communities.tsv",
-        iclu_stats = config["rdir"] + "/integrated_cluster_DB/cluster_category_summary_stats.tsv",
-        ihq_clu = config["rdir"] + "/integrated_cluster_DB/HQ_clusters.tsv",
+        iclu_cat = config["rdir"] + "/integrated_cluster_DB/cluster_ids_categ.tsv.gz",
+        iclu_com = config["rdir"] + "/integrated_cluster_DB/cluster_communities.tsv.gz",
+        iclu_stats = config["rdir"] + "/integrated_cluster_DB/cluster_category_summary_stats.tsv.gz",
+        ihq_clu = config["rdir"] + "/integrated_cluster_DB/HQ_clusters.tsv.gz",
         iclu_hmm = config["rdir"] + "/integrated_cluster_DB/mmseqs-profiles/clu_hmm_db",
         iclu_seq = config["rdir"] + "/integrated_cluster_DB/mmseqs-cluseqdb/clu_seqDB"
     shell:
@@ -103,7 +103,7 @@ rule integrated_cluster_db:
         if [[ ! -s {params.or_clu_cat} ]]; then
             wget https://ndownloader.figshare.com/files/23067140 -O {params.or_clu_cat}
         fi
-        cat {input.clu_cat} <(zcat {params.or_clu_cat}) > {output.iclu_cat}
+        cat {input.clu_cat} <(zcat {params.or_clu_cat}) | gzip > {output.iclu_cat}
 
         # and the cluster genes
         if [[ ! -s {params.or_clu_gene} ]]; then
@@ -117,21 +117,21 @@ rule integrated_cluster_db:
             wget https://ndownloader.figshare.com/files/23067134 -O {params.or_clu_com}
         fi
         cat <(awk -vOFS='\\t' 'NR>1{{print $1,$2"_new",$3}}' {input.clu_com} ) \
-         <( awk -vOFS='\\t' 'NR>1{{print $1,$2"_or",$3}}' <(zcat {params.or_clu_com})) > {output.iclu_com}
+         <( awk -vOFS='\\t' 'NR>1{{print $1,$2"_or",$3}}' <(zcat {params.or_clu_com})) > {params.tmpl}
 
-        echo -e "cl_name\tcom\tcategory" | cat - {output.iclu_com} > {params.tmpl} && mv {params.tmpl} {output.iclu_com}
+        echo -e "cl_name\tcom\tcategory" | cat - {params.tmpl} | gzip > {output.iclu_com}
 
         # Integrated cluster summary information
         if [[ ! -s {params.or_clu_stats} ]]; then
             wget https://ndownloader.figshare.com/files/23066981 -O {params.or_clu_stats}
         fi
-        cat {input.clu_stats} <(zcat {params.or_clu_stats} | awk -vOFS='\\t' 'NR>1{{print $0}}') > {output.iclu_stats}
+        cat {input.clu_stats} <(zcat {params.or_clu_stats} | awk -vOFS='\\t' 'NR>1{{print $0}}') | gzip > {output.iclu_stats}
 
         # Integrated set of high quality (HQ) clusters
         if [[ ! -s {params.or_hq_clu} ]]; then
             wget https://ndownloader.figshare.com/files/23067137 -O {params.or_hq_clu}
         fi
-        cat {input.hq_clu} <(zcat {params.or_hq_clu} | awk -vOFS='\\t' 'NR>1{{print $0}}' ) > {output.ihq_clu}
+        cat {input.hq_clu} <(zcat {params.or_hq_clu} | awk -vOFS='\\t' 'NR>1{{print $0}}' ) | gzip > {output.ihq_clu}
 
         # New integarted cluster HMMs DB (for MMseqs profile searches)
         # Download and uncompress the mmseqs-profiles
