@@ -158,10 +158,10 @@ rule integrated_cluster_db:
 
 rule integrated_cludb_done:
     input:
-        iclu_cat = config["rdir"] + "/integrated_cluster_DB/cluster_ids_categ.tsv",
-        iclu_com = config["rdir"] + "/integrated_cluster_DB/cluster_communities.tsv",
-        iclu_stats = config["rdir"] + "/integrated_cluster_DB/cluster_category_summary_stats.tsv",
-        ihq_clu = config["rdir"] + "/integrated_cluster_DB/HQ_clusters.tsv",
+        iclu_cat = config["rdir"] + "/integrated_cluster_DB/cluster_ids_categ.tsv.gz",
+        iclu_com = config["rdir"] + "/integrated_cluster_DB/cluster_communities.tsv.gz",
+        iclu_stats = config["rdir"] + "/integrated_cluster_DB/cluster_category_summary_stats.tsv.gz",
+        ihq_clu = config["rdir"] + "/integrated_cluster_DB/HQ_clusters.tsv.gz",
         iclu_hmm = config["rdir"] + "/integrated_cluster_DB/mmseqs-profiles/clu_hmm_db",
         iclu_seq = config["rdir"] + "/integrated_cluster_DB/mmseqs-cluseqdb/clu_seqDB"
     output:
