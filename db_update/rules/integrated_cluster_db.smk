@@ -15,9 +15,9 @@ rule integrated_cluster_db:
         original = config["rdir"] + "/mmseqs_clustering/cluDB_original_name_rep_size.tsv",
         shared = config["rdir"] + "/mmseqs_clustering/cluDB_shared_name_rep_size.tsv",
         new = config["rdir"] + "/mmseqs_clustering/cluDB_new_name_rep_size.tsv",
+        clu_info = config["rdir"] + "/mmseqs_clustering/cluDB_info.tsv",
         tmpl = config["rdir"] + "/integrated_cluster_DB/tmpl",
         clu_seq = config["rdir"] + "/cluster_categories/refined_clusterDB",
-        clu_gene = config["rdir"] + "/cluster_categories/cluster_ids_categ_genes.tsv.gz",
         sp_sh = config["rdir"] + "/spurious_shadow/spurious_shadow_info.tsv",
         multi_annot = config["rdir"] + "/annot_and_clust/pfam_name_acc_clan_multi.tsv.gz",
         partial = config["rdir"] + "/gene_prediction/orf_partial_info.tsv",
@@ -29,7 +29,6 @@ rule integrated_cluster_db:
         or_dir = config["ordir"],
         or_clu_orig = config["ordir"] + "/cluDB_name_origin_size.tsv.gz",
         or_clu_cat = config["ordir"] + "/cluster_ids_categ.tsv.gz",
-        or_clu_gene = config["ordir"] + "/cluster_ids_categ_genes.tsv.gz",
         or_clu_com = config["ordir"] + "/cluster_communities.tsv.gz",
         or_clu_stats = config["ordir"] + "/cluster_category_summary_stats.tsv.gz",
         or_hq_clu = config["ordir"] + "/HQ_clusters.tsv.gz",
@@ -107,10 +106,11 @@ rule integrated_cluster_db:
         cat {input.clu_cat} <(zcat {params.or_clu_cat}) | gzip > {output.iclu_cat}
 
         # and the cluster genes
-        if [[ ! -s {params.or_clu_gene} ]]; then
-            wget https://ndownloader.figshare.com/files/23067068 -O {params.or_clu_gene}
-        fi
-        zcat {params.clu_gene} {params.or_clu_gene} | gzip > {params.iclu_gene}
+        # join cluster_ids_categ with cluDB_info to get all genes (new ones as well)
+        # join -11 -21 <(zcat {output.iclu_cat} | sort -k1,1) \
+         <(awk '{{print $1,$3}}' {params.clu_info} | sort -k1,1 --parallel={threads} -T {params.local_tmp} ) > {params.tmpl}
+
+         sed 's/ /\\t/g' {params.tmpl} | gzip > {params.iclu_gene}
 
         # Integrated set of cluster communities
         # to avoid having overlapping communities names, we append the dataset origin
