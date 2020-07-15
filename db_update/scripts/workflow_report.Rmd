@@ -425,7 +425,7 @@ kable_styling(bootstrap_options = c("striped", "condensed"),full_width = F)
 We integrated the main results for the original and newly obtained cluster DBs. The main numbers are reported in the following tables.
 
 ```{r,echo=FALSE,warning=FALSE}
-clu_comm <- fread(paste0(dir,"/integrated_cluster_DB/cluster_communities.tsv"),
+clu_comm <- fread(paste0(dir,"/integrated_cluster_DB/cluster_communities.tsv.gz"),
                  stringsAsFactors = F,header = T)
 
 tibble(Type=c("Communities","Clusters"),
@@ -437,7 +437,7 @@ tibble(Type=c("Communities","Clusters"),
 kable_styling(bootstrap_options = c("striped", "condensed"),full_width = F)
 
 
-HQ_clu <- fread(paste(dir,"/integrated_cluster_DB/HQ_clusters.tsv",sep=""),
+HQ_clu <- fread(paste(dir,"/integrated_cluster_DB/HQ_clusters.tsv.gz",sep=""),
                  stringsAsFactors = F,header = T)
 
 tibble(Type=c("HQ clusters"),

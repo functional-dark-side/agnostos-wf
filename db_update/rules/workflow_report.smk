@@ -1,7 +1,7 @@
 rule workflow_report:
     input:
         iclu_hmm = config["rdir"] + "/integrated_cluster_DB/mmseqs-profiles/clu_hmm_db",
-        iclu_com = config["rdir"] + "/integrated_cluster_DB/cluster_communities.tsv",
+        iclu_com = config["rdir"] + "/integrated_cluster_DB/cluster_communities.tsv.gz",
         comm = config["rdir"] + "/cluster_communities/cluster_communities.tsv"
     threads: 28
     conda:
