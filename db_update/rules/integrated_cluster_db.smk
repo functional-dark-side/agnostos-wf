@@ -96,7 +96,7 @@ rule integrated_cluster_db:
         cat <(zcat ${{ODIR}}/K_annotations.tsv.gz) ${{NDIR}}/K_annotations.tsv | gzip > {params.idir}/K_annotations.tsv.gz
         cat <(zcat ${{ODIR}}/KWP_annotations.tsv.gz) ${{NDIR}}/KWP_annotations.tsv | gzip > {params.idir}/KWP_annotations.tsv.gz
         cat <(zcat ${{ODIR}}/GU_annotations.tsv.gz) ${{NDIR}}/GU_annotations.tsv | gzip > {params.idir}/GU_annotations.tsv.gz
-        rm ${{ODIR}}/*_annotations.tsv.gz
+        # rm ${{ODIR}}/*_annotations.tsv.gz
 
         # Integrated set of cluster categories
         # Download original gene cluster catgeory info
