@@ -111,6 +111,7 @@ rule integrated_cluster_db:
          <(awk '{{print $1,$3}}' {params.clu_info} | sort -k1,1 --parallel={threads} -T {params.local_tmp} ) > {params.tmpl}
 
          sed 's/ /\\t/g' {params.tmpl} | gzip > {params.iclu_gene}
+         rm {params.tmpl}
 
         # Integrated set of cluster communities
         # to avoid having overlapping communities names, we append the dataset origin
