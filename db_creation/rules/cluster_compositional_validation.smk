@@ -12,6 +12,7 @@ rule cluster_compositional_validation:
         datamash = config["datamash_bin"],
         parallel_bin = config["parallel_bin"],
         igraph_lib = config["igraph_lib"],
+        parasail_lib = config["parasail_lib"],
         threads_collect = config["threads_collect"],
         cvals = config["wdir"] + "/scripts/compositional_validation.sh",
         stats = config["wdir"] + "/scripts/get_stats.r",
@@ -46,6 +47,7 @@ rule cluster_compositional_validation:
         export OMP_PROC_BIND=FALSE
 
         {params.igraph_lib}
+        {params.parasail_lib}
 
         # Run compositional validation in mpi-mode
         {params.mpi_runner} {params.mmseqs_bin} apply {params.clseqdb} {params.outdb} --threads {threads} \

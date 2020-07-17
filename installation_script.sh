@@ -76,21 +76,17 @@ make install
 cd ..
 ###############################################################################
 # Parasail
-# git clone https://github.com/jeffdaily/parasail
-# cd parasail
-# cmake -DCMAKE_INSTALL_PREFIX=${PWD}/parasail .
-# make
-# export PATH=${PWD}/parasail:$PATH
-# cd ..
-wget https://static-content.springer.com/esm/art%3A10.1186%2Fs12859-016-0930-z/MediaObjects/12859_2016_930_MOESM1_ESM.gz
-tar -xzvf 12859_2016_930_MOESM1_ESM.gz
-cd parasail-1.0.0/
+git clone https://github.com/jeffdaily/parasail
+cd parasail
+sed -i "s|int matches = parasail_result_get_matches(result);|int matches = parasail_result_get_similar(result);|" apps/parasail_aligner.cpp
+autoreconf -fi
 mkdir build
 cd build
 cmake -DCMAKE_INSTALL_PREFIX="${WD}" ..
 make -j 8
 make install
 cd ../..
+export LD_LIBRARY_PATH=/vol/cloud/agnostos-wf/lib:${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}
 ###############################################################################
 
 # Igraph C-library

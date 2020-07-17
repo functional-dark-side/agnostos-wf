@@ -70,6 +70,7 @@ get_stats: "/vol/cloud/agnostos-wf/db_creation/scripts/get_stats.r"
 isconn: "/vol/cloud/agnostos-wf/db_creation/scripts/is_connected"
 filterg: "/vol/cloud/agnostos-wf/db_creation/scripts/filter_graph"
 igraph_lib: "export LD_LIBRARY_PATH=/vol/cloud/agnostos-wf/bin/igraph/lib:${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
+parasail_lib: "export LD_LIBRARY_PATH=/vol/cloud/agnostos-wf/lib:${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
 
 # Cluster classification config
 seqkit_bin: "seqkit"

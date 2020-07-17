@@ -81,6 +81,7 @@ odseq_bin: "/vol/cloud/agnostos-wf/bin/OD-seq"
 parasail_bin: "/vol/cloud/agnostos-wf/bin/parasail_aligner"
 parallel_bin: "parallel"
 igraph_lib: "export LD_LIBRARY_PATH=/vol/cloud/agnostos-wf/bin/igraph/lib:${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
+parasail_lib: "export LD_LIBRARY_PATH=/vol/cloud/agnostos-wf/lib:${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
 
 # Cluster classification config
 seqkit_bin: "seqkit"
