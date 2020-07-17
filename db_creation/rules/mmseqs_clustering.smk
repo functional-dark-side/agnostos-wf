@@ -49,8 +49,7 @@ rule mmseqs_clustering:
           -c {params.mmseqs_cov} \
           --cov-mode {params.mmseqs_cov_mode} \
           --min-seq-id {params.mmseqs_id} \
-          -s {params.mmseqs_ens}  \
-          --cluster-reassign 1 \
+          -s {params.mmseqs_ens} \
           --mpi-runner "{params.mmseqs_mpi_runner}" 2>>{log.err} 1>>{log.out}
 
         {params.mmseqs_bin} createtsv {params.seqdb} {params.seqdb} {params.cludb} {output.clu}

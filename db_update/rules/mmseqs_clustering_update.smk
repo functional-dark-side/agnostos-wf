@@ -77,8 +77,7 @@ rule mmseqs_clustering_update:
           -c {params.mmseqs_cov} \
           --cov-mode {params.mmseqs_cov_mode} \
           --min-seq-id {params.mmseqs_id} \
-          -s {params.mmseqs_ens} \
-          --cluster-reassign 1 2>>{log.err} 1>>{log.out}
+          -s {params.mmseqs_ens} 2>>{log.err} 1>>{log.out}
 
         {params.mmseqs_bin} createtsv \
           {params.updt_seqdb} \
