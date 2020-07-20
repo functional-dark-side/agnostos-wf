@@ -264,6 +264,8 @@ lag <- brStick(p_rej_cl)$thresh_by_bsm %>% enframe() %>% mutate(lag = round(valu
   filter(lag > .01) %>% top_n(1) %>% .$name
 if (length(lag)!=0){
   rej_threshold <- brStick(p_rej_cl)$thresh_by_bsm[lag - 1]
+} else if (length(brStick(p_rej_cl)$thresh_by_bsm) == 0) {
+  rej_threshold <- 0
 } else {
   rej_threshold <- brStick(p_rej_cl)$thresh_by_bsm %>% as_tibble %>% filter(value<0.9) %>% .$value %>% max()
   #rej_threshold <- brStick(p_rej_cl)$thresh_by_bsm[length(brStick(p_rej_cl)$thresh_by_bsm)]
@@ -274,23 +276,23 @@ val_stats <- data.frame(total_clusters = dim(cl_val_df)[1],
                                           filter(funct_annot=="noannot" & prop_rejected < rej_threshold | funct_annot!="noannot" & prop_rejected<rej_threshold & jacc_median_raw==1))[1],
                         good_cl_orfs = sum(cl_val_df %>%
                                           filter(funct_annot=="noannot" & prop_rejected < rej_threshold | funct_annot!="noannot" & prop_rejected<rej_threshold & jacc_median_raw==1) %>%
-                                          select(n_orfs)),
+                                          .$n_orfs),
                         bad_cl_n = dim(cl_val_df %>%
                                          filter(prop_rejected >= rej_threshold | funct_annot!="noannot" & jacc_median_raw<1 | funct_annot!="noannot" & is.na(jacc_median_raw)))[1],
                         bad_cl_orfs = sum(cl_val_df %>%
                                          filter(prop_rejected >= rej_threshold | funct_annot!="noannot" & jacc_median_raw<1 | funct_annot!="noannot" & is.na(jacc_median_raw)) %>%
-                                           select(n_orfs)),
+                                           .$n_orfs),
                         cl_with_rej = dim(cl_val_df %>% filter(rejected>0))[1],
-                        orfs_cl_with_rej = sum(cl_val_df %>% filter(rejected>0) %>% dplyr::select(n_orfs)),
+                        orfs_cl_with_rej = sum(cl_val_df %>% filter(rejected>0) %>% .$n_orfs),
                         cl_without_rejected = dim(cl_val_df %>% filter(rejected==0))[1],
-                        orfs_cl_without_rej = sum(cl_val_df %>% filter(rejected==0) %>% dplyr::select(n_orfs)),
+                        orfs_cl_without_rej = sum(cl_val_df %>% filter(rejected==0) %>% .$n_orfs),
                         rejected_orfs = sum(cl_val_df$rejected),
                         comp_bad = dim(cl_val_df %>% filter(prop_rejected >= rej_threshold))[1],
-                        comp_bad_orfs = sum(cl_val_df %>% filter(prop_rejected >= rej_threshold) %>% dplyr::select(n_orfs)),
-                        bad_cl_rej_orfs = sum(cl_val_df %>% filter(prop_rejected >= rej_threshold) %>% dplyr::select(rejected)),
+                        comp_bad_orfs = sum(cl_val_df %>% filter(prop_rejected >= rej_threshold) %>% .$n_orfs),
+                        bad_cl_rej_orfs = sum(cl_val_df %>% filter(prop_rejected >= rej_threshold) %>% .$rejected),
                         comp_good = dim(cl_val_df %>% filter(prop_rejected < rej_threshold))[1],
-                        comp_good_orfs = sum(cl_val_df %>% filter(prop_rejected < rej_threshold) %>% dplyr::select(n_orfs)),
-                        good_cl_rej_orfs = sum(cl_val_df %>% filter(prop_rejected < rej_threshold) %>% dplyr::select(rejected)),
+                        comp_good_orfs = sum(cl_val_df %>% filter(prop_rejected < rej_threshold) %>% .$n_orfs),
+                        good_cl_rej_orfs = sum(cl_val_df %>% filter(prop_rejected < rej_threshold) %>% .$rejected),
                         func_good = dim(cl_val_df %>% filter(funct_annot!="noannot" & jacc_median_raw==1))[1],
                         func_bad = dim(cl_val_df %>%
                            filter(funct_annot!="noannot" & jacc_median_raw<1 | funct_annot!="noannot" & is.na(jacc_median_raw)))[1],
@@ -411,7 +413,7 @@ p_rej_simil <- ggplot(cl_val_df, aes(raw_mean_id/100, prop_rejected)) +
       legend.title = element_text(size=13))
 
 # Size distribution of the kept and rejected clusters.
-p_size_rej <- ggplot(cl_val_df %>% filter(rejected>0,prop_rejected >= 0.1), aes(n_orfs, fill = "Rejected")) +
+p_size_rej <- ggplot(cl_val_df %>% filter(rejected>0,prop_rejected >= rej_threshold), aes(n_orfs, fill = "Rejected")) +
   geom_histogram(data = cl_val_df %>% filter(prop_rejected < 0.1), aes(n_orfs, fill = "Kept"), color = "white", size = 0.1) +
   geom_histogram(color = "white", size = 0.1) +
   theme_light() +

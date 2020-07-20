@@ -4,7 +4,7 @@ rule mmseqs_clustering_update:
         annot = config["rdir"] + "/pfam_annotation/pfam_annot_parsed.tsv"
     params:
         mmseqs_bin = config["mmseqs_bin"],
-        mmseqs_tmp = config["mmseqs_tmp"],
+        mmseqs_tmp = config["ordir"] + "/mmseqs_clustering/tmp",
         mmseqs_local_tmp = config["mmseqs_local_tmp"],
         mmseqs_cov = 0.8,
         mmseqs_id = 0.3,
