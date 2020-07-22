@@ -76,4 +76,4 @@ To lern more about what we are doing check out our website  [dark.metagenomics.e
 
 #### Citation:
 
-Vanni, C., Schechter, M., Acinas, S., Barberán, A., Buttigieg, P. L., Casamayor, E. O., Delmont, T. O., Duarte, C. M., Murat Eren, A., Finn, R., Mitchell, A., Sanchez, P., Siren, K., Steinegger, M., Glöckner, F. O., & Fernandez-Guerra, A. (2020). Light into the darkness: Unifying the known and unknown coding sequence space in microbiome analyses. In bioRxiv (p. 2020.06.30.180448). [https://doi.org/10.1101/2020.06.30.180448](https://doi.org/10.1101/2020.06.30.180448)
+Vanni, C., Schechter, M., Acinas, S., Barberán, A., Buttigieg, P. L., Casamayor, E. O., Delmont, T. O., Duarte, C. M., Murat Eren, A., Finn, R., Kottmann, R., Mitchell, A., Sanchez, P., Siren, K., Steinegger, M., Glöckner, F. O., & Fernandez-Guerra, A. (2020). Light into the darkness: Unifying the known and unknown coding sequence space in microbiome analyses. In bioRxiv (p. 2020.06.30.180448). [https://doi.org/10.1101/2020.06.30.180448](https://doi.org/10.1101/2020.06.30.180448)
