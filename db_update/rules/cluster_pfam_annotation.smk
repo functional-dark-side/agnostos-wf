@@ -63,9 +63,11 @@ rule cluster_pfam_annotation:
         fi
 
         # Combine with new completion info
-        join -11 -21 <(cat {input.partial} <(zcat {params.or_partial}) \
-        | sort -k1,1 --parallel={threads} -T {params.local_tmp}) \
-        <( awk '{{print $3}}' {input.clu} | sort -k1,1 --parallel={threads}) > {params.partial}
+        join -11 -21 <(sort -k1,1 --parallel={threads} -T {params.local_tmp} {input.partial}) \
+         <( awk '{{print $3}}' {input.clu} | sort -k1,1 --parallel={threads}) > {params.partial}
+        join -11 -21 <(zcat {params.or_partial} | \
+         sort -k1,1 --parallel={threads} -T {params.local_tmp}) \
+         <( awk '{{print $3}}' {input.clu} | sort -k1,1 --parallel={threads}) >> {params.partial}
 
         sed -i 's/ /\t/g' {params.partial}
 
