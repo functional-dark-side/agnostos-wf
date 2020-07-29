@@ -85,7 +85,7 @@ rule mmseqs_clustering_results:
         # Singletons
         awk -vOFS='\\t' '$3=="1"{{print $1,$2}}' {params.info1} > {output.singl}
 
-        rm {params.tmp} {params.tmp1}
+        rm {params.tmp} {params.tmp1} {params.namedb} {params.namedb}.index {params.namedb}.dbtype
 
         """
 

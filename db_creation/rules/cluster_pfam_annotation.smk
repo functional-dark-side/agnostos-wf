@@ -10,7 +10,7 @@ rule cluster_pfam_annotation:
         pfam_clan = config["pfam_clan"],
         singl = config["rdir"] + "/mmseqs_clustering/cluDB_singletons.tsv",
         s_annot = config["rdir"] + "/annot_and_clust/singletons_pfam_annot.tsv",
-        multi_annot = config["rdir"] + "/annot_and_clust/pfam_multi_annot_name_acc_clan.tsv",
+        multi_annot = config["rdir"] + "/annot_and_clust/pfam_name_acc_clan_multi.tsv",
         tmp = config["rdir"] + "/annot_and_clust/tmp",
         concat = "scripts/concat_multi_annot.awk"
     output:

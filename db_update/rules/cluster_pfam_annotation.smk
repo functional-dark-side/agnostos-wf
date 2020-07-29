@@ -67,9 +67,9 @@ rule cluster_pfam_annotation:
          <( awk '{{print $3}}' {input.clu} | sort -k1,1 --parallel={threads}) > {params.partial}
         join -11 -21 <(zcat {params.or_partial} | \
          sort -k1,1 --parallel={threads} -T {params.local_tmp}) \
-         <( awk '{{print $3}}' {input.clu} | sort -k1,1 --parallel={threads}) >> {params.partial}
+         <( awk '{{print $3}}' {input.clu} | sort -k1,1 --parallel={threads}) >> {params.partial} 2>>{log.err}
 
-        sed -i 's/ /\t/g' {params.partial}
+        sed -i 's/ /\\t/g' {params.partial}
 
         ## 2. Cluster annotations
 
@@ -79,7 +79,7 @@ rule cluster_pfam_annotation:
                              --clusters {input.clu} \
                              --partial {params.partial} \
                              --output_annot {output.cl_annot} \
-                             --output_noannot {output.cl_noannot} 2>{log.err}
+                             --output_noannot {output.cl_noannot} 2>>{log.err}
 
         ## 3. Singleton annotations
 
