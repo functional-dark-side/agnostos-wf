@@ -1,9 +1,9 @@
 # This file should contain everything to configure the workflow on a global scale.
 # In case of sample based data, it should be complemented by a samples.tsv file that contains
 # one row per sample. It can be parsed easily via pandas.
-wdir: "/vol/cloud/agnostos-wf"
-rdir: "/vol/cloud/agnostos-wf/db_creation"
-data: "/vol/cloud/agnostos-wf/data" # rename your data to match the format "{sample_name}_contigs.fasta"
+wdir: "/vol/cloud/agnostos-wf/db_creation"
+rdir: "/vol/cloud/db_creation"
+data: "/vol/cloud/data" # rename your data to match the format "{sample_name}_contigs.fasta"
 # choose a name for your dataset
 data_name: "tara_039_041"
 

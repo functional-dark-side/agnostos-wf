@@ -21,22 +21,22 @@ spurious_shadow:
     partition: nomaster
 
 mmseqs_clustering_update:
-    nodes: 9
-    ntasks: 9
+    nodes: 4
+    ntasks: 4
     ntasks_per_node: 1
     cpus_per_task: 28
     partition: nomaster
 
 mmseqs_clustering_results:
-    nodes: 9
-    ntasks: 18
+    nodes: 4
+    ntasks: 8
     ntasks_per_node: 2
     cpus_per_task: 14
     partition: nomaster
 
 cluster_compositional_validation:
-    nodes: 9
-    ntasks: 36
+    nodes: 4
+    ntasks: 16
     ntasks_per_node: 4
     partition: nomaster
 
@@ -49,35 +49,35 @@ cluster_refinement:
 
 cluster_classification:
     time: 1000:00:00
-    nodes: 9
+    nodes: 4
     ntasks_per_node: 1
-    ntasks: 9
+    ntasks: 4
     cpus_per_task: 28
     partition: nomaster
 
 cluster_category_refinement:
-    nodes: 9
-    ntasks: 63
+    nodes: 4
+    ntasks: 28
     ntasks_per_node: 7
     partition: nomaster
 
 cluster_category_database:
-    nodes: 9
-    ntasks: 252
+    nodes: 4
+    ntasks: 112
     ntasks_per_node: 28
     partition: nomaster
 
 cluster_category_stats:
     time: 1000:00:00
-    nodes: 9
+    nodes: 4
     ntasks_per_node: 1
-    ntasks: 9
+    ntasks: 4
     cpus_per_task: 28
     partition: nomaster
 
 cluster_communities:
     time: 1000:00:00
-    nodes: 9
+    nodes: 4
     ntasks_per_node: 4
-    ntasks: 36
+    ntasks: 16
     partition: nomaster
