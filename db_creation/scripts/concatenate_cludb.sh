@@ -3,8 +3,8 @@
 cludb="${1}"
 threads="${2}"
 
-N=$(("${threads}" - 1))
+N=$(($threads-1))
 
-cat "${cludb}".{0..$N} > "${cludb}"
+for i in $(seq 0 $N); do cat "${cludb}".$i >> "${cludb}"; done
 
-rm "${cludb}".{0..$N}
+for i in $(seq 0 $N); do rm "${cludb}".$i; done
