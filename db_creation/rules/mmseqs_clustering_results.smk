@@ -17,6 +17,7 @@ rule mmseqs_clustering_results:
         tmp1 = config["rdir"] + "/mmseqs_clustering/cluDB_tmpl1",
         awk_wide = "scripts/convert_long_wide.awk",
         awk_row_col = "scripts/row_columns.awk",
+        concat_clu = "scripts/concatenate_cludb.sh",
         naming = "scripts/cluster_naming.sh",
         namedb = config["rdir"] + "/mmseqs_clustering/cluDB_ids.db"
     conda:
@@ -86,6 +87,14 @@ rule mmseqs_clustering_results:
         awk -vOFS='\\t' '$3=="1"{{print $1,$2}}' {params.info1} > {output.singl}
 
         rm {params.tmp} {params.tmp1} {params.namedb} {params.namedb}.index {params.namedb}.dbtype
+
+        if [[ -s {params.cludb}.0 ]]; then
+            {params.concat_clu} {params.cludb} {threads}
+        fi
+
+        if [[ -s {params.cluseqdb}.0 ]]; then
+            {params.concat_clu} {params.cluseqdb} {threads}
+        fi
 
         """
 

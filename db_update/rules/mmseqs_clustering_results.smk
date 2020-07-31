@@ -58,16 +58,12 @@ rule mmseqs_clustering_results:
         fi
 
         #Check if sequences contain "*", and if yes, clean them
-
-        match=$( grep "\*" {params.seqdb} | head -n1 )
-
-        if [ -n "$match" ]; then
-            {params.mpi_runner} {params.mmseqs_bin} apply \
-                {params.cluseqdb}_orig \
-                {params.cluseqdb}  \
-                --threads {threads} \
-                -- {params.clean_seqs} 2>>{log.err}
-        fi
+        
+        {params.mpi_runner} {params.mmseqs_bin} apply \
+            {params.cluseqdb}_orig \
+            {params.cluseqdb}  \
+            --threads {threads} \
+            -- {params.clean_seqs} 2>>{log.err}
 
         # To convert this cluster results tab separated file in wide format (repres member member member ..)
         awk -f {params.awk_wide} {input.clu} > {params.wide} 2>>{log.err}
