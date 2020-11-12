@@ -54,6 +54,24 @@ The output of these 2 modules is described in the [Output_README.md](Output_READ
 
 <br>
 
+### Test dataset
+Set of 10K contigs to test the DB-creation module and 5K contigs to test the DB-update module of the workflow.
+The test-dataset can be downloaded from Figshare as follows:
+
+```{bash}
+mkdir -p agnostos_test
+cd agnostos_test
+wget https://ndownloader.figshare.com/files/25473332 -O db_creation_data.tar.gz
+tar -xzvf db_creation_data.tar.gz
+
+wget https://ndownloader.figshare.com/files/25473335 -O db_update_data.tar.gz
+tar -xzvf db_update_data.tar.gz
+```
+
+A brief description of the dataset is available on Figshare.
+
+<br>
+
 **Profile-search**: the profile-search vs the AgnostosDB cluster HMM profiles database is not part of the Snakemake workflow. However, if you want to search your set of genes against our profiles you just need to dowload the profile DB from [here](https://ndownloader.figshare.com/files/23066963).
 The scripts can be found in the [Profile_search/](Profile_search) folder.
 To run the search you just need the following command:
