@@ -25,6 +25,7 @@ rule all:
         cluster_categ_stats_done = config["rdir"] + "/cluster_category_stats/cat_stats.done",
         cluster_comm_done = config["rdir"] + "/cluster_communities/comm.done",
         integrated_cludb_done = config["rdir"] + "/integrated_cluster_DB/integdb.done",
+        output_tables_done = config["rdir"] + "/output_tables/res.done",
         report_done = config["rdir"] + "/report/workflow_report.html"
 
 include: "rules/gene_prediction.smk"
@@ -44,4 +45,5 @@ include: "rules/cluster_category_database.smk"
 include: "rules/cluster_category_stats.smk"
 include: "rules/cluster_communities.smk"
 include: "rules/integrated_cluster_db.smk"
+include: "rules/output_tables.smk"
 include: "rules/workflow_report.smk"

@@ -66,6 +66,15 @@ make install
 cd ../..
 ###############################################################################
 
+# Kaiju
+git clone https://github.com/bioinformatics-centre/kaiju.git
+cd kaiju/src
+make -j 8
+cd ../
+cp bin/* "${WD}"/bin/
+cd ../
+###############################################################################
+
 # HMMER MPI-mode
 wget http://eddylab.org/software/hmmer/hmmer-3.3.tar.gz
 tar zxf hmmer-3.3.tar.gz
@@ -88,6 +97,11 @@ make -j 8
 make install
 cd ../..
 export LD_LIBRARY_PATH=/vol/cloud/agnostos-wf/lib:${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}
+###############################################################################
+
+# LEON-BIS
+wget http://www.lbgi.fr/~julie/LEON-BIS/Src/leon-bis.tar
+tar xvf leon-bis.tar --directory "${WD}"/bin/
 ###############################################################################
 
 # Igraph C-library

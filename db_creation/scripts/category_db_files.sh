@@ -105,6 +105,12 @@ if [[ ${STEP} = "known refinement" ]]; then
     CATEG=$(echo -e "kwp")
 elif [[ ${STEP} = "unknown refinement" ]]; then
     CATEG=$(echo -e "eu")
+elif [[ ! -s "${IDIR}"/eu_ids.txt ]]; then
+    CATEG=$(echo -e "gu\nkwp\nk")
+elif [[ ! -s "${IDIR}"/gu_ids.txt ]]; then
+    CATEG=$(echo -e "eu\nkwp\nk")
+elif [[ ! -s "${IDIR}"/kwp_ids.txt ]]; then
+    CATEG=$(echo -e "eu\ngu\nk")
 else
     CATEG=$(echo -e "eu\ngu\nkwp\nk")
 fi
@@ -147,7 +153,7 @@ for categ in $CATEG; do
     ln -sf "${RES}"/"${categ}"_a3m_db "${RES}"/"${categ}"_a3m.ffdata
     ln -sf "${RES}"/"${categ}"_a3m_db.index "${RES}"/"${categ}"_a3m.ffindex
 
-    OMP_NUM_THREADS="${NSLOTS}" "${HHSUITE}"/bin/cstranslate -i "${RES}"/"${categ}"_aln -o "${RES}"/"${categ}"_cs219 \
+    ${RUNNER} "${HHSUITE}"/bin/cstranslate_mpi -i "${RES}"/"${categ}"_aln -o "${RES}"/"${categ}"_cs219 \
         -A "${HHSUITE}"/data/cs219.lib -D "${HHSUITE}"/data/context_data.lib \
         -x 0.3 -c 4 -b -f -I fas &>/dev/null
 
@@ -157,9 +163,10 @@ for categ in $CATEG; do
 
     ln -sf "${RES}"/"${categ}"_cs219.ffdata "${RES}"/"${categ}"_cs219
     ln -sf "${RES}"/"${categ}"_cs219.ffindex "${RES}"/"${categ}"_cs219.index
+    ln -sf "${RES}"/"${categ}"_hhm_db "${RES}"/"${categ}"_hhm_db.ffdata
+    ln -sf "${RES}"/"${categ}"_hhm_db.index "${RES}"/"${categ}"_hhm_db.ffindex
     ln -sf "${RES}"/"${categ}"_hhm_db "${RES}"/"${categ}"_hhm.ffdata
     ln -sf "${RES}"/"${categ}"_hhm_db.index "${RES}"/"${categ}"_hhm.ffindex
-
     #rm "${RES}"/"${categ}"_cs219.log.*
 done
 
@@ -175,13 +182,28 @@ fi
 
 if [[ ${STEP} = "category database" ]]; then
 
-  "${MMSEQS_BIN}" concatdbs "${RES}"/eu_hhm_db "${RES}"/gu_hhm_db "${RES}"/tmp_hhm_db --threads 1
+  for categ in $CATEG; do
+    mv "${RES}"/"${categ}"_aln "${RES}"/"${categ}"_a3m_db
+    mv "${RES}"/"${categ}"_aln.index "${RES}"/"${categ}"_a3m_db.index
+    mv "${RES}"/"${categ}"_aln.dbtype "${RES}"/"${categ}"_a3m_db.dbtype
+    ln -sf "${RES}"/"${categ}"_a3m_db "${RES}"/"${categ}"_a3m.ffdata
+    ln -sf "${RES}"/"${categ}"_a3m_db.index "${RES}"/"${categ}"_a3m.ffindex
+    rm "${RES}"/"${categ}"_aln.ff*
+  done
+  if [[ ! -s "${IDIR}"/eu_ids.txt ]]; then
+    "${MMSEQS_BIN}" concatdbs "${RES}"/k_hhm_db "${RES}"/kwp_hhm_db "${RES}"/tmp_hhm_db --threads 1
 
-  "${MMSEQS_BIN}" concatdbs "${RES}"/k_hhm_db "${RES}"/kwp_hhm_db "${RES}"/tmp1_hhm_db --threads 1
+    "${MMSEQS_BIN}" concatdbs "${RES}"/gu_hhm_db "${RES}"/tmp_hhm_db "${RES}"/clu_hhm_db --threads 1
 
-  "${MMSEQS_BIN}" concatdbs "${RES}"/tmp_hhm_db "${RES}"/tmp1_hhm_db "${RES}"/clu_hhm_db --threads 1
+    rm "${RES}"/tmp_hhm_db* "${RES}"/"${NAM}"*
+  else
+    "${MMSEQS_BIN}" concatdbs "${RES}"/eu_hhm_db "${RES}"/gu_hhm_db "${RES}"/tmp_hhm_db --threads 1
 
-  rm "${RES}"/tmp_hhm_db* "${RES}"/tmp1_hhm_db* "${RES}"/"${NAM}"*
+    "${MMSEQS_BIN}" concatdbs "${RES}"/k_hhm_db "${RES}"/kwp_hhm_db "${RES}"/tmp1_hhm_db --threads 1
 
+    "${MMSEQS_BIN}" concatdbs "${RES}"/tmp_hhm_db "${RES}"/tmp1_hhm_db "${RES}"/clu_hhm_db --threads 1
+
+    rm "${RES}"/tmp_hhm_db* "${RES}"/tmp1_hhm_db* "${RES}"/"${NAM}"*
+  fi
   echo "Done building clusters hmm databases"
 fi

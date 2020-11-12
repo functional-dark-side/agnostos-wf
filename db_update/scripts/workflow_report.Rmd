@@ -72,7 +72,7 @@ a) Two genes on the same strand are considered shadows if they overlap by at lea
 b) genes on opposite strands are identified as shadows if they overlap by at least 50 bps, and their ends of 3' are within the intervals of the others, or if they overlap by at least 120 bps and the end of 5' of one is in the interval of the other.
 
 ```{r,echo=FALSE}
-sp_sh <- fread(paste0(dir,"/integrated_cluster_DB/spurious_shadow_info.tsv.gz"),stringsAsFactors = F,header = F)
+sp_sh <- fread(paste0(dir,"/integrated_cluster_DB/spurious_shadow_info.tsv.gz"),stringsAsFactors = F,header = F, sep="\t")
 spurious <- dim(sp_sh %>% filter(V7==TRUE))[1]
 shadows <- dim(sp_sh %>% filter(V6==TRUE))[1]
 

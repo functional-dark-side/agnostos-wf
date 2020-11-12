@@ -58,7 +58,7 @@ rule mmseqs_clustering_results:
         fi
 
         #Check if sequences contain "*", and if yes, clean them
-        
+
         {params.mpi_runner} {params.mmseqs_bin} apply \
             {params.cluseqdb}_orig \
             {params.cluseqdb}  \
@@ -80,12 +80,12 @@ rule mmseqs_clustering_results:
 
         # Store the information about changes in the original Clusters
         sort -k2,2n {params.rename_or} | awk -vOFS='\\t' '{{print $2,$1,$3,$5}}' > {params.or_new_info}
-        # Order and rejoin old and new cluster ids/NAMES (the new ids will start from the last of the original clustering)
+        # Order and re-join old and new cluster ids/NAMES (the new ids will start from the last of the original clustering)
         OR=$(wc -l {params.or_new_info} | cut -d ' ' -f1)
 
-        awk -vOR=$OR -vOFS='\\t' '{{print NR+OR,$1,$3}}' {params.rename_new} > {params.new_info1} 2>>{log.err}
+        awk -vOR=$OR -vOFS='\\t' '!seen[$0]++{{print NR+OR,$1,$3}}' {params.rename_new} > {params.new_info1} 2>>{log.err}
 
-        cat <(awk -vOFS='\\t' '{{print $1,$2,$4}}' {params.or_new_info} ) \
+        cat <(awk -vOFS='\\t' '!seen[$0]++{{print $1,$2,$4}}' {params.or_new_info} ) \
           {params.new_info1} > {params.info1}
 
         # Cluster naming
@@ -101,11 +101,11 @@ rule mmseqs_clustering_results:
         join -12 -22 <(sed -e 's/\\x0//' {params.namedb} | sort -k2,2 --parallel={threads} -T {params.local_tmp}) \
         <(sort -k2,2 --parallel={threads} -T {params.mmseqs_tmp} {params.info1} ) > {params.index} 2>>{log.err}
 
-        awk -vOFS='\\t' '{{print $2,$3}}' {params.index} > {params.tmp} && mv {params.tmp} {params.index}
+        awk -vOFS='\\t' '!seen[$0]++{{print $2,$3}}' {params.index} > {params.tmp} && mv {params.tmp} {params.index}
 
         # Join with the long format cluster file
         join -11 -22 <(sort --parallel={threads} -T {params.local_tmp} -k1,1 {input.clu} ) \
-            <(sort --parallel={threads} -k2,2 {params.info1} ) > {params.tmp} 2>>{log.err}
+            <(sort --parallel={threads} -T {params.local_tmp} -k2,2 {params.info1} ) > {params.tmp} 2>>{log.err}
 
         # Add length info
         sed -e 's/\\x0//g' {params.cluseqdb} | {params.seqtk_bin} comp | cut -f1,2 > {params.length}
@@ -114,19 +114,19 @@ rule mmseqs_clustering_results:
          <(sort -k2,2 --parallel={threads} -T {params.mmseqs_tmp} {params.tmp}) > {output.clu_info} 2>>{log.err}
 
         # Reorder fields (cl_name rep orf length size)
-        sort -k4,4n --parallel={threads} -T {params.mmseqs_tmp} {output.clu_info} \
-        | awk -vOFS='\\t' '{{print $4,$3,$1,$2,$5}}' > {params.tmp}
+        sort -k4,4n --parallel={threads} -T {params.local_tmp} {output.clu_info} \
+        | awk -vOFS='\\t' '!seen[$0]++{{print $4,$3,$1,$2,$5}}' > {params.tmp} 2>>{log.err}
 
-        cp {params.tmp} {output.clu_info}
+        mv {params.tmp} {output.clu_info}
 
         ## Retrieve the different cluster sets:
         # 1. Only-original clusters: cluDB_original_name_rep_size.tsv
 
-        awk -vOFS='\\t' '$3==$4{{print $1,$2,$3}}' {params.or_new_info} > {params.original}
+        awk -vOFS='\\t' '$3==$4{{print $1,$2,$3}}' {params.or_new_info} | awk '!seen[$0]++' > {params.original}
 
         # 2. Shared original-new clusters: cluDB_shared_name_rep_size.tsv
 
-        awk -vOFS='\\t' '$3!=$4{{print $1,$2,$4}}' {params.or_new_info} > {params.shared}
+        awk -vOFS='\\t' '$3!=$4{{print $1,$2,$4}}' {params.or_new_info} | awk '!seen[$0]++' > {params.shared}
 
         # 3. Only-new clusters: cluDB_new_name_rep_size.tsv
         # we already have this set: {params.new_info1}
@@ -135,7 +135,7 @@ rule mmseqs_clustering_results:
         # the shared_cluDB previously singletons now with size > 1
 
         cat {params.new_info1} \
-        <(awk -vFS='\\t' -vOFS='\\t' '$3==1 && $4>1 {{print $1,$2,$4}}' {params.or_new_info} ) > {params.info2}
+        <(awk -vFS='\\t' -vOFS='\\t' '$3==1 && $4>1 && !seen[$0]++{{print $1,$2,$4}}' {params.or_new_info} ) > {params.info2}
 
         # Subset cluster-index-name:
 
@@ -162,10 +162,10 @@ rule mmseqs_clustering_results:
         join -12 -21 <(sort -k2,2 {params.tmp1}) \
         <(sort -k1,1 --parallel={threads} -T {params.local_tmp} {input.clu} ) > {params.tmp}
 
-        awk -vOFS='\\t' '{{print $2,$1,$3}}' {params.tmp} > {output.clusters}
+        awk -vOFS='\\t' '!seen[$0]++{{print $2,$1,$3}}' {params.tmp} > {output.clusters}
 
         # Singletons
-        awk -vOFS='\\t' '$3=="1"{{print $1,$2}}' {params.info2} > {output.singl}
+        awk -vOFS='\\t' '$3=="1"{{print $1,$2}}' {params.info2} | awk '!seen[$0]++' > {output.singl}
 
         rm {params.tmp} {params.tmp1} {params.namedb} {params.namedb}.index {params.namedb}.dbtype
 

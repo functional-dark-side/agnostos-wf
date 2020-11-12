@@ -104,7 +104,7 @@ rule cluster_refinement:
         # Reorder columns to have cl_name - orf - pfam_name
         awk -vOFS='\\t' '{{print $2,$1,$3}}' {output.ref_annot} > {params.tmp} && mv {params.tmp} {output.ref_annot}
 
-        # Find in the refiend annotated clusters, those left with no annotated ORFs
+        # Find in the refined annotated clusters, those left with no annotated ORFs
         sort -k1,1 {output.ref_annot} \
           | awk '!seen[$1,$3]++{{print $1,$3}}' \
           | awk 'BEGIN{{getline;id=$1;l1=$1;l2=$2;}}{{if($1 != id){{print l1,l2;l1=$1;l2=$2;}}else{{l2=l2"|"$2;}}id=$1;}}END{{print l1,l2;}}' \
@@ -135,7 +135,7 @@ rule cluster_refinement:
         awk -vOFS='\\t' '{{print $1,$2}}' {output.ref_noannot} > {params.tmp} && mv {params.tmp} {output.ref_noannot}
 
         # Using the cluster ids retrieve the two sub database for annotated clusters and not
-        # Again we need to use the MMseqs2 index instead of the Cluster names
+        # Again we need to use the MMseqs2 index instead of the Cluster name
         join -11 -22 <(awk '!seen[$1]++{{print $1}}' {output.ref_annot} | sort -k1,1) \
             <(sort -k2,2 {params.name_index}) > {params.tmp2}
 

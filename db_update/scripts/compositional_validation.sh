@@ -9,6 +9,7 @@ Options:
 --derep    tool to dereplicate cluster sequences (mmseqs)
 --msa      tool for MSAs (famsa)
 --msaeval  tool to evaluate the MSAs (odseq)
+--msaevall second tool to evaluate the MSAs (leon-bis)
 --ssn      sequence similarity network tool (parasail)
 --gfilter  graph filtering script
 --gconnect is_connected graph script
@@ -21,7 +22,7 @@ Options:
   exit 1
 }
 
-OPT_LIST="derep:,msa:,msaeval:,ssn:,gfilter:,gconnect:,seqp:,datap:,stats:,index:,outdir:,threads:"
+OPT_LIST="derep:,msa:,msaeval:,msaevall:,ssn:,gfilter:,gconnect:,seqp:,datap:,stats:,index:,outdir:,threads:"
 
 eval set -- "$(getopt -o '' --long "${OPT_LIST}" -- "$@")"
 while true; do
@@ -36,6 +37,10 @@ while true; do
     ;;
   --msaeval)
     ODSEQ_BIN=$2
+    shift 2
+    ;;
+  --msaevall)
+    LEON_BIS=$2
     shift 2
     ;;
   --ssn)
@@ -84,7 +89,7 @@ while true; do
   esac
 done
 
-if [ -z "${MMSEQS_BIN}" ] || [ -z "${FAMSA_BIN}" ] || [ -z "${ODSEQ_BIN}" ] ||
+if [ -z "${MMSEQS_BIN}" ] || [ -z "${FAMSA_BIN}" ] || [ -z "${ODSEQ_BIN}" ] || [ -z "${LEON_BIS}" ] ||
   [ -z "${PARASAIL_BIN}" ] || [ -z "${FILTER_BIN}" ] || [ -z "${ISCON_BIN}" ] ||
   [ -z "${SEQTK_BIN}" ] || [ -z "${DATAMASH_BIN}" ] || [ -z "${STATS}" ] ||
   [ -z "${OUT}" ] || [ -z "${NSLOTS}" ]; then
@@ -197,6 +202,20 @@ function align_sequences() {
   # MSA with FAMSA
   ALN="${N}".aln
   "${FAMSA_BIN}" -t "${NSLOTS}" "${DEDUP}" "${ALN}" 2>/dev/null
+}
+
+function get_outliers_leon() {
+  awk '$0 ~ /^>/{print $0"\tseq"NR}' "${ALN}" > ${N}.ids
+  REP_SEQ=$(grep $REP ${N}.ids | cut -f2)
+  #rename sequences
+  awk '{if($0~/^>/){print ">seq"NR}else{print $0}}' "${ALN}" > "${N}"_renamed.aln
+  "${LEON_BIS}" ${N}_renamed.aln ${REP_SEQ} "${N}".leon.out "${N}".leon.log
+  grep -f <(grep  -w 'HOMOLOG' "${N}".leon.log | awk '{print $2}') ${N}.ids | cut -f1 > "${N}"_core.txt
+  grep -f <(grep  -w 'HOMOLOG' "${N}".leon.log | awk '{print $2}') -v ${N}.ids | cut -f1 > "${N}"_rejected.txt
+
+  NREJ=$(awk "END{print NR}" "${N}"_rejected.txt)
+  NCOR=$(awk "END{print NR}" "${N}"_core.txt)
+  rm "${N}".leon.out "${N}".leon.log ${N}_renamed.aln ${N}.ids
 }
 
 function get_outliers() {
@@ -375,8 +394,6 @@ main() {
     else
       # Align sequences
       align_sequences
-      # Identify outlier sequences
-      get_outliers
       # calculate SSN
       get_SSN_para
       # Simplify graph
@@ -402,11 +419,23 @@ main() {
           continue
         fi
       done
+      # Identify outlier sequences
+      if [[ "${NSEQS}" -ge 1000 ]]; then
+        get_outliers
+      else
+        get_outliers_leon
+      fi
       # Filter SSN
       filter_SSN
       if [ -s "${N}"_SSN_filt_stats.tsv ]; then
         mv_results
       else
+        # Identify outlier sequences
+        if [[ "${NSEQS}" -ge 1000 ]]; then
+          get_outliers
+        else
+          get_outliers_leon
+        fi
         filter_SSN_2
         mv_results
       fi

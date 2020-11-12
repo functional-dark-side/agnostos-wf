@@ -114,12 +114,12 @@ rule integrated_cluster_db:
          rm {params.tmpl}
 
         # Integrated set of cluster communities
-        # to avoid having overlapping communities names, we append the dataset origin
+        # to avoid having overlapping communities names, the dataset origin is appended to the name
         if [[ ! -s {params.or_clu_com} ]]; then
             wget https://ndownloader.figshare.com/files/23067134 -O {params.or_clu_com}
         fi
-        cat <(awk -vOFS='\\t' 'NR>1{{print $1,$2"_new",$3}}' {input.clu_com} ) \
-         <( awk -vOFS='\\t' 'NR>1{{print $1,$2"_or",$3}}' <(zcat {params.or_clu_com})) > {params.tmpl}
+        cat <(awk -vN={params.data_name} -vOFS='\\t' 'NR>1{{print $1,$2"_"N,$3}}' {input.clu_com} ) \
+         <( awk -vOFS='\\t' 'NR>1{{print $1,$2,$3}}' <(zcat {params.or_clu_com})) > {params.tmpl}
 
         echo -e "cl_name\tcom\tcategory" | cat - {params.tmpl} | gzip > {output.iclu_com}
 

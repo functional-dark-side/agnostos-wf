@@ -9,6 +9,7 @@ Options:
 --derep    tool to dereplicate cluster sequences (mmseqs)
 --msa      tool for MSAs (famsa)
 --msaeval  tool to evaluate the MSAs (odseq)
+--msaevall second tool to evaluate the MSAs (leon-bis)
 --ssn      sequence similarity network tool (parasail)
 --gfilter  graph filtering script
 --gconnect is_connected graph script
@@ -16,12 +17,12 @@ Options:
 --datap    data processing tool (datamash)
 --stats    script to get the SSN stats
 --index    cluster name-index file
---out      output directory
+--outdir   output directory
 --threads  number of threads to use" 1>&2
   exit 1
 }
 
-OPT_LIST="derep:,msa:,msaeval:,ssn:,gfilter:,gconnect:,seqp:,datap:,stats:,index:,outdb:,outdir:,threads:"
+OPT_LIST="derep:,msa:,msaeval:,msaevall:,ssn:,gfilter:,gconnect:,seqp:,datap:,stats:,index:,outdir:,threads:"
 
 eval set -- "$(getopt -o '' --long "${OPT_LIST}" -- "$@")"
 while true; do
@@ -36,6 +37,10 @@ while true; do
     ;;
   --msaeval)
     ODSEQ_BIN=$2
+    shift 2
+    ;;
+  --msaevall)
+    LEON_BIS=$2
     shift 2
     ;;
   --ssn)
@@ -84,7 +89,7 @@ while true; do
   esac
 done
 
-if [ -z "${MMSEQS_BIN}" ] || [ -z "${FAMSA_BIN}" ] || [ -z "${ODSEQ_BIN}" ] ||
+if [ -z "${MMSEQS_BIN}" ] || [ -z "${FAMSA_BIN}" ] || [ -z "${ODSEQ_BIN}" ] || [ -z "${LEON_BIS}" ] ||
   [ -z "${PARASAIL_BIN}" ] || [ -z "${FILTER_BIN}" ] || [ -z "${ISCON_BIN}" ] ||
   [ -z "${SEQTK_BIN}" ] || [ -z "${DATAMASH_BIN}" ] || [ -z "${STATS}" ] ||
   [ -z "${OUT}" ] || [ -z "${NSLOTS}" ]; then
@@ -138,6 +143,10 @@ function create_destdirs() {
   STATSDIR="${RES}"/stats
   if [[ ! -d "${STATSDIR}" ]]; then
     mkdir -p "${STATSDIR}"
+  fi
+  SSNDIR="${RES}"/SSN
+  if [[ ! -d "${SSNDIR}" ]]; then
+    mkdir -p "${SSNDIR}"
   fi
 }
 
@@ -195,11 +204,25 @@ function align_sequences() {
   "${FAMSA_BIN}" -t "${NSLOTS}" "${DEDUP}" "${ALN}" 2>/dev/null
 }
 
+function get_outliers_leon() {
+  awk '$0 ~ /^>/{print $0"\tseq"NR}' "${ALN}" > ${N}.ids
+  REP_SEQ=$(grep $REP ${N}.ids | cut -f2)
+  #rename sequences
+  awk '{if($0~/^>/){print ">seq"NR}else{print $0}}' "${ALN}" > "${N}"_renamed.aln
+  "${LEON_BIS}" ${N}_renamed.aln ${REP_SEQ} "${N}".leon.out "${N}".leon.log
+  grep -f <(grep  -w 'HOMOLOG' "${N}".leon.log | awk '{print $2}') ${N}.ids | cut -f1 > "${N}"_core.txt
+  grep -f <(grep  -w 'HOMOLOG' "${N}".leon.log | awk '{print $2}') -v ${N}.ids | cut -f1 > "${N}"_rejected.txt
+
+  NREJ=$(awk "END{print NR}" "${N}"_rejected.txt)
+  NCOR=$(awk "END{print NR}" "${N}"_core.txt)
+  rm "${N}".leon.out "${N}".leon.log ${N}_renamed.aln ${N}.ids
+}
+
 function get_outliers() {
   "${ODSEQ_BIN}" -t "${NSLOTS}" -s 2.5 -i "${ALN}" -o "${N}".out -c "${N}".cor &>/dev/null
   # Get Rejected Ids
-  LC_ALL=C grep -w -F -f <(grep '>' "${N}".cor | tr -d '>') "${N}"_replicates.tsv | cut -f2 | sort -u --parallel=4 > "${N}"_core.txt
-  LC_ALL=C grep -w -F -f <(grep '>' "${N}".out | tr -d '>') "${N}"_replicates.tsv | cut -f2 | sort -u --parallel=4 > "${N}"_rejected.txt
+  LC_ALL=C grep -w -F -f <(grep '>' "${N}".cor | tr -d '>') "${N}"_replicates.tsv | cut -f2 | sort -u --parallel=4 >"${N}"_core.txt
+  LC_ALL=C grep -w -F -f <(grep '>' "${N}".out | tr -d '>') "${N}"_replicates.tsv | cut -f2 | sort -u --parallel=4 >"${N}"_rejected.txt
 
   NREJ=$(awk "END{print NR}" "${N}"_rejected.txt)
   NCOR=$(awk "END{print NR}" "${N}"_core.txt)
@@ -210,13 +233,13 @@ function get_SSN_para() {
   # Identity scores from the MSA
   ID="${N}"_id
   # the 5th column has the identity score
-  "${PARASAIL_BIN}" -a sg_stats_scan_16 -f "${DEDUP}" -g ssn.out -t 7 -c 1 -x &>/dev/null
-  awk 'BEGIN{FS=","}{print $1" "$2" "$9/$10}' ssn.out >"${ID}"
+  "${PARASAIL_BIN}" -a sg_stats_scan_16 -f "${DEDUP}" -g "${N}"_ssn.out -t 7 -c 1 -x &>/dev/null
+  awk 'BEGIN{FS=","}{print $1" "$2" "$9/$10}' "${N}"_ssn.out > "${ID}"
   # Get statistics from the raw SSN
   SSN_RAW_STATS="${N}"_SSN_raw_stats.tsv
   RSTATS=$("${STATS}" "${ID}")
   echo "${RSTATS}" | awk -vN="${N}" -vS="${NSEQS}" 'BEGIN{OFS="\t"}{print N,S,$1,$3,$4,$6}' >"${SSN_RAW_STATS}"
-  rm ssn.out
+  rm "${N}"_ssn.out
 }
 
 function filter_SSN() {
@@ -263,7 +286,9 @@ function filter_SSN() {
     COM=$(grep Num_components "${SSN}" | cut -f2)
     CON=$(grep Connected "${SSN}" | cut -f2)
 
-    "${STATS}" trimmed_graph.ncol |
+    mv trimmed_graph.ncol "${N}"_trimmed_graph.ncol
+
+    "${STATS}" "${N}"_trimmed_graph.ncol |
       awk -vN="${N}" -vV="${NVX}" -vR="${REP}" -vD="${DEN}" -vE="${NED}" -vC="${CW}" \
         -vRMIN="${RMINW}" -vRMEA="${RMEAW}" -vRMED="${RMEDW}" -vRMAX="${RMAXW}" \
         -vCON="${CON}" -vCOM="${COM}" \
@@ -271,7 +296,7 @@ function filter_SSN() {
         -vL="${LEN_STATS}" -vNS="${NSEQS}" \
         'BEGIN{OFS="\t"}{print N,R,NS,V,E,D,C,CON,COM,$1,$3,$4,$6,RMIN,RMEA,RMED,RMAX,L,REJ,COR,REJ/NS}' >"${SSN_FILT_STATS}"
 
-    "${STATS}" trimmed_graph.ncol |
+    "${STATS}" "${N}"_trimmed_graph.ncol |
       awk -vN="${N}" -vV="${NVX}" -vR="${REP}" -vD="${DEN}" -vE="${NED}" -vC="${CW}" \
         -vRMIN="${RMINW}" -vRMEA="${RMEAW}" -vRMED="${RMEDW}" -vRMAX="${RMAXW}" \
         -vCON="${CON}" -vCOM="${COM}" \
@@ -279,6 +304,7 @@ function filter_SSN() {
         -vL="${LEN_STATS}" -vNS="${NSEQS}" \
         'BEGIN{OFS="\t"}{print N,R,NS,V,E,D,C,CON,COM,$1,$3,$4,$6,RMIN,RMEA,RMED,RMAX,L,REJ,COR,REJ/NS}' |
       grep --line-buffered '^' >>"${GLOBAL_OUT}"
+    gzip "${N}"_trimmed_graph.ncol
   fi
 }
 
@@ -316,6 +342,8 @@ function mv_results() {
   rsync -Pauqx --append "${N}"_core.txt "${CORDIR}"/
   rsync -Pauqx --append "${SSN_FILT_STATS}" "${STATSDIR}"/
   rsync -Pauqx --append "${SSN_RAW_STATS}" "${STATSDIR}"/
+  rsync -Pauqx --append "${ID}" "${SSNDIR}"/
+  rsync -Pauvx --append "${N}"_trimmed_graph.ncol.gz "${SSNDIR}"/
 }
 
 main() {
@@ -366,8 +394,6 @@ main() {
     else
       # Align sequences
       align_sequences
-      # Identify outlier sequences
-      get_outliers
       # calculate SSN
       get_SSN_para
       # Simplify graph
@@ -393,11 +419,23 @@ main() {
           continue
         fi
       done
+      # Identify outlier sequences
+      if [[ "${NSEQS}" -ge 1000 ]]; then
+        get_outliers
+      else
+        get_outliers_leon
+      fi
       # Filter SSN
       filter_SSN
       if [ -s "${N}"_SSN_filt_stats.tsv ]; then
         mv_results
       else
+        # Identify outlier sequences
+        if [[ "${NSEQS}" -ge 1000 ]]; then
+          get_outliers
+        else
+          get_outliers_leon
+        fi
         filter_SSN_2
         mv_results
       fi

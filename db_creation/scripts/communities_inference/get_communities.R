@@ -414,6 +414,8 @@ if (cfg$da_dist != ""){
   lo_env$da_dist <- stringdist::stringdistmatrix(d$exp_rep, useNames = TRUE, method = "cosine", q = 3, nthread = cfg$dt_cores)
   lo_env$da_dist <- melt(as.matrix(lo_env$da_dist), varnames = c("item1", "item2")) %>%
    rename(distance=value) %>% filter(distance!=0)
+    #broom::tidy() %>%
+    #as.data.table()
   cat(" done\n")
 
   da_dist_file <- file.path(results, paste0("da_dist_", time_string, ".tsv"))
@@ -658,6 +660,9 @@ best_inflation <- k_partition_stats_eval %>%
 
 if (length(best_inflation >1 )) {
     best_inflation <- max(best_inflation)
+}
+if (is_empty(best_inflation)) {
+  best_inflation <- 2.0
 }
 msg(paste0("\nOptimal inflation value identified at ", red(best_inflation), "\n\n"))
 

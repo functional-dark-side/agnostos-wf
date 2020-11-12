@@ -14,70 +14,84 @@ pfam_annotation:
     partition: nomaster
 
 spurious_shadow:
-    nodes: 2
-    ntasks: 56
+    nodes: 10
+    ntasks: 280
     ntasks_per_node: 28
     cpus_per_task: 1
-    partition: nomaster
+    partition: debug
 
-mmseqs_clustering_update:
-    nodes: 4
-    ntasks: 4
+mmseqs_clustering:
+    nodes: 10
+    ntasks: 10
     ntasks_per_node: 1
     cpus_per_task: 28
-    partition: nomaster
+    partition: debug
+
+mmseqs_clustering_update:
+    nodes: 10
+    ntasks: 10
+    ntasks_per_node: 1
+    cpus_per_task: 28
+    partition: debug
 
 mmseqs_clustering_results:
-    nodes: 4
-    ntasks: 8
+    nodes: 10
+    ntasks: 20
     ntasks_per_node: 2
     cpus_per_task: 14
-    partition: nomaster
+    partition: debug
 
 cluster_compositional_validation:
-    nodes: 4
-    ntasks: 16
+    nodes: 10
+    ntasks: 40
     ntasks_per_node: 4
-    partition: nomaster
+    partition: debug
 
 cluster_refinement:
-    nodes: 4
-    ntasks: 4
+    nodes: 10
+    ntasks: 10
     ntasks-per_node: 1
     cpus_per_task: 28
-    partition: nomaster
+    partition: debug
 
 cluster_classification:
     time: 1000:00:00
-    nodes: 4
+    nodes: 10
     ntasks_per_node: 1
-    ntasks: 4
+    ntasks: 10
     cpus_per_task: 28
-    partition: nomaster
+    partition: debug
 
 cluster_category_refinement:
-    nodes: 4
-    ntasks: 28
-    ntasks_per_node: 7
-    partition: nomaster
+    nodes: 10
+    ntasks: 280
+    ntasks_per_node: 28
+    partition: debug
 
 cluster_category_database:
-    nodes: 4
-    ntasks: 112
+    nodes: 10
+    ntasks: 280
     ntasks_per_node: 28
-    partition: nomaster
+    partition: debug
 
 cluster_category_stats:
     time: 1000:00:00
-    nodes: 4
+    nodes: 10
     ntasks_per_node: 1
-    ntasks: 4
+    ntasks: 10
     cpus_per_task: 28
-    partition: nomaster
+    partition: debug
 
-cluster_communities:
+cluster_communities_dbs:
     time: 1000:00:00
-    nodes: 4
+    nodes: 10
+    ntasks: 280
+    ntasks_per_node: 28
+    partition: debug
+
+cluster_communities_inference:
+    time: 1000:00:00
+    nodes: 10
     ntasks_per_node: 4
-    ntasks: 16
-    partition: nomaster
+    ntasks: 40
+    partition: debug

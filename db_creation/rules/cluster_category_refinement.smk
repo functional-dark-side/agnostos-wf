@@ -5,22 +5,21 @@ rule cluster_category_refinement:
         gu = config["rdir"] + "/cluster_classification/gu_ids.txt",
         eu = config["rdir"] + "/cluster_classification/eu_ids.txt"
     threads: config["threads_cat_ref"]
+    conda:
+        config["conda_env"]
     params:
         mmseqs_bin = config["mmseqs_bin"],
         ffindex_apply = config["ffindex_apply"],
         mpi_runner = config["mpi_runner"],
         hhsuite = config["hhsuite"],
         famsa_bin = config["famsa_bin"],
+        vmtouch = config["vmtouch"],
         hhblits_bin_mpi = config["hhblits_bin_mpi"],
-        hhblits_bin = config["hhblits_bin"],
         uniclust_db = config["uniclust_db"],
         pfam_db = config["pfam_hh_db"],
         cluseqdb = config["rdir"] + "/cluster_refinement/refined_clusterDB",
         index = config["rdir"] + "/mmseqs_clustering/cluDB_name_index.txt",
-        hh_parser = "scripts/hh_parser.sh",
-        hh_reader = "scripts/hh_reader.py",
-        hhpfam = "scripts/hhpfam_search.sh",
-        hhblits_search = "scripts/hhblits_search.sh",
+        hhblits_search = "scripts/hhblits_search_parser.sh",
         hhpfam_parser = "scripts/hhpfam_parser.sh",
         patterns = "scripts/hypothetical_grep.tsv",
         pfam_clan = config["pfam_clan"],
@@ -65,7 +64,8 @@ rule cluster_category_refinement:
         export OMP_PROC_BIND=FALSE
 
         ### Environmental unknown refinement searching for remote homologies (in the Uniclust DB)
-        {params.categ_db} --cluseq_db {params.cluseqdb} \
+        if [[ ! -f {params.hmm_eu} ]]; then
+            {params.categ_db} --cluseq_db {params.cluseqdb} \
                         --step "{params.step_unk}" \
                         --index {params.index} \
                         --mpi_runner "{params.mpi_runner}" \
@@ -79,18 +79,97 @@ rule cluster_category_refinement:
                         --idir {params.idir} \
                         --clu_hhm "none" \
                         --threads {threads} 2>{log.err} 1>{log.out}
+        fi
+        # vmtouch the DBs
+        {params.vmtouch} -f {params.uniclust_db}*
+        {params.vmtouch} -f {params.pfam_db}*
+        {params.vmtouch} -f {params.hmm_eu}
 
-        if [[ ! -f {params.tmp_eu}.index || ! -f {params.tmp_eu}_parsed.tsv ]]; then
-            mkdir -p {params.outdir}/hhr
-            {params.mpi_runner} {params.mmseqs_bin} apply {params.hmm_eu} {params.tmp_eu} \
-                --threads 1 \
-                -- {params.hhblits_search} {params.uniclust_db} {params.outdir}/hhr {params.hhblits_bin} {threads} {params.hhblits_prob}
+        # If EU GCs <= 10,000 search them vs Uniclust and parse results
+        EU=$(wc -l {input.eu} | cut -d' ' -f1)
+        if [[ ! -f {params.tmp_eu}_parsed.tsv ]]; then
+            if [[ $EU -le 10000 ]]; then
+                # Run directly EU vs Uniclust
+                {params.mpi_runner} {params.hhblits_bin_mpi} -i {params.hmm_eu} \
+                                                             -o {params.tmp_eu} \
+                                                             -n 2 -cpu 1 -v 0 \
+                                                             -d {params.uniclust_db} 2>>{log.err} 1>>{log.out}
+                mv {params.tmp_eu}.ffdata {params.tmp_eu}
+                mv {params.tmp_eu}.ffindex {params.tmp_eu}.index
+                {params.mpi_runner} {params.mmseqs_bin} apply {params.tmp_eu} {params.tmp_eu}.parsed \
+                    --threads 1 \
+                    -- {params.hhblits_search} {params.outdir}/templ {threads} {params.hhblits_prob} 2>>{log.err} 1>>{log.out}
 
-            rm -rf {params.outdir}/hhr
+                 sed -e 's/\\x0//g' {params.tmp_eu}.parsed > {params.tmp_eu}_parsed.tsv
+                 rm -rf {params.outdir}/templ
+            else
+                # Run EU vs PFAM and then EU vs Uniclust
+                ## EU vs Pfam
+                {params.mpi_runner} {params.hhblits_bin_mpi} -i {params.hmm_eu} \
+                                                             -o {params.tmp_eu} \
+                                                             -n 2 -cpu 1 -v 0 \
+                                                             -d {params.pfam_db} 2>>{log.err} 1>>{log.out}
+                mv {params.tmp_eu}.ffdata {params.tmp_eu}
+                mv {params.tmp_eu}.ffindex {params.tmp_eu}.index
+                {params.mpi_runner} {params.mmseqs_bin} apply {params.tmp_eu} {params.tmp_eu}.parsed_pfam \
+                    --threads 1 \
+                    -- {params.hhblits_search} {params.outdir}/templ {threads} {params.hhblits_prob} 2>>{log.err} 1>>{log.out}
+                rm -rf {params.outdir}/templ
+                sed -e 's/\\x0//g' {params.tmp_eu}.parsed_pfam > {params.tmp_eu}.tsv
 
-            sed -e 's/\\x0//g' {params.tmp_eu} > {params.tmp_eu}_parsed.tsv
+                #Parsing hhblits result files and filtering for hits with coverage > 0.4, and removing overlapping pfam domains/matches
+                ./{params.hhpfam_parser} {params.tmp_eu}.tsv {threads} > {params.tmp_eu}_filt.tsv
+
+                # join with the pfam names and clans
+                join -11 -21 <(awk '{{split($1,a,"."); print a[1],$3,$8,$9}}' {params.tmp_eu}_filt.tsv | sort -k1,1) \
+                    <(gzip -dc {params.pfam_clan} |\
+                    awk -vFS='\\t' -vOFS='\\t' '{{print $1,$2,$4}}' |\
+                    awk -vFS='\\t' -vOFS='\\t' '{{for(i=1; i<=NF; i++) if($i ~ /^ *$/) $i = "no_clan"}};1' \
+                    | sort -k1,1) > {params.tmp_eu}_name_acc_clan.tsv
+
+                # Multi domain format
+                awk '{{print $2,$3,$4,$5,$1,$6}}' {params.tmp_eu}_name_acc_clan.tsv |\
+                    sort -k1,1 -k2,3g | \
+                    awk -vOFS='\\t' '{{print $1,$4,$5,$6}}' | \
+                    awk -f {params.concat} > {params.tmp_eu}_name_acc_clan_multi.tsv
+
+                rm {params.tmp_eu}_name_acc_clan.tsv
+
+                if [ -s {params.tmp_eu}_name_acc_clan_multi.tsv ]; then
+                    # Divide the new hits with pfam into DUFs and not DUFs
+                    ./{params.new_da} {params.tmp_eu}_name_acc_clan_multi.tsv {params.tmp_eu}
+
+                    # New K clusters
+                    awk '{{print $1}}' {params.tmp_eu}_new_k_ids_annot.tsv >> {output.k}
+                    cat {input.k} >> {output.k}
+                    # New GU clusters
+                    awk '{{print $1}}' {params.tmp_eu}_new_gu_ids_annot.tsv >> {output.gu}
+                    # Remaning EU clusters
+                    join -11 -21 -v1 <(sort -k1,1 {input.eu}) \
+                        <(awk '{{print $1}}' {params.tmp_eu}_name_acc_clan_multi.tsv | sort -k1,1) > {output.eu}
+                    # Subset the EU hmm DB
+                    {params.mmseqs_bin} createsubdb {output.eu} {params.hmm_eu} {params.hmm_eu}.left
+                    mv {params.hmm_eu}.left {params.hmm_eu}
+                    mv {params.hmm_eu}.left.index {params.hmm_eu}.index
+                fi
+                # Run remaining EU GCs vs Uniclust
+                {params.vmtouch} -f {params.hmm_eu}
+                {params.mpi_runner} {params.hhblits_bin_mpi} -i {params.hmm_eu} \
+                                                             -o {params.tmp_eu} \
+                                                             -n 2 -cpu 1 -v 0 \
+                                                             -d {params.uniclust_db} 2>>{log.err} 1>>{log.out}
+                mv {params.tmp_eu}.ffdata {params.tmp_eu}
+                mv {params.tmp_eu}.ffindex {params.tmp_eu}.index
+                {params.mpi_runner} {params.mmseqs_bin} apply {params.tmp_eu} {params.tmp_eu}.parsed_unicl \
+                    --threads 1 \
+                    -- {params.hhblits_search} {params.outdir}/templ {threads} {params.hhblits_prob} 2>>{log.err} 1>>{log.out}
+
+                sed -e 's/\\x0//g' {params.tmp_eu}.parsed_unicl > {params.tmp_eu}_parsed.tsv
+                rm -rf {params.outdir}/templ
+            fi
         fi
 
+        # Parse EU refinement results
         LC_ALL=C rg -j 4 -i -f {params.patterns} {params.tmp_eu}_parsed.tsv | \
             awk '{{print $0"\thypo"}}' > {params.tmp_eu}_hypo_char
         LC_ALL=C rg -j 4 -v -i -f {params.patterns} {params.tmp_eu}_parsed.tsv | \
@@ -107,13 +186,14 @@ rule cluster_category_refinement:
                  <(sort -k1,1 {params.tmp_eu}_new_gu_ids.txt) > {params.tmp_eu}_new_kwp_ids.txt
 
             join -11 -21 -v1 <(sort -k1,1 {input.eu}) \
-                 <(awk '!seen[$2]++{{print $2}}' {params.tmp_eu}_parsed.tsv | sort -k1,1) > {output.eu}
+                 <(awk '!seen[$2]++{{print $2}}' {params.tmp_eu}_parsed.tsv | sort -k1,1) >> {output.eu}
 
-            cat {input.kwp} {params.tmp_eu}_new_kwp_ids.txt > {output.kwp}
+            cat {input.kwp} {params.tmp_eu}_new_kwp_ids.txt >> {output.kwp}
 
-            cat {input.gu} {params.tmp_eu}_new_gu_ids.txt > {output.gu}
-
-            cp {input.k} {output.k}
+            cat {input.gu} {params.tmp_eu}_new_gu_ids.txt >> {output.gu}
+            if [[ ! -s {output.k} ]]; then
+                cp {input.k} {output.k}
+            fi
         else
             echo "No EU was found to be a remote homolog of an already observed protein"
             cp {input.k} {output.k}
@@ -123,15 +203,14 @@ rule cluster_category_refinement:
         fi
 
         # clean the results ...
-
         rm -rf {params.hmm_eu} {params.hmm_eu}.index {params.hmm_eu}.dbtype
         rm -rf {params.tmp_eu} {params.tmp_eu}.index {params.tmp_eu}.dbtype
         rm -rf {params.tmp_eu}_hypo_char
 
         #######
         ## Known without Pfam refinement, searching for remote homologies (in the Pfam DB)
-
-        {params.categ_db} --cluseq_db {params.cluseqdb} \
+        if [[ ! -f {params.hmm_kwp} ]]; then
+            {params.categ_db} --cluseq_db {params.cluseqdb} \
                           --step "{params.step_k}" \
                           --index {params.index} \
                           --mpi_runner "{params.mpi_runner}" \
@@ -145,23 +224,29 @@ rule cluster_category_refinement:
                           --idir {params.idir} \
                           --clu_hhm "none" \
                           --threads {threads} 2>{log.err} 1>{log.out}
+        fi
 
         rm -f {params.hmm_kwp}.ff*
         ln -s {params.hmm_kwp} {params.hmm_kwp}.ffdata
         ln -s {params.hmm_kwp}.index {params.hmm_kwp}.ffindex
 
         if [[ ! -f {params.tmp_kwp}.index || ! -f {params.tmp_kwp}.tsv ]]; then
-            mkdir -p {params.outdir}/hhr
-            {params.mpi_runner} {params.mmseqs_bin} apply {params.hmm_kwp} {params.tmp_kwp} \
-                --threads 1 \
-                -- {params.hhblits_search} {params.pfam_db} {params.outdir}/hhr {params.hhblits_bin} {threads} {params.hhblits_prob}
-            rm -rf {params.outdir}/hhr
-
+            {params.vmtouch} -f {params.hmm_kwp}
+            {params.mpi_runner} {params.hhblits_bin_mpi} -i {params.hmm_kwp} \
+                                                         -o {params.tmp_kwp} \
+                                                         -n 2 -cpu 1 -v 0 \
+                                                         -d {params.pfam_db}
+            mv {params.tmp_kwp}.ffdata {params.tmp_kwp}
+            mv {params.tmp_kwp}.ffindex {params.tmp_kwp}.index
+            {params.mpi_runner} {params.mmseqs_bin} apply {params.tmp_kwp} {params.tmp_kwp}.parsed \
+                    --threads 1 \
+                    -- {params.hhblits_search} {params.outdir}/templ {threads} {params.hhblits_prob}
+            rm -rf  {params.outdir}/templ
             # Parsing hhr result files and filtering for hits with probability ≥ 90%
-            sed -e 's/\\x0//g' {params.tmp_kwp} > {params.tmp_kwp}.tsv
+            sed -e 's/\\x0//g' {params.tmp_kwp}.parsed > {params.tmp_kwp}.tsv
         fi
 
-        #Parsing hhblits result files and filtering for hits with probability ≥ 90% and coverage > 0.4, and removing overlapping pfam domains/matches
+        #Parsing hhblits result files and filtering for hits with coverage > 0.4, and removing overlapping pfam domains/matches
         ./{params.hhpfam_parser} {params.tmp_kwp}.tsv {threads} > {params.tmp_kwp}_filt.tsv
 
         # join with the pfam names and clans
@@ -182,28 +267,30 @@ rule cluster_category_refinement:
             # Divide the new hits with pfam into DUFs and not DUFs
             ./{params.new_da} {params.tmp_kwp}_name_acc_clan_multi.tsv {params.tmp_kwp}
 
-            # New Ks clusters
+            # New K clusters
             awk '{{print $1}}' {params.tmp_kwp}_new_k_ids_annot.tsv >> {output.k}
-
-            # New GUs clusters
+            # New GU clusters
             awk '{{print $1}}' {params.tmp_kwp}_new_gu_ids_annot.tsv >> {output.gu}
-
-            # New KWPs clusters
+            # New KWP clusters
             join -11 -21 -v1 <(sort -k1,1 {output.kwp}) \
                     <(awk '{{print $1}}' {params.tmp_kwp}_name_acc_clan_multi.tsv | sort -k1,1) > {params.tmp_kwp}_kwp
             mv {params.tmp_kwp}_kwp {output.kwp}
-
-            # EUs remain the same
+            # EU remain the same
         else
             # The categories mantain the same clusters
             echo "No KWP was found to be remote homolog of a Pfam domain"
         fi
 
         # clean the results ...
-
         rm -rf {params.hmm_kwp} {params.hmm_kwp}.index {params.hmm_kwp}.dbtype {params.hmm_kwp}.ff*
         rm -rf {params.tmp_kwp} {params.tmp_kwp}.index {params.tmp_kwp}.dbtype
         rm -rf {params.tmp_kwp}_filt.tsv
+
+        #Clean eventual duplicates
+        awk '!seen[$0]++' {output.k} > {output.k}.tmp && mv {output.k}.tmp {output.k}
+        awk '!seen[$0]++' {output.kwp} > {output.kwp}.tmp && mv {output.kwp}.tmp {output.kwp}
+        awk '!seen[$0]++' {output.gu} > {output.gu}.tmp && mv {output.gu}.tmp {output.gu}
+        awk '!seen[$0]++' {output.eu} > {output.eu}.tmp && mv {output.eu}.tmp {output.eu}
 
         # Create a file with cl_name and category
         cat <(awk -vOFS='\\t' '{{print $1,"K"}}' {output.k}) \
@@ -213,7 +300,7 @@ rule cluster_category_refinement:
 
         # Add ORFs
         join -11 -21 <(sort -k1,1 {output.categ}) \
-            <(awk '{{print $1,$3}}' {params.ref_clu} | sort -k1,1) \
+            <(awk '!seen[$1,$3]++{{print $1,$3}}' {params.ref_clu} | sort -k1,1) \
             > {params.categ_orfs}
 
         gzip {params.categ_orfs}
@@ -226,6 +313,9 @@ rule cluster_category_refinement:
         join -11 -21 <(sort -k1,1 {output.gu}) \
                 <(awk '{{print $1,"Uniclust",$3,$4}}' {params.tmp_eu}_parsed.tsv | sort -k1,1) \
                 > {params.outdir}/GU_annotations.tsv
+        if [ -s {params.tmp_eu}_new_gu_ids_annot.tsv ]; then
+            awk 'NR>1{{print $1,"Pfam","0.0",$2}}' {params.tmp_eu}_new_gu_ids_annot.tsv >> {params.outdir}/GU_annotations.tsv
+        fi
         awk 'NR>1{{print $1,"Pfam","0.0",$2}}' {params.tmp_kwp}_new_gu_ids_annot.tsv >> {params.outdir}/GU_annotations.tsv
         cat {params.idir}/gu_annotations.tsv >> {params.outdir}/GU_annotations.tsv
         sed -i 's/ /\\t/g' {params.outdir}/GU_annotations.tsv
@@ -239,10 +329,15 @@ rule cluster_category_refinement:
         sed -i 's/ /\\t/g' {params.outdir}/KWP_annotations.tsv
 
         # K annotations
+        if [ -s {params.tmp_eu}_new_k_ids_annot.tsv ]; then
+            awk 'NR>1{{print $1,"Pfam","0.0",$2}}' {params.tmp_eu}_new_k_ids_annot.tsv >> {params.outdir}/K_annotations.tsv
+        fi
         cat {params.idir}/k_annotations.tsv \
                 <(awk -vOFS='\\t' 'NR>1{{print $1,"Pfam","0.0",$2}}' {params.tmp_kwp}_new_k_ids_annot.tsv) \
-                    > {params.outdir}/K_annotations.tsv
-
+                    >> {params.outdir}/K_annotations.tsv
+        if [ -s {params.tmp_eu}_new_k_ids_annot.tsv ]; then
+                    awk 'NR>1{{print $1,"Pfam","0.0",$2}}' {params.tmp_eu}_new_k_ids_annot.tsv >> {params.outdir}/K_annotations.tsv
+        fi
       """
 
 rule cluster_categ_ref_done:

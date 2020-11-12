@@ -9,8 +9,8 @@ rule cluster_classification:
         config["conda_env"]
     params:
         wd = config["wdir"],
+        vmtouch = config["vmtouch"],
         mmseqs_bin = config["mmseqs_bin"],
-        ffindex_apply = config["ffindex_apply"],
         mpi_runner = config["mpi_runner"],
         filterbyname = config["filterbyname"],
         famsa_bin = config["famsa_bin"],
@@ -25,11 +25,11 @@ rule cluster_classification:
             "/cluster_classification/cluster_pfam_domain_architectures.tsv",
         da_r = "scripts/cluster_pfam_domain_architectures.r",
         patterns = "scripts/hypothetical_grep.tsv",
-        uniref_fasta = config["uniref90_db"],
+        uniref_db = config["uniref90_db"],
         uniref_prot = config["uniref90_prot"],
         uniref_res = config["rdir"] + \
             "/cluster_classification/noannot_vs_uniref90.tsv",
-        nr_fasta = config["nr_db"],
+        nr_db = config["nr_db"],
         nr_prot = config["nr_prot"],
         nr_res = config["rdir"] + \
             "/cluster_classification/uniref-nohits_vs_NR.tsv",
@@ -94,11 +94,12 @@ rule cluster_classification:
         rm {params.db_aln}* {params.db_cons}* {params.outdir}/cons_tmpl
 
         # Search the not annotated cluster consensus sequences against the UniRef90 database
+        {params.vmtouch} -f {params.uniref_db}
         {params.mmseqs_search} --search {params.mmseqs_bin} \
                                --mpi_runner "{params.mpi_runner}" \
                                --ltmp {params.mmseqs_local_tmp} \
                                --cons {params.ref_cons} \
-                               --db_fasta {params.uniref_fasta} \
+                               --db_target {params.uniref_db} \
                                --db_info {params.uniref_prot} \
                                --evalue_filter {params.evalue_filt} \
                                --evalue_threshold {params.evalue_thr} \
@@ -120,12 +121,12 @@ rule cluster_classification:
                               include=f ignorejunk overwrite=true 2>>{log.err} 1>>{log.out}
         ####
         # Search the non-matching consensus sequences against the NCBI nr database
-
+        {params.vmtouch} -f {params.nr_db}
         {params.mmseqs_search} --search {params.mmseqs_bin} \
                                 --mpi_runner "{params.mpi_runner}" \
                                 --ltmp {params.mmseqs_local_tmp} \
                                 --cons {params.outdir}/noannot_vs_uniref90_nohits.fasta \
-                                --db_fasta {params.nr_fasta} \
+                                --db_target {params.nr_db} \
                                 --db_info {params.nr_prot} \
                                 --evalue_filter {params.evalue_filt} \
                                 --evalue_threshold {params.evalue_thr} \

@@ -12,13 +12,13 @@ default:
   entropy_cores:        32 # Number of cores to calculate MCL cluster entropy (uses a lot of RAM, 32 for bigmems)
   das_refinement_cores: 64
   # Files
-  wd:                   "/vol/cloud/db_update/cluster_communities"
+  wd:                   "/vol/cloud/agnostos_test/db_update/cluster_communities"
   graph_lib:            "/vol/cloud/agnostos-wf/db_update/scripts/communities_inference/graph_lib.R"
-  cl_cat:               "/vol/cloud/db_update/cluster_categories/cluster_ids_categ.tsv"
-  cl_comp:              "/vol/cloud/db_update/cluster_category_stats/cluster_category_completeness.tsv"
+  cl_cat:               "/vol/cloud/agnostos_test/db_update/cluster_categories/cluster_ids_categ.tsv"
+  cl_comp:              "/vol/cloud/agnostos_test/db_update/cluster_category_stats/cluster_category_completeness.tsv"
   p_clan:               "/vol/cloud/agnostos-wf/databases/Pfam-A.clans.tsv.gz"
-  p_doms:               "/vol/cloud/db_update/cluster_classification/cluster_pfam_domain_architectures.tsv"
-  hhblits_results:      "/vol/cloud/db_update/cluster_communities/k_hhblits.tsv"
+  p_doms:               "/vol/cloud/agnostos_test/db_update/cluster_classification/cluster_pfam_domain_architectures.tsv"
+  hhblits_results:      "/vol/cloud/agnostos_test/db_update/cluster_communities/k_hhblits.tsv"
   # Files with results that can be loaded to skip time consuming steps, leave it empty to recalculate them
   k_g_mcl_list:         ""
   k_gc:                 ""
@@ -27,12 +27,12 @@ default:
   da_dist:              ""
   k_das_refinement:     ""
 
-  kwp_hhblits_results:  "/vol/cloud/db_update/cluster_communities/kwp_hhblits.tsv"
+  kwp_hhblits_results:  "/vol/cloud/agnostos_test/db_update/cluster_communities/kwp_hhblits.tsv"
   kwp_g_mcl_list:       ""
   kwp_gc:               ""
-  gu_hhblits_results:   "/vol/cloud/db_update/cluster_communities/gu_hhblits.tsv"
+  gu_hhblits_results:   "/vol/cloud/agnostos_test/db_update/cluster_communities/gu_hhblits.tsv"
   gu_g_mcl_list:        ""
   gu_gc:                ""
-  eu_hhblits_results:   "/vol/cloud/db_update/cluster_communities/eu_hhblits.tsv"
+  eu_hhblits_results:   "/vol/cloud/agnostos_test/db_update/cluster_communities/eu_hhblits.tsv"
   eu_g_mcl_list:        ""
   eu_gc:                ""

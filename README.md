@@ -24,7 +24,7 @@ The cluster was build using BiBiGrid and it is using SLURM as Grid Batch Schedul
 
 3.  Check the config files in the [config/](config) folder. Change the programs (binaries) and output paths to your designated folders.
 
-4.  Check that you have the required external DBs listed in the [config.yaml](config/config.yaml) file (in the "databases/" folder). In case you miss some of them, you can find the instructions for the dowload in [download_DBs.sh](util/download_DBs.sh). If you want to download all needed databases simply run `sh download_DBs.sh`.
+4.  Check that you have the required external DBs listed in the [config.yaml](config/config.yaml) file (in the "databases/" folder). In case you miss some of them, you can find the instructions for the dowload in [download_DBs.sh](util/download_DBs.sh). If you want to download all needed databases simply run `sh download_DBs.sh` (be patient this may take a while...).
 
 When everything is set...
 

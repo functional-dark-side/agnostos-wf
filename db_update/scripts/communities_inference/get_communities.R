@@ -661,6 +661,9 @@ best_inflation <- k_partition_stats_eval %>%
 if (length(best_inflation >1 )) {
     best_inflation <- max(best_inflation)
 }
+if (is_empty(best_inflation)) {
+  best_inflation <- 2.0
+}
 msg(paste0("\nOptimal inflation value identified at ", red(best_inflation), "\n\n"))
 
 

@@ -3,16 +3,12 @@
 set -x
 set -e
 
-HHBLITS=${1}
-DB=${2}
-DIR=${3}
-mkdir -p "${DIR}"
 
-perl -ne 'print $_' | "${HHBLITS}" -i stdin -n 2 -v 0 -d "${DB}" -cpu 2 -Z 10000000 -B 10000000 -e 1 -o "${DIR}"/"${MMSEQS_ENTRY_NAME}".hhr
+FILE=$(perl -ne 'print $_')
 
-QLEN=$(grep 'Match_' "${DIR}"/${MMSEQS_ENTRY_NAME}.hhr | awk '{print $2}')
+QLEN=$(grep 'Match_' <(echo "${FILE}") | awk '{print $2}')
 
-sed -n '/No Hit/,/No 1/p' "${DIR}"/"${MMSEQS_ENTRY_NAME}".hhr \
+sed -n '/No Hit/,/No 1/p' <(echo "${FILE}") \
   | grep -v 'No' \
   | sed '/^\s*$/d' | sed 's/[()]/ /g' | tr -s ' ' \
   | awk -v ql="${QLEN}" -v q="${MMSEQS_ENTRY_NAME}" \

@@ -7,13 +7,14 @@ rule cluster_compositional_validation:
         mmseqs_bin = config["mmseqs_bin"],
         famsa_bin = config["famsa_bin"],
         odseq_bin = config["odseq_bin"],
+        leonbis_bin = config["leonbis_bin"],
         parasail_bin = config["parasail_bin"],
         seqtk_bin = config["seqtk_bin"],
         datamash = config["datamash_bin"],
         parallel_bin = config["parallel_bin"],
-        threads_collect = config["threads_collect"],
         igraph_lib = config["igraph_lib"],
         parasail_lib = config["parasail_lib"],
+        threads_collect = config["threads_collect"],
         cvals = config["wdir"] + "/scripts/compositional_validation.sh",
         stats = config["wdir"] + "/scripts/get_stats.r",
         isconnect = config["wdir"] + "/scripts/is_connected",
@@ -54,6 +55,7 @@ rule cluster_compositional_validation:
             -- {params.cvals} --derep {params.mmseqs_bin} \
                        --msa {params.famsa_bin} \
                        --msaeval {params.odseq_bin} \
+                       --msaevall {params.leonbis_bin} \
                        --ssn {params.parasail_bin} \
                        --gfilter {params.filterg} \
                        --gconnect {params.isconnect} \
@@ -66,10 +68,10 @@ rule cluster_compositional_validation:
 
         # Collect results:
         # collect cluster main compositional validation stats and cluster rejected (bad-aligned) ORFs
-        {params.collect} {params.stat_dir} {output.cl_cval} {output.cval_rej} {params.parallel_bin} {params.threads_collect} 2>{log.err} 1>{log.out}
+        {params.collect} {params.stat_dir} {output.cl_cval} {output.cval_rej} {params.parallel_bin} {params.threads_collect} 2>>{log.err} 1>>{log.out}
+
 
         rm -rf {params.outdb} {params.outdb}.index {params.outdb}.dbtype
-
         """
 
 

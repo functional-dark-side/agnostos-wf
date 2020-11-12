@@ -32,10 +32,10 @@ rule cluster_validation_results:
         # Not annotated clusters
         #
         join -11 -21 <(awk '{{print $1,$2}}' {input.cval} | sort -k1,1 --parallel={threads}) \
-          <(awk '!seen[$1]++{{print $1,$2,"noannot",$3}}' {params.cl_noannot} | sort -k1,1 --parallel={threads}) > {params.val_annot}
+          <(awk '!seen[$1]++{{print $1,$2,"noannot",$4}}' {params.cl_noannot} | sort -k1,1 --parallel={threads}) > {params.val_annot}
         # Annotated clusters
         join -11 -21 <(awk '{{print $1,$2}}' {input.cval} | sort -k1,1 --parallel={threads}) \
-          <(awk '!seen[$1]++{{print $1,$2,"annot",$3}}' {params.cl_annot} | sort -k1,1 --parallel={threads} ) >> {params.val_annot}
+          <(awk '!seen[$1]++{{print $1,$2,"annot",$4}}' {params.cl_annot} | sort -k1,1 --parallel={threads} ) >> {params.val_annot}
 
         awk -vOFS='\\t' '{{print $1,$2,$3,$5,$4}}'  {params.val_annot} \
             > {params.tmp} && mv {params.tmp} {params.val_annot}

@@ -17,12 +17,13 @@ if (!is.installed("entropy") || !is.installed("ggridges")) {
   }
 }
 
-library(tidyverse)
 library(data.table)
+library(tidyverse)
 library(maditr)
 library(entropy)
 library(ggridges)
 library(optparse)
+library(parallel)
 
 # Script command line options ---------------------------------------------
 
@@ -31,11 +32,15 @@ option_list <- list(
     type = "character", default = NULL,
     help = "Refined set of clusters", metavar = "character"
   ),
-  make_option(c("-c", "--clu_categ"),
+  make_option(c("-a", "--clu_categ"),
     type = "character", default = NULL,
     help = "Cluster ids-categories", metavar = "character"
   ),
-  make_option(c("-t", "--clu_tax"),
+  make_option(c("-t", "--mmseqs_tax"),
+    type = "character", default = NULL,
+    help = "Cluster taxonomy results", metavar = "character"
+  ),
+  make_option(c("-k", "--kaiju_tax"),
     type = "character", default = NULL,
     help = "Cluster taxonomy results", metavar = "character"
   ),
@@ -69,7 +74,7 @@ opt_parser <- OptionParser(option_list = option_list)
 opt <- parse_args(opt_parser)
 
 if (is.null(opt$ref_clu) | is.null(opt$clu_categ) |
-  is.null(opt$clu_tax) | is.null(opt$clu_dark) |
+  is.null(opt$mmseqs_tax) | is.null(opt$kaiju_tax) | is.null(opt$clu_dark) |
   is.null(opt$dpd_info) | is.null(opt$compl) |
   is.null(opt$hq_clu) | is.null(opt$summ_stats) |
   is.null(opt$output)) {
@@ -99,7 +104,7 @@ ref_clu <- ref_clu %>% dt_inner_join(category)
 # cluster ORF length stats
 clu_stats <- ref_clu %>%
   group_by(cl_name) %>%
-  mutate(size=max(size)) %>% 
+  mutate(size=max(size)) %>%
   mutate(
     min_len = min(length), mean_len = mean(length),
     median_len = median(length), max_len = max(length), sd_len = sd(length)
@@ -230,11 +235,11 @@ cat_compl <- cat_stats %>%
   }
 
 # Cluster taxonomy stats
-cl_tax <- fread(opt$clu_tax,
+cl_mmseqs <- fread(opt$mmseqs_tax,
   stringsAsFactors = F, header = F, fill = T, sep="\t") %>%
   setNames(c("orf", "cl_name", "category", "taxid", "rank", "classific", "lineage"))
 # Filter out the unclassified ones and split the taxonomic levels in the lineage
-cl_tax <- cl_tax %>%
+cl_mmseqs <- cl_mmseqs %>%
   filter(classific != "unclassified") %>%
   mutate(lineage = gsub("-_cellular__organisms;", "", lineage)) %>%
   mutate(
@@ -250,135 +255,68 @@ cl_tax <- cl_tax %>%
                           classific=="Archaea" ~ "Archaea",
                           classific=="Eukaryota" ~ "Eukaryota",
                           classific=="Viruses" ~ "Viruses",
-                          TRUE ~ domain))
+                          TRUE ~ domain)) %>%
+  unite(mmseqs_tax, domain:species,sep=";") %>% select(orf,cl_name,category,mmseqs_tax)
 
-# Taxonomic homogeneity
-homo_tax <- cl_tax %>%
-  select(-orf, -taxid, -classific, -rank, -lineage) %>%
-  group_by(cl_name, category) %>%
-  summarise(
-    homo_d = length(unique(domain[!is.na(domain)])),
-    homo_p = length(unique(phylum[!is.na(phylum)])),
-    homo_o = length(unique(`order`[!is.na(`order`)])),
-    homo_c = length(unique(class[!is.na(class)])),
-    homo_f = length(unique(family[!is.na(family)])),
-    homo_g = length(unique(genus[!is.na(genus)])),
-    homo_s = length(unique(species[!is.na(species)]))
-  )
+cl_kaiju <- fread(opt$kaiju_tax,
+  header = F, fill=T, sep="\t") %>%
+  setNames(c("orf","domain","phylum","class","order","family","genus","species")) %>%
+  unite(kaiju_tax, domain:species,sep=";")
 
-### Plot:
-plot_tax <- gather(homo_tax, ranks, n, homo_p:homo_s) %>%
-  mutate(ranks = case_when(
-    ranks == "homo_p" ~ "Phylum",
-    ranks == "homo_c" ~ "Class",
-    ranks == "homo_o" ~ "Order",
-    ranks == "homo_f" ~ "Family",
-    ranks == "homo_g" ~ "Genus",
-    TRUE ~ "Species"
-  )) %>%
-  mutate(n = as.numeric(n), ranks = as.factor(ranks)) %>%
-  as_tibble()
-plot_tax$category <- factor(as.factor(plot_tax$category), levels = c("K", "KWP", "GU", "EU"))
-plot_tax$ranks <- factor(as.factor(plot_tax$ranks), levels = c("Phylum", "Class", "Order", "Family", "Genus", "Species"))
-# joy_div plot
-taxp <- ggplot(plot_tax %>% filter(n <= 50 & n > 0), aes(y = category, x = n, fill = category)) +
-  geom_density_ridges(scale = 4, bandwidth = .3, alpha = .8, size = .3) +
-  scale_x_continuous(breaks = c(1, 5, 10, 15, 20)) +
-  coord_cartesian(xlim = c(0, 20)) +
-  facet_wrap(. ~ ranks) +
-  scale_fill_manual(values = c("#233B43", "#556c74", "#65ADC2", "#E84646")) + ## 4B636A K
-  theme_light() +
-  xlab("Number of different taxonomies inside each cluster") +
-  ylab("") +
-  theme(
-    axis.text.x = element_text(size = 6),
-    axis.text.y = element_text(size = 6),
-    axis.title.x = element_text(size = 7),
-    legend.text = element_text(size = 6),
-    legend.title = element_blank(),
-    legend.key.size = unit(.39, "cm"),
-    strip.text = element_text(size = 7, colour = "white"),
-    strip.background = element_rect(fill = "#273133")
-  )
-save(taxp, file = paste0(opt$output, "/cluster_category_taxonomy_plot.rda"))
+cl_kaiju <- cl_kaiju %>% dt_left_join(ref_clu %>% select(cl_name,category,orf))
 
-# Calculate cluster taxonomic entropy
-d <- cl_tax %>%
-  group_by(cl_name, category, domain) %>%
-  summarise(n = n()) %>%
-  mutate(df = n / sum(n)) %>%
-  group_by(cl_name, category) %>%
-  mutate(de = entropy.empirical(df, unit = "log2")) %>%
-  select(1, 2, 6) %>%
-  distinct()
-p <- cl_tax %>%
-  group_by(cl_name, category, phylum) %>%
-  summarise(n = n()) %>%
-  mutate(pf = n / sum(n)) %>%
-  group_by(cl_name, category) %>%
-  mutate(pe = entropy.empirical(pf, unit = "log2")) %>%
-  select(1, 2, 6) %>%
-  distinct()
-o <- cl_tax %>%
-  group_by(cl_name, category, order) %>%
-  summarise(n = n()) %>%
-  mutate(of = n / sum(n)) %>%
-  group_by(cl_name, category) %>%
-  mutate(oe = entropy.empirical(of, unit = "log2")) %>%
-  select(1, 2, 6) %>%
-  distinct()
-c <- cl_tax %>%
-  group_by(cl_name, category, class) %>%
-  summarise(n = n()) %>%
-  mutate(cf = n / sum(n)) %>%
-  group_by(cl_name, category) %>%
-  mutate(ce = entropy.empirical(cf, unit = "log2")) %>%
-  select(1, 2, 6) %>%
-  distinct()
-f <- cl_tax %>%
-  group_by(cl_name, category, family) %>%
-  summarise(n = n()) %>%
-  mutate(ff = n / sum(n)) %>%
-  group_by(cl_name, category) %>%
-  mutate(fe = entropy.empirical(ff, unit = "log2")) %>%
-  select(1, 2, 6) %>%
-  distinct()
-g <- cl_tax %>%
-  group_by(cl_name, category, genus) %>%
-  summarise(n = n()) %>%
-  mutate(gf = n / sum(n)) %>%
-  group_by(cl_name, category) %>%
-  mutate(ge = entropy.empirical(gf, unit = "log2")) %>%
-  select(1, 2, 6) %>%
-  distinct()
-s <- cl_tax %>%
-  group_by(cl_name, category, species) %>%
-  summarise(n = n()) %>%
-  mutate(sf = n / sum(n)) %>%
-  group_by(cl_name, category) %>%
-  mutate(se = entropy.empirical(sf, unit = "log2")) %>%
-  select(1, 2, 6) %>%
-  distinct()
-tax_entropy <- d %>%
-  left_join(p) %>%
-  left_join(c) %>%
-  left_join(o) %>%
-  left_join(f) %>%
-  left_join(g) %>%
-  left_join(s)
-rm(d,p, c, o, f, g, s)
-write_tsv(tax_entropy, path = paste0(opt$output, "/cluster_category_taxonomy_entropy.tsv"), col_names = TRUE)
+cluster_taxonomy <- ref_clu %>% select(cl_name,category,orf) %>%
+ dt_left_join(cl_mmseqs %>% select(-category,-cl_name)) %>%
+ dt_left_join(cl_kaiju %>% select(-category,-cl_name))
+write_tsv(cluster_taxonomy,path = paste0(opt$output, "/cluster_category_taxonomies.tsv"), col_names = TRUE)
 
-## Retrieve the prevalent taxa for each cluster
-prev_tax <- cl_tax %>%
-  group_by(cl_name, category, domain, phylum, class, order, family, genus, species) %>%
-  count() %>%
-  ungroup() %>%
-  group_by(cl_name, category) %>%
-  arrange(desc(n)) %>%
-  slice(1) %>%
-  select(-n)
-write_tsv(prev_tax, path = paste0(opt$output, "/cluster_category_prevalent_tax.tsv"), col_names = TRUE)
+# Majority vote functions
+majority_vote <- function (x, seed = 12345) {
+  set.seed(seed)
+  whichMax <- function(x) {
+    m <- seq_along(x)[x == max(x, na.rm = TRUE)]
+    if (length(m) > 1)
+      sample(m, size = 1)
+    else m
+  }
+  x <- as.vector(x)
+  tab <- table(x)
+  m <- whichMax(tab)
+  out <- list(table = tab, ind = m, majority = names(tab)[m])
+  return(out)
+}
+
+apply_majority <- function(X){
+  DT.1 <- X[,majority:=majority_vote(mmseqs_tax)$majority, by="cl_name"]
+  df <- DT.1 %>% as_tibble() %>% distinct()
+}
+
+get_majority <- function(X){
+
+  list_genes <- X %>%                                        # Split into groups by gene-caller-id
+    split(.$cl_name)
+
+  maj_l <- mclapply(list_genes,apply_majority, mc.cores=8) # run majority_vote function
+  maj_df <- plyr::ldply(maj_l, data.frame) %>%  # bind list rowwise and get distint votes for gene category
+    select(cl_name,majority) %>%
+    distinct() %>%
+    as_tibble()
+}
+
+if(dim(cl_mmseqs)[1] > 0) {
+  mmseqs_maj <- get_majority(cl_mmseqs %>% select(cl_name,mmseqs_tax) %>% distinct())
+}
+apply_majority <- function(X){
+  DT.1 <- X[,majority:=majority_vote(kaiju_tax)$majority, by="cl_name"]
+  df <- DT.1 %>% as_tibble() %>% distinct()
+}
+kaiju_maj <- get_majority(cl_kaiju %>% select(cl_name,kaiju_tax) %>% distinct())
+
+if(dim(cl_mmseqs)[1] > 0){
+  clu_majority_tax <- bind_rows(mmseqs_maj %>% mutate(cl_name=as.character(cl_name)),kaiju_maj)
+}else{
+  clu_majority_tax <- kaiju_maj
+}
 
 # Cluster darkness stats
 dpd_res <- fread(opt$clu_dark,
@@ -408,11 +346,10 @@ cat_dark <- dpd_res %>%
 write_tsv(cat_dark, path = paste0(opt$output, "/cluster_category_dpd_perc.tsv"), col_names = TRUE)
 
 ## Cluster general stats
-clu_stats <- clu_stats %>% select(-rep_compl) %>%
-  dt_left_join(tax_entropy %>% ungroup() %>% mutate(cl_name = as.character(cl_name))) %>%
-  dt_left_join(prev_tax %>% ungroup() %>% mutate(cl_name = as.character(cl_name))) %>%
+clu_stats <- clu_stats %>% select(-rep_compl) %>% mutate(cl_name = as.character(cl_name)) %>%
+  dt_left_join(clu_majority_tax %>% ungroup() %>% mutate(cl_name = as.character(cl_name))) %>%
   dt_left_join(cl_dark %>% ungroup() %>% mutate(cl_name = as.character(cl_name))) %>%
-  dt_left_join(HQ_clusters %>% mutate(is.HQ = TRUE)) %>% distinct()
+  dt_left_join(HQ_clusters %>% mutate(is.HQ = TRUE) %>% mutate(cl_name = as.character(cl_name))) %>% distinct()
 write_tsv(clu_stats, path = opt$summ_stats, col_names = TRUE)
 
 ## Category general stats
@@ -420,6 +357,5 @@ cat_stats <- cat_stats %>%
   dt_left_join(cat_compl) %>%
   dt_select(-cl_name, -orf, -rep, -size, -length, -partial) %>%
   distinct() %>%
-  dt_left_join(tax_entropy %>% ungroup() %>% select(-cl_name) %>% group_by(category) %>% summarise_all(sum)) %>%
   dt_left_join(cat_dark)
 write_tsv(cat_stats, path = paste0(opt$output, "/only_category_summary_stats.tsv"), col_names = TRUE)

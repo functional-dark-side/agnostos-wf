@@ -70,7 +70,6 @@ fi
 
 DIR=$(dirname "${RES}")
 queryDB="${DIR}"/query_db
-targetDB="${DIR}"/taxa_db
 taxresDB="${DIR}"/taxres_db
 taxres="${DIR}"/taxres.tsv
 report="${DIR}"/taxres_report
@@ -80,20 +79,11 @@ sed -e 's/\x0//g' "${QUERY}" >"${DIR}"/query.fasta
 # Create query and target DBs
 "${MMSEQS_BIN}" createdb "${DIR}"/query.fasta "${queryDB}"
 
-if [[ ! -e "${targetDB}" ]]; then
-  "${MMSEQS_BIN}" databases "${TAXDB}" "${targetDB}" "${DIR}"/tmp
-  #"${MMSEQS_BIN}" createdb "${DB_FA}" "${targetDB}"
-  # Create a taxadb, the target DB should contain UniProt IDS (This scripts is using the UniProtKB)
-  # The next module will download the Uniprot idmapping and ncbi-taxdump and map the identifier of the seqTaxDB to NCBI taxonomic identifier.
-  # By default, createtaxdb downloads the Uniprot id mapping file (idmapping.dat.gz), and thus only supports Uniprot identifiers.
-  "${MMSEQS_BIN}" createtaxdb "${targetDB}" "${DIR}"/tmp
-fi
-
 # Run the taxonomy search
 # --lca-mode 4 (top-hit, default) -> assigns taxonomic labels based on the lowest common ancestor of all equal scoring top hits
 rm -rf "${DIR}"/taxres*
 
-"${MMSEQS_BIN}" taxonomy "${queryDB}" "${targetDB}" "${taxresDB}" "${DIR}"/tmp --threads "${NSLOTS}" -e 1e-05 --cov-mode 0 -c 0.6  --lca-mode 2 --tax-lineage --mpi-runner "${RUNNER}"
+"${MMSEQS_BIN}" taxonomy "${queryDB}" "${TAXDB}" "${taxresDB}" "${DIR}"/tmp --threads "${NSLOTS}" -e 1e-05 --cov-mode 0 -c 0.6  --lca-mode 2 --tax-lineage --mpi-runner "${RUNNER}"
 
 # Parse the results
 "${MMSEQS_BIN}" createtsv "${queryDB}" "${taxresDB}" "${taxres}" --threads "${NSLOTS}"
@@ -108,4 +98,4 @@ sed -i 's/ /\t/g' "${RES}"
 # Optional: create a taxonomy Kraken-style report that can be visualized using the interactive metagenomics data explorer Pavian
 #"${MMSEQS_BIN}" taxonomyreport "${targetDB}" "${taxresDB}" "${report}" --threads "${NSLOTS}"
 
-rm -rf "${taxresDB}"* "${queryDB}"** "${targetDB}"* "${DIR}"/tmp
+rm -rf "${taxresDB}"* "${queryDB}"* "${DIR}"/tmp

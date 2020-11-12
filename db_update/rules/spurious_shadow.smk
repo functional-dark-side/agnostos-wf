@@ -47,13 +47,18 @@ rule spurious_shadow:
         {params.mpi_runner} {params.hmmer_bin} --mpi --cut_ga -Z "${{N}}" --domtblout {params.hmmout} -o {params.hmmlog} {params.antifamdb} {input.fasta} 2>{log.err} 1>{log.out}
 
         # Parse the results
-        grep -v '^#' {params.hmmout} | \
-            awk '$13<=1e-05 && !seen[$1]++{{print $1}}' > {params.spur}
+        grep -v '^#' {params.hmmout} > {params.spur}.tmp || true > {params.spur}.tmp 2>>{log.err}
+
+        if [[ -s {params.spur}.tmp ]]; then
+            awk '$13<=1e-05 && !seen[$1]++{{print $1}}' {params.spur}.tmp > {params.spur} 2>>{log.err}
+        else
+            mv {params.spur}.tmp {params.spur}
+        fi
 
         # 2. Detection of shadow ORFs
         ./{params.shadowr} --orfs {input.orfs} \
                            --shadows {params.all_shad} \
-                           --threads {threads} 2>{log.err}
+                           --threads {threads} 2>>{log.err}
 
         ## 2.1 Parsing of results adding cluster information
         ## Add cluster info on the first column of ORFs

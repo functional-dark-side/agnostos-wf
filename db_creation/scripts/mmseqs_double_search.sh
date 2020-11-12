@@ -10,7 +10,7 @@ Options:
 --mpi_runner         mpi runner \
 --ltmp               local template folder \
 --cons               query consensus sequences fasta format \
---db_fasta           database sequences fasta format \
+--db_target           database sequences fasta format \
 --db_info            database sequence additional information \
 --evalue_filter      script to filter hitsbased on evalue \
 --evalue_threshold   evalue threshold \
@@ -22,7 +22,7 @@ Options:
   exit 1
 }
 
-OPT_LIST="search:,mpi_runner:,ltmp:,cons:,db_fasta:,db_info:,evalue_filter:,evalue_threshold:,hypo_threshold:,hypo_patterns:,grep:,output:,threads:,outdir:"
+OPT_LIST="search:,mpi_runner:,ltmp:,cons:,db_target:,db_info:,evalue_filter:,evalue_threshold:,hypo_threshold:,hypo_patterns:,grep:,output:,threads:,outdir:"
 
 eval set -- "$(getopt -o '' --long "${OPT_LIST}" -- "$@")"
 while true; do
@@ -43,8 +43,8 @@ while true; do
     CONS=$2
     shift 2
     ;;
-  --db_fasta)
-    DB_FA=$2
+  --db_target)
+    DB=$2
     shift 2
     ;;
   --db_info)
@@ -94,24 +94,17 @@ while true; do
 done
 
 if [ -z "${MMSEQS_BIN}" ] || [ -z "${MPI}" ] || [ -z "${LTMP}" ] || [ -z "${CONS}" ] ||
-  [ -z "${DB_FA}" ] || [ -z "${DB_PROT}" ] || [ -z "${EFILTER}" ] || [ -z "${DIR}" ] ||
+  [ -z "${DB}" ] || [ -z "${DB_PROT}" ] || [ -z "${EFILTER}" ] || [ -z "${DIR}" ] ||
   [ -z "${PATTERNS}" ] || [ -z "${PGREP}" ] || [ -z "${RES}" ]; then
   usage
 fi
 
 queryDB="${DIR}"/cons_db
-targetDB="${DIR}"/$(md5sum <(echo "${DB_FA}") | awk '{print $1}')
 
-# Create query and target DBs
+# Create query MMseqs DB
 "${MMSEQS_BIN}" createdb "${CONS}" "${queryDB}"
 
-if [ ! -f "${targetDB}" ]; then
-  "${MMSEQS_BIN}" createdb "${DB_FA}" "${targetDB}"
-fi
-
-
 res1="${DIR}"/round1_res
-
 
 top1="${DIR}"/top1
 
@@ -131,7 +124,7 @@ aln_2b="${DIR}"/aln_2b
 # First search [round 1]
 mkdir -p "${DIR}"/tmp_hsp1
 
-"${MMSEQS_BIN}" search "${queryDB}" "${targetDB}" "${res1}" "${DIR}"/tmp_hsp1 \
+"${MMSEQS_BIN}" search "${queryDB}" "${DB}" "${res1}" "${DIR}"/tmp_hsp1 \
   --local-tmp "${LTMP}" \
   --max-seqs 300 --threads "${NSLOTS}" -a -e 1e-5 \
   --cov-mode 2 -c 0.6 \
@@ -146,7 +139,7 @@ mkdir -p "${DIR}"/tmp_hsp1
 
 "${MMSEQS_BIN}" createsubdb "${top1}".index "${queryDB}"_h "${top1}"_h
 # Extract aligned regions from target DB
-"${MMSEQS_BIN}" extractalignedregion "${queryDB}" "${targetDB}" \
+"${MMSEQS_BIN}" extractalignedregion "${queryDB}" "${DB}" \
   "${top1}" "${aligned}" --extract-mode 2 --threads "${NSLOTS}"
 
 # Second search [round 2]
@@ -155,7 +148,7 @@ mkdir -p "${DIR}"/tmp_hsp2
 "${MMSEQS_BIN}" createsubdb "${aligned}" "${queryDB}" "${aligned_db}"
 
 #lower e-value?
-"${MMSEQS_BIN}" search "${aligned_db}" "${targetDB}" "${res2}" "${DIR}"/tmp_hsp2 \
+"${MMSEQS_BIN}" search "${aligned_db}" "${DB}" "${res2}" "${DIR}"/tmp_hsp2 \
   --local-tmp "${LTMP}" \
   --max-seqs 300 --threads "${NSLOTS}" -a -e 1e-5 \
   --cov-mode 2 -c 0.6 \
@@ -168,7 +161,7 @@ mkdir -p "${DIR}"/tmp_hsp2
 "${MMSEQS_BIN}" filterdb "${merged}" "${aln_2b}" --beats-first --filter-column 4 --comparison-operator le
 
 #The results can be converted into flat format both with createtsv or convertalis
-"${MMSEQS_BIN}" convertalis "${queryDB}" "${targetDB}" "${aln_2b}" "${RES}" \
+"${MMSEQS_BIN}" convertalis "${queryDB}" "${DB}" "${aln_2b}" "${RES}" \
   --threads "${NSLOTS}" \
   --format-output 'query,target,pident,alnlen,mismatch,gapopen,qstart,qend,tstart,tend,evalue,bits,qcov,tcov'
 
@@ -190,5 +183,5 @@ awk -v P="${HYPO}" 'BEGIN{FS="\t"}{a[$2][$16]++}END{for (i in a) {N=a[i]["hypo"]
 
 awk '{print $2"\t"$1"\t"$11"\t"$15}' "${FOUT}" >"${FP}"
 
-rm -rf "${F}" "${FOUT}" "${queryDB}"* "${targetDB}"* "${merged}"* "${aln_2b}"* "${top1}"* "${res1}"* "${res2}"* "${aligned}"* "${aligned_db}"*
+rm -rf "${F}" "${FOUT}" "${queryDB}"* "${merged}"* "${aln_2b}"* "${top1}"* "${res1}"* "${res2}"* "${aligned}"* "${aligned_db}"*
 rm -rf "${DIR}"/tmp_hsp1 "${DIR}"/tmp_hsp2

@@ -2,8 +2,8 @@
 # In case of sample based data, it should be complemented by a samples.tsv file that contains
 # one row per sample. It can be parsed easily via pandas.
 wdir: "/vol/cloud/agnostos-wf/db_creation"
-rdir: "/vol/cloud/db_creation"
-data: "/vol/cloud/data" # rename your data to match the format "{sample_name}_contigs.fasta"
+rdir: "/vol/cloud/agnostos_test/db_creation"
+data: "/vol/cloud/agnostos_test/db_creation_data" # rename your data to match the format "{sample_name}_contigs.fasta"
 # choose a name for your dataset
 data_name: "tara_039_041"
 
@@ -16,15 +16,15 @@ threads_cat_ref: 4
 pfam_db: "/vol/cloud/agnostos-wf/databases/Pfam-A.hmm"
 pfam_clan: "/vol/cloud/agnostos-wf/databases/Pfam-A.clans.tsv.gz"
 antifam_db: "/vol/cloud/agnostos-wf/databases/AntiFam.hmm"
-uniref90_db: "/vol/cloud/agnostos-wf/databases/uniref90.fasta.gz"
-nr_db: "/vol/cloud/agnostos-wf/databases/nr.fasta.gz"
+uniref90_db: "/vol/cloud/agnostos-wf/databases/uniref90.db"
+nr_db: "/vol/cloud/agnostos-wf/databases/nr.db"
 uniclust_db: "/vol/cloud/agnostos-wf/databases/uniclust30_2018_08/uniclust30_2018_08"
 #uniprot_db: "/vol/cloud/agnostos-wf/databases/uniprotKB.fasta.gz"
 pfam_hh_db: "/vol/cloud/agnostos-wf/databases/pfam"
 DPD: "/vol/cloud/agnostos-wf/databases/dpd_uniprot_sprot.fasta.gz"
 db_dir: "/vol/cloud/agnostos-wf/databases/"
-taxdb: "UniProtKB"
-
+taxdb: "/vol/cloud/agnostos-wf/databases/uniprotKB"
+gtdb_tax: "/vol/cloud/agnostos-wf/databases/gtdb-r89_54k/gtdb-r89_54k.fmi"
 # Files retrieved from the databases
 # List of shared reduced Pfam domain names (dowloadable from Figshare..)
 pfam_shared_terms: "/vol/cloud/agnostos-wf/databases/Pfam-31_names_mod_01122019.tsv"
@@ -39,6 +39,9 @@ local_tmp: "/vol/scratch/tmp"
 
 # MPI runner (de.NBI cloud, SLURM)
 mpi_runner: "srun --mpi=pmi2"
+
+#vmtouch for the DBs
+vmtouch: "vmtouch"
 
 # Gene prediction
 prodigal_bin: "prodigal"
@@ -64,6 +67,7 @@ hmmpress_bin: "/vol/cloud/agnostos-wf/bin/hmmpress"
 datamash_bin: "datamash"
 famsa_bin: "/vol/cloud/agnostos-wf/bin/famsa"
 odseq_bin: "/vol/cloud/agnostos-wf/bin/OD-seq"
+leonbis_bin: "/vol/cloud/agnostos-wf/bin/leon-bis.tcsh"
 parasail_bin: "/vol/cloud/agnostos-wf/bin/parasail_aligner"
 parallel_bin: "parallel"
 get_stats: "/vol/cloud/agnostos-wf/db_creation/scripts/get_stats.r"
@@ -83,6 +87,9 @@ hhblits_bin_mpi: "/vol/cloud/agnostos-wf/bin/hh-suite/bin/hhblits_mpi"
 hhmake: "/vol/cloud/agnostos-wf/bin/hh-suite/bin/hhmake"
 hhblits_prob: 90
 hypo_filt: 1.0
+
+# Taxonomy
+kaiju_bin: "/vol/cloud/agnostos-wf/bin/kaiju"
 
 # Cluster communities
 hhblits_bin: "/vol/cloud/agnostos-wf/bin/hh-suite/bin/hhblits"

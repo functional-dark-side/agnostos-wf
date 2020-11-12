@@ -2,8 +2,8 @@
 # In case of sample based data, it should be complemented by a samples.tsv file that contains
 # one row per sample. It can be parsed easily via pandas.
 wdir: "/vol/cloud/agnostos-wf/db_update"
-rdir: "/vol/cloud/db_update"
-data: "/vol/cloud/data"
+rdir: "/vol/cloud/agnostos_test/db_update"
+data: "/vol/cloud/agnostos_test/db_update_data"
 # choose a name for your dataset
 new_data_name: "tara_038"
 
@@ -12,33 +12,33 @@ conda_env: "/vol/cloud/agnostos-wf/envs/workflow.yml"
 # Setting update to TRUE to run the cluster-update version of the snakemake workflow (otherwise FALSE or empty)
 update: "TRUE"
 # Path to original cluster DB (sequence and cluster DBs)
-ordir: "/vol/cloud/agnostosDB"
+ordir: "/vol/cloud/agnostos_test/db_creation/clusterDB_results" #"/vol/cloud/agnostosDB"
 # Path to the sequences that need to be integrated
 # Formats: name_contigs.fasta or name_genes.fasta
-new_data: "/vol/cloud/data/new_genes.fasta"
+new_data: "/vol/cloud/agnostos_test/db_update_data/TARA_038_SRF_0.1-0.22_5K_contigs.fasta"
 # specify at which stage are your data, can be either "genes" or "contigs"
-new_data_stage: "genes" #"genes" or "contigs"
+new_data_stage: "contigs" #"genes" or "contigs"
 # If you alrady have the gene predictions, please provide path to gene completeness information
-new_data_partial: "/vol/cloud/data/new_genes_partial_info.tsv"
+new_data_partial: "/vol/cloud/agnostos_test/db_update_data/new_genes_partial_info.tsv"
 
 # Threads configuration
 threads_default: 28
 threads_collect: 28
-threads_cat_ref: 4
+threads_cat_ref: 28
 threads_res: 14
 # Databases
 pfam_db: "/vol/cloud/agnostos-wf/databases/Pfam-A.hmm"
 pfam_clan: "/vol/cloud/agnostos-wf/databases/Pfam-A.clans.tsv.gz"
 antifam_db: "/vol/cloud/agnostos-wf/databases/AntiFam.hmm"
-uniref90_db: "/vol/cloud/agnostos-wf/databases/uniref90.fasta.gz"
-nr_db: "/vol/cloud/agnostos-wf/databases/nr.fasta.gz"
+uniref90_db: "/vol/cloud/agnostos-wf/databases/uniref90.db"
+nr_db: "/vol/cloud/agnostos-wf/databases/nr.db"
 uniclust_db: "/vol/cloud/agnostos-wf/databases/uniclust30_2018_08/uniclust30_2018_08"
 #uniprot_db: "/vol/cloud/agnostos-wf/databases/uniprotKB.fasta.gz"
 pfam_hh_db: "/vol/cloud/agnostos-wf/databases/pfam"
 DPD: "/vol/cloud/agnostos-wf/databases/dpd_uniprot_sprot.fasta.gz"
 db_dir: "/vol/cloud/agnostos-wf/databases/"
-taxdb: "UniProtKB"
-
+taxdb: "/vol/cloud/agnostos-wf/databases/uniprotKB"
+gtdb_tax: "/vol/cloud/agnostos-wf/databases/gtdb-r89_54k/gtdb-r89_54k.fmi"
 # Files retrieved from the databases
 # List of shared reduced Pfam domain names (dowloadable from Figshare..)
 pfam_shared_terms: "/vol/cloud/agnostos-wf/databases/Pfam-31_names_mod_01122019.tsv"
@@ -53,6 +53,9 @@ local_tmp: "/vol/scratch/tmp"
 
 # MPI runner (de.NBI cloud, SLURM)
 mpi_runner: "srun --mpi=pmi2"
+
+#vmtouch for the DBs
+vmtouch: "vmtouch"
 
 # Gene prediction
 prodigal_bin: "prodigal"
@@ -78,6 +81,7 @@ hmmpress_bin: "/vol/cloud/agnostos-wf/bin/hmmpress"
 datamash_bin: "datamash"
 famsa_bin: "/vol/cloud/agnostos-wf/bin/famsa"
 odseq_bin: "/vol/cloud/agnostos-wf/bin/OD-seq"
+leonbis_bin: "/vol/cloud/agnostos-wf/bin/leon-bis.tcsh"
 parasail_bin: "/vol/cloud/agnostos-wf/bin/parasail_aligner"
 parallel_bin: "parallel"
 igraph_lib: "export LD_LIBRARY_PATH=/vol/cloud/agnostos-wf/bin/igraph/lib:${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
@@ -94,6 +98,9 @@ hhblits_bin_mpi: "/vol/cloud/agnostos-wf/bin/hh-suite/bin/hhblits_mpi"
 hhmake: "/vol/cloud/agnostos-wf/bin/hh-suite/bin/hhmake"
 hhblits_prob: 90
 hypo_filt: 1.0
+
+# Taxonomy
+kaiju_bin: "/vol/cloud/agnostos-wf/bin/kaiju"
 
 # Cluster communities
 hhblits_bin: "/vol/cloud/agnostos-wf/bin/hh-suite/bin/hhblits"
