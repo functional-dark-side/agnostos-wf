@@ -16,8 +16,11 @@ rule integrated_cluster_db:
         shared = config["rdir"] + "/mmseqs_clustering/cluDB_shared_name_rep_size.tsv",
         new = config["rdir"] + "/mmseqs_clustering/cluDB_new_name_rep_size.tsv",
         clu_info = config["rdir"] + "/mmseqs_clustering/cluDB_info.tsv",
-        tmpl = config["rdir"] + "/integrated_cluster_DB/tmpl",
+        new_orf = config["rdir"] + "/gene_prediction/orf_seqs.txt",
+        tmpl1 = config["rdir"] + "/integrated_cluster_DB/tmpl1",
+        tmpl2 = config["rdir"] + "/integrated_cluster_DB/tmpl2",
         clu_seq = config["rdir"] + "/cluster_categories/refined_clusterDB",
+        clu_gene = config["rdir"] + "/cluster_categories/cluster_ids_categ_genes.tsv.gz",
         sp_sh = config["rdir"] + "/spurious_shadow/spurious_shadow_info.tsv",
         multi_annot = config["rdir"] + "/annot_and_clust/pfam_name_acc_clan_multi.tsv.gz",
         partial = config["rdir"] + "/gene_prediction/orf_partial_info.tsv",
@@ -29,6 +32,7 @@ rule integrated_cluster_db:
         or_dir = config["ordir"],
         or_clu_orig = config["ordir"] + "/cluDB_name_origin_size.tsv.gz",
         or_clu_cat = config["ordir"] + "/cluster_ids_categ.tsv.gz",
+        or_clu_gene = config["ordir"] + "/cluster_ids_categ_genes.tsv.gz",
         or_clu_com = config["ordir"] + "/cluster_communities.tsv.gz",
         or_clu_stats = config["ordir"] + "/cluster_category_summary_stats.tsv.gz",
         or_hq_clu = config["ordir"] + "/HQ_clusters.tsv.gz",
@@ -106,12 +110,23 @@ rule integrated_cluster_db:
         cat {input.clu_cat} <(zcat {params.or_clu_cat}) | gzip > {output.iclu_cat}
 
         # and the cluster genes
-        # join cluster_ids_categ with cluDB_info to get all genes (new ones as well)
-        join -11 -21 <(zcat {output.iclu_cat} | sort -k1,1) \
-         <(awk '{{print $1,$3}}' {params.clu_info} | sort -k1,1 --parallel={threads} -T {params.local_tmp} ) > {params.tmpl}
+        # Download original gene cluster catgeory info
+        if [[ ! -s {params.or_clu_gene} ]]; then
+            wget https://ndownloader.figshare.com/files/24121865 -O {params.or_clu_gene}
+        fi
 
-         sed 's/ /\\t/g' {params.tmpl} | gzip > {params.iclu_gene}
-         rm {params.tmpl}
+        # get the new genes in the good clusters (shared)
+        ### double join, first cluDB.info, then orf_seqs.txt to get the new ones only
+        join -11 -21 <(zcat {output.iclu_cat} | sort -k1,1) \
+         <(awk '{{print $1,$3}}' {params.clu_info} | sort -k1,1 --parallel={threads} -T {params.local_tmp} ) > {params.tmpl1}
+        join -13 -21 <(sort -k3,3 --parallel={threads} -T {params.local_tmp} {params.tmpl1}) \
+            <(sort -k1,1 {params.new_orf}) > {params.tmpl2}
+        # add to original clu genes and new clu genes
+        cat <(awk -vOFS='\\t' '{{print $2,$3,$1}}' {params.tmpl2}) \
+          <(zcat {params.or_clu_gene} | grep -v 'cl_name') > {params.tmpl1}
+        # join cluster_ids_categ with cluDB_info to get all genes (new ones as well)
+        cat {params.tmpl1} <(zcat {params.clu_gene}) | gzip > {params.iclu_gene}
+         rm {params.tmpl1} {params.tmpl2}
 
         # Integrated set of cluster communities
         # to avoid having overlapping communities names, the dataset origin is appended to the name
@@ -119,9 +134,9 @@ rule integrated_cluster_db:
             wget https://ndownloader.figshare.com/files/23067134 -O {params.or_clu_com}
         fi
         cat <(awk -vN={params.data_name} -vOFS='\\t' 'NR>1{{print $1,$2"_"N,$3}}' {input.clu_com} ) \
-         <( awk -vOFS='\\t' 'NR>1{{print $1,$2,$3}}' <(zcat {params.or_clu_com})) > {params.tmpl}
+         <( awk -vOFS='\\t' 'NR>1{{print $1,$2,$3}}' <(zcat {params.or_clu_com})) > {params.tmpl1}
 
-        echo -e "cl_name\tcom\tcategory" | cat - {params.tmpl} | gzip > {output.iclu_com}
+        echo -e "cl_name\tcom\tcategory" | cat - {params.tmpl1} | gzip > {output.iclu_com}
 
         # Integrated cluster summary information
         if [[ ! -s {params.or_clu_stats} ]]; then

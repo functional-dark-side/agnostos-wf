@@ -154,10 +154,11 @@ if(original=="agnostosDB"){
 # Create table with all annotations
 kwp_annot <- fread(opt$kwp_annot, stringsAsFactors = F, header = F) %>%
     select(V1,V4) %>% setNames(c("cl_name","annot"))
-kwp_annot <- kwp_annot %>% dt_filter(!grepl("Unchar|Hypo|hypo|unchar",annot))
+kwp_annot <- kwp_annot %>% dt_filter(!grepl("Unchar|Hypo|hypo|unchar",annot)) %>%
+  mutate(cl_name=as.character(cl_name))
 
 gu_annot <- fread(opt$gu_annot , stringsAsFactors = F, header = F) %>%
-    select(V1,V4) %>% setNames(c("cl_name","annot"))
+    select(V1,V4) %>% setNames(c("cl_name","annot")) %>% mutate(cl_name=as.character(cl_name))
 
 other_annot <- bind_rows(kwp_annot,gu_annot) %>% distinct()
 DB_annot <- DB_info_exp %>% select(cl_name,category,pfam) %>% distinct() %>%

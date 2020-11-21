@@ -50,21 +50,23 @@ rule mmseqs_clustering_results:
         set -e
         set -x
 
+        mkdir -p {params.mmseqs_tmp}
+
         # Create sequences database for the clustering
         # This DB can be accessed with ffindex, to extractt separated fasta files for each cluster and perform operations on them
         # Ex: ffindex_apply_mpi cluseqdb cluseqdb.index -- your_program/script
-        if [[ ! -s {params.cluseqdb}_orig.index ]]; then
-            {params.mmseqs_bin} createseqfiledb {params.seqdb} {params.cludb} {params.cluseqdb}_orig 2>{log.err}
+        if [[ ! -s {params.cluseqdb}.index ]]; then
+            if [[ ! -s {params.cluseqdb}_orig.index ]]; then
+                {params.mmseqs_bin} createseqfiledb {params.seqdb} {params.cludb} {params.cluseqdb}_orig 2>{log.err}
+            fi
+
+            #Check if sequences contain "*", and if yes, clean them
+            {params.mpi_runner} {params.mmseqs_bin} apply \
+                {params.cluseqdb}_orig \
+                {params.cluseqdb}  \
+                --threads {threads} \
+                -- {params.clean_seqs} 2>>{log.err}
         fi
-
-        #Check if sequences contain "*", and if yes, clean them
-
-        {params.mpi_runner} {params.mmseqs_bin} apply \
-            {params.cluseqdb}_orig \
-            {params.cluseqdb}  \
-            --threads {threads} \
-            -- {params.clean_seqs} 2>>{log.err}
-
         # To convert this cluster results tab separated file in wide format (repres member member member ..)
         awk -f {params.awk_wide} {input.clu} > {params.wide} 2>>{log.err}
 
@@ -92,32 +94,32 @@ rule mmseqs_clustering_results:
         # The official cluster names are going to be based on the line number of the wide formatted file
         # We are also going to produce a correspondence file to access the clusters in the MMseqs2 indices
         # Retrieving MMseqs-entry-name and sequence header from the clu_seqDB
-        if [ -s {params.cluseqdb} ]; then
-            {params.mpi_runner} {params.mmseqs_bin} apply {params.cluseqdb} {params.namedb} --threads {threads} -- {params.naming}
-        else
-            {params.mpi_runner} {params.mmseqs_bin} apply {params.cluseqdb}_orig {params.namedb} --threads {threads} -- {params.naming}
-        fi
-        # Join the sequences with the representatives: this way we combine mmseqs-name with cluster-name (row number)
-        join -12 -22 <(sed -e 's/\\x0//' {params.namedb} | sort -k2,2 --parallel={threads} -T {params.local_tmp}) \
-        <(sort -k2,2 --parallel={threads} -T {params.mmseqs_tmp} {params.info1} ) > {params.index} 2>>{log.err}
+        if [[ ! -s {params.index} ]]; then
+            if [ -s {params.cluseqdb} ]; then
+                {params.mpi_runner} {params.mmseqs_bin} apply {params.cluseqdb} {params.namedb} --threads {threads} -- {params.naming}
+            else
+                {params.mpi_runner} {params.mmseqs_bin} apply {params.cluseqdb}_orig {params.namedb} --threads {threads} -- {params.naming}
+            fi
+            # Join the sequences with the representatives: this way we combine mmseqs-name with cluster-name (row number)
+            join -12 -22 <(sed -e 's/\\x0//' {params.namedb} | sort -k2,2 --parallel={threads} -T {params.local_tmp}) \
+            <(sort -k2,2 --parallel={threads} -T {params.mmseqs_tmp} {params.info1} ) > {params.index} 2>>{log.err}
 
-        awk -vOFS='\\t' '!seen[$0]++{{print $2,$3}}' {params.index} > {params.tmp} && mv {params.tmp} {params.index}
+            awk -vOFS='\\t' '!seen[$0]++{{print $2,$3}}' {params.index} > {params.tmp} && mv {params.tmp} {params.index}
+        fi
 
         # Join with the long format cluster file
-        join -11 -22 <(sort --parallel={threads} -T {params.local_tmp} -k1,1 {input.clu} ) \
-            <(sort --parallel={threads} -T {params.local_tmp} -k2,2 {params.info1} ) > {params.tmp} 2>>{log.err}
+        parallel={threads} -T {params.local_tmp} -k1,1 {input.clu} ) \
+            <(sort --parallel={threads} -T {params.local_tmp} -k2,2 {params.info1} ) > {output.clu_info} 2>>{log.err}
 
         # Add length info
         sed -e 's/\\x0//g' {params.cluseqdb} | {params.seqtk_bin} comp | cut -f1,2 > {params.length}
 
         join -11 -22 <(sort -k1,1 --parallel={threads} -T {params.local_tmp} {params.length}) \
-         <(sort -k2,2 --parallel={threads} -T {params.mmseqs_tmp} {params.tmp}) > {output.clu_info} 2>>{log.err}
+         <(sort -k2,2 --parallel={threads} -T {params.mmseqs_tmp} {output.clu_info}) > {params.tmp} 2>>{log.err} 1>>{log.out}
 
         # Reorder fields (cl_name rep orf length size)
-        sort -k4,4n --parallel={threads} -T {params.local_tmp} {output.clu_info} \
-        | awk -vOFS='\\t' '!seen[$0]++{{print $4,$3,$1,$2,$5}}' > {params.tmp} 2>>{log.err}
-
-        mv {params.tmp} {output.clu_info}
+        sort -k4,4n --parallel={threads} -T {params.local_tmp} {params.tmp} | \
+         awk -vOFS='\\t' '!seen[$0]++{{print $4,$3,$1,$2,$5}}' > {output.clu_info} 2>>{log.err} 1>>{log.out}
 
         ## Retrieve the different cluster sets:
         # 1. Only-original clusters: cluDB_original_name_rep_size.tsv
@@ -138,22 +140,23 @@ rule mmseqs_clustering_results:
         <(awk -vFS='\\t' -vOFS='\\t' '$3==1 && $4>1 && !seen[$0]++{{print $1,$2,$4}}' {params.or_new_info} ) > {params.info2}
 
         # Subset cluster-index-name:
-
         join -11 -22 <(awk '{{print $1}}' {params.info2} | sort -k1,1 ) \
         <(sort -k2,2 {params.index}) > {params.tmp}
 
         awk -vOFS='\\t' '!seen[$1,$2]++{{print $2,$1}}' {params.tmp} > {output.new_index}
 
         # And then subset the cluseqDB:
-        if [ -s {params.cluseqdb} ]; then
-            {params.mmseqs_bin} createsubdb <(awk '{{print $1}}' {output.new_index}) \
+        if [[ ! -s {params.new_cluseqdb} ]]; then
+            if [ -s {params.cluseqdb} ]; then
+                {params.mmseqs_bin} createsubdb <(awk '{{print $1}}' {output.new_index}) \
                                             {params.cluseqdb} \
                                             {params.new_cluseqdb} 2>>{log.err}
-            rm {params.cluseqdb}_orig*
-        else
-            {params.mmseqs_bin} createsubdb <(awk '{{print $1}}' {output.new_index}) \
+                rm {params.cluseqdb}_orig*
+            else
+                {params.mmseqs_bin} createsubdb <(awk '{{print $1}}' {output.new_index}) \
                                             {params.cluseqdb}_orig \
                                             {params.new_cluseqdb} 2>>{log.err}
+            fi
         fi
 
         # Subset the clusters based on their size
