@@ -123,7 +123,7 @@ rule integrated_cluster_db:
             <(sort -k1,1 {params.new_orf}) > {params.tmpl2}
         # add to original clu genes and new clu genes
         cat <(awk -vOFS='\\t' '{{print $2,$3,$1}}' {params.tmpl2}) \
-          <(zcat {params.or_clu_gene} | grep -v 'cl_name') > {params.tmpl1}
+          <(zcat {params.or_clu_gene}) > {params.tmpl1}
         # join cluster_ids_categ with cluDB_info to get all genes (new ones as well)
         cat {params.tmpl1} <(zcat {params.clu_gene}) | gzip > {params.iclu_gene}
          rm {params.tmpl1} {params.tmpl2}
