@@ -117,6 +117,25 @@ The results of the creation-mode workflow are structured in folders correspondin
 -   report/
     -   workflow_report.html
 
+##### Folder containing the files necessary for the DB_update module:
+-   clusterDB_results/
+    -   cluDB_name_origin_size.tsv - table with cluster names, their origin and their size.
+    -   cluster_ids_categ.tsv - table with refined cluster names and categories.
+    -   cluster_ids_categ_genes.tsv.gz  - table with refined cluster names, categories and genes.
+    -   cluster_communities.tsv - summary table containing the correspondence cluster-community.
+    -   cluster_category_summary_stats.tsv - summary table containing various information about the clusters.
+    -   pfam_name_acc_clan_multi.tsv.gz - all genes Pfam annotations.
+    -   K/KWP/GU/EU_annotations.tsv.gz - category annotations.
+    -   orf_partial_info.tsv.gz - list of gene headers and their level of completness, based on the Prodigal prediction results.
+    -   HQ_clusters.tsv - set of high quality clusters (clusters with high percentage of complete genes).
+    -   spurious_shadow_info.tsv.gz - summary table with gene quality information.
+    -   mmseqs_profiles/
+            - clu_hmm_db - cluster HMM profiles MMseqs2 database (for profile searches).
+    -   mmseqs_cluseqdb/
+            - clu_seqDB - cluster sequences MMseqs2 database.
+
+    Plus, the mmseqs_clustering/ folder has to be copied here as well, including the cluDB, the seqDB and the file cluDB_name_rep_size.tsv
+
 ### Update-mode
 
 The results structure is the same as the creation-mode one (the clusters processed through the workflow steps are those not found in the original DB), plus a folder containing the cluster-update summary results (derived from the merging of the new with the original clusterDB):
@@ -136,6 +155,20 @@ The results structure is the same as the creation-mode one (the clusters process
         -   clu_hmm_db - cluster HMM profiles MMseqs2 database (for profile searches).
     -   mmseqs_cluseqdb/
         -   clu_seqDB - cluster sequences MMseqs2 database.
+Tables summarasing the results and eventually the cluster contextual data
+
+-   output_tables/
+    -   contig_genes.tsv - genome - contig - gene ids
+    -   DB_cluster_annotations.tsv - summary of K, KWP and GU annotations per cluster
+    -   DB_genes_clusters_communities.tsv - gene - cluster - category - community
+    -   DB_genes_summary_info_red.tsv - reduced set of information per cluster
+    -   DB_genes_summary_info_exp.tsv - expanded set of information per cluster
+    Contextual data (if the pre-existing DB ir or originates from the agnostosDB):
+    -   DB_clusters_niche_breadth.tsv - clusters with significant niche breadth values in metagenomes
+    -   DB_lineage_specific_clusters.tsv - linege-specific clusters within the GTDB phylogeney
+    -   DB_mutant_phenotype_clusters.tsv - clusters with mutant phenotype (Proce et al. 2018)
+    -   DB_clusters_in_metagenomes.tsv
+    -   DB_clusters_in_gtdb_genomes.tsv
 
 The cluster-update results in the form of MMseqs2 databases are stored in the "mmseqs_clustering/" folder.
 

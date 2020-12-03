@@ -46,6 +46,12 @@ cd db_update/
 snakemake -s Snakefile --use-conda -j 100 --cluster-config config/cluster.yaml --cluster "sbatch --export=ALL -t {cluster.time} -c {threads} --ntasks-per-node {cluster.ntasks_per_node} --nodes {cluster.nodes} --cpus-per-task {cluster.cpus_per_task} --job-name {rulename}.{jobid} --partition {cluster.partition}" -R --until workflow_report
 ```
 
+NB:  If you want to run the DB-update module on the results of the DB-creation module, first copy/move the cluster database in the final DB-update results:
+
+```{bash}
+mv db_creation/mmseqs_clustering db_creation/clusterDB_results/
+```
+
 <br>
 
 **Output**
