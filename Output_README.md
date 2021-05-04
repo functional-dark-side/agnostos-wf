@@ -163,7 +163,27 @@ Tables summarasing the results and eventually the cluster contextual data
     -   DB_genes_clusters_communities.tsv - gene - cluster - category - community
     -   DB_genes_summary_info_red.tsv - reduced set of information per cluster
     -   DB_genes_summary_info_exp.tsv - expanded set of information per cluster
-    Contextual data (if the pre-existing DB ir or originates from the agnostosDB):
+    Contextual data (if the pre-existing DB is or originates from the agnostosDB)
+        Fields:
+        -  cl_name - cluster identifier
+        -  gene - gene identifier
+        -  contig - contig identifier
+        -  gene_x_contig - numner of genes per contig
+        -  db - database of origin (agnostosDB, new, etc..)
+        -  size - number of genes per cluster
+        -  category - AGNOSTOS GC category
+        -  is.HQ - Logic (TRUE if the GC is high-quality)
+        -  is.LS - Logic (TRUE if the GC is lineage-specific)
+        -  lowest_rank - lineage-secific taxonomic rank
+        -  lowest_level - lineage-secific taxonomic level
+        -  mg_project - TARA/GOS/OSD/Malaspina/HMP
+        -  norfs - number of metagenomic orfs per project
+        -  coverage - coverage of orfs per project
+        -  niche_breadth_sign - Levin's niche breadth distribution
+        -  observed - Levin's niche breadth analysis - in the samples
+        -  mean_proportion - Levin's niche breadth analysis - in the samples
+        -  pfam - GC pfam domain annotation, in the form of domain architectures (domains separated by "|")
+        -  gene_caller_id - optional in case you renamed the sequences from anvi'o
     -   DB_clusters_niche_breadth.tsv - clusters with significant niche breadth values in metagenomes
     -   DB_lineage_specific_clusters.tsv - linege-specific clusters within the GTDB phylogeney
     -   DB_mutant_phenotype_clusters.tsv - clusters with mutant phenotype (Proce et al. 2018)
