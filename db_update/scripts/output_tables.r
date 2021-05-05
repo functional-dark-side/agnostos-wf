@@ -167,8 +167,9 @@ write.table(DB_annot,paste0(dir,"/DB_cluster_annotations.tsv"), col.names = T, r
 
 DB_info_exp <- DB_info_exp %>%
     distinct() %>%
-    dt_left_join(DB_info_ls %>% mutate(is.LS=T) %>% select(cl_name,is.LS,lowest_rank,lowest_level) %>% distinct()) %>%
+    dt_left_join(DB_info_ls) %>%
     dt_left_join(DB_info_nb %>% select(cl_name,niche_breadth_sign)) %>%
+    mutate(is.LS=ifelse(is.na(is.LS),F,T)) %>%
     select(gene_callers_id,cl_name,contig,gene_x_contig,cl_size,category,pfam,is.HQ,is.LS,lowest_rank,lowest_level,niche_breadth_sign)
 
 write.table(DB_info_exp,paste0(dir,"/DB_genes_summary_info_exp.tsv"), col.names = T, row.names = F, sep="\t",quote = F)
