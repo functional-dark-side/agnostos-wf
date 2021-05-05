@@ -108,8 +108,6 @@ DB_info_exp <- DB_info_exp %>%
     distinct() %>% mutate(is.HQ=ifelse(is.na(is.HQ),FALSE,is.HQ)) %>%
     rename(cl_size=size)
 
-write.table(DB_info_exp,paste0(dir,"/DB_genes_summary_info_exp.tsv"), col.names = T, row.names = F, sep="\t",quote = F)
-
 # If the original GC database is the agnostosDB add the contextual data
 original <- basename(opt$orig_db)
 
@@ -165,3 +163,12 @@ DB_annot <- DB_info_exp %>% select(cl_name,category,pfam) %>% distinct() %>%
         dt_left_join(other_annot %>% mutate(cl_name=as.character(cl_name)) %>% rename(other_annot=annot)) %>%
         distinct()
 write.table(DB_annot,paste0(dir,"/DB_cluster_annotations.tsv"), col.names = T, row.names = F, sep="\t",quote = F)
+
+
+DB_info_exp <- DB_info_exp %>%
+    distinct() %>%
+    dt_left_join(DB_info_ls %>% mutate(is.LS=T) %>% select(cl_name,is.LS,lowest_rank,lowest_level) %>% distinct()) %>%
+    dt_left_join(DB_info_nb %>% select(cl_name,niche_breadth_sign)) %>%
+    select(gene_callers_id,cl_name,contig,gene_x_contig,cl_size,category,pfam,is.HQ,is.LS,lowest_rank,lowest_level,niche_breadth_sign)
+
+write.table(DB_info_exp,paste0(dir,"/DB_genes_summary_info_exp.tsv"), col.names = T, row.names = F, sep="\t",quote = F)
