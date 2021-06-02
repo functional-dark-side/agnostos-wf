@@ -1,6 +1,6 @@
 ## Installation and usage notes: setting up AGNOSTOS
 
-The AGNOSTOS workflow DB-creation and DB-update modules were developed and tested in an HPC cluster setup with at least 4 nodes of 28 cores and 252 G of memory each, which uses [SLURM](https://slurm.schedmd.com/documentation.html) as Grid Batch Scheduler.
+The AGNOSTOS workflow **DB-creation** and **DB-update modules** were developed and tested in an HPC cluster setup with at least 4 nodes of 28 cores and 252 G of memory each, which uses [SLURM](https://slurm.schedmd.com/documentation.html) as Grid Batch Scheduler.
 To run one of these two modules follow the next stps:
 
 1.  Clone the repository: `git clone https://github.com/functional-dark-side/agnostos-wf` and `cd agnostos-wf/`
@@ -10,7 +10,7 @@ To run one of these two modules follow the next stps:
 
 3.  **Check the configuration files (.yaml)** in the [config/](db_update/config) folders of the different modules. To change the programs (binaries) and output paths to your designated folders you can use the following commands:
 
-(Example for the DB-update module)
+(Example for the **DB-update module**)
 
 ```{bash}
 # workflow directory
@@ -54,14 +54,14 @@ new_data_partial: "/vol/cloud/agnostos_test/db_update_data/new_genes_partial_inf
 
 When everything is set you can run AGNOSTOS as follow:
 
-(Example for the DB-update module)
+(Example for the **DB-update module**)
 
 ```{bash}
 cd db_update/
 snakemake -s Snakefile --use-conda -j 100 --cluster-config config/cluster.yaml --cluster "sbatch --export=ALL -t {cluster.time} -c {threads} --ntasks-per-node {cluster.ntasks_per_node} --nodes {cluster.nodes} --cpus-per-task {cluster.cpus_per_task} --job-name {rulename}.{jobid} --partition {cluster.partition}" -R --until workflow_report
 ```
 
-The profile-search module does not require an HPC environment and can be run on a local computer following the steps below and installing [MMseqs2](https://github.com/soedinglab/MMseqs2) in case you don't have it yet:
+The **profile-search module** does not require an HPC environment and can be run on a local computer following the steps below and installing [MMseqs2](https://github.com/soedinglab/MMseqs2) in case you don't have it yet:
 
 
 ```{bash}
