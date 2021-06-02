@@ -27,7 +27,7 @@ sed -i 's|/vol/cloud/agnostos_test/db_update|/your/results/path|g' db_update/con
 # the directory of the existing GC database
 sed -i 's|/vol/cloud/agnostosDB|/your/GC_DB/path|g' db_update/config/config.yaml
 
-# the directory to the external database
+# the directory to the external databases
 sed -i 's|/vol/cloud/agnostos-wf/databases|/your/external_database/path|g' db_update/config/config.yaml
 sed -i 's|/vol/cloud/agnostos-wf/databases|/your/external_database/path|g' db_update/config/config_communities.yaml
 
@@ -72,5 +72,6 @@ tar -xzvf mmseqs_profiles.tar.gz
 # download the AGNOSTOS seed database gene cluster categories
 wget https://ndownloader.figshare.com/files/23067140 -O cluster_ids_categ.tsv
 
+# Run the sequence-profile search
 Profile_search/profile_search.sh --query your-genes.fasta --clu_hmm mmseqs_profiles/clu_hmm_db --clu_cat cluster_ids_categ.tsv --mmseqs /path/to/mmseqs --threads 8
 ```
