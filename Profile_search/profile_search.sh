@@ -10,9 +10,10 @@ Options:
 --clu_cat        cluster categories table \
 --info             genes additional information \
 --mmseqs           location of mmseqs binary \
+--mpi              logic, default is FALSE \
 --threads          number of threads to use" 1>&2; exit 1; }
 
-OPT_LIST="query:,clu_hmm:,clu_cat:,info:,mmseqs:,threads:"
+OPT_LIST="query:,clu_hmm:,clu_cat:,info:,mmseqs:,mpi:,threads:"
 
 eval set -- $(getopt -o '' --long "${OPT_LIST}" -- "$@")
 while true; do
@@ -27,6 +28,8 @@ while true; do
       INFO=$2; shift 2 ;;
     --mmseqs)
       MMSEQS_BIN=$2; shift 2 ;;
+    --mpi)
+      MPI=$2; shift 2 ;;
     --threads)
       NSLOTS=$2; shift 2 ;;
     --)
@@ -36,11 +39,13 @@ while true; do
   esac
 done
 
-if [ -z "${QUERY}" ] ; then
+if [ -z "${QUERY}" ] || [ -z "${CLHMM}" ] || [ -z "${CLCAT}" ]; then
   usage
 fi
 
 MMSEQS_BIN=${MMSEQS_BIN:=~/opt/MMseqs2/bin/mmseqs}
+
+MPI=${MPI:=FALSE}
 
 # Fixed variables
 MPI="srun --mpi=pmi2"
@@ -60,16 +65,21 @@ QUERY_DB="${OUTDIR}"/"${NAME}"_db
 # Decide to use mpi search based on the number of query sequences:
 NSEQS=$(grep -c '^>' "${QUERY}")
 
-if [[ ${NSEQS} -ge 10000 ]]; then
-  # Sequernce-profile search against the Cluster HMM profiles
-  sbatch --ntasks-per-node 1 --wait \
-    --nodes 9 --cpus-per-task 28 \
-    --job-name profs --partition nomaster \
-    --wrap " ${MMSEQS_BIN} search ${QUERY_DB} ${CLHMM} ${OUTDIR}/${NAME}_vs_mg_gtdb_hmm_db ${OUTDIR}/tmp \
-    --local-tmp ${LTMP} \
-    --threads ${NSLOTS} -e 1e-20 --cov-mode 2 -c 0.6 \
-    --split-mode 0 --split-memory-limit 150G \
-    --mpi-runner \"${MPI}\" "
+if [[ ${NSEQS} -ge 100000 ]]; then
+  if [[ ${MPI}=="mpi" ]]; then
+    # Sequernce-profile search against the Cluster HMM profiles
+    sbatch --ntasks-per-node 1 --wait \
+      --nodes 9 --cpus-per-task 28 \
+      --job-name profs --partition nomaster \
+      --wrap " ${MMSEQS_BIN} search ${QUERY_DB} ${CLHMM} ${OUTDIR}/${NAME}_vs_mg_gtdb_hmm_db ${OUTDIR}/tmp \
+      --local-tmp ${LTMP} \
+      --threads ${NSLOTS} -e 1e-20 --cov-mode 2 -c 0.6 \
+      --split-mode 0 --split-memory-limit 150G \
+      --mpi-runner \"${MPI}\" "
+  else
+    "${MMSEQS_BIN}" search "${QUERY_DB}" "${CLHMM}" "${OUTDIR}"/"${NAME}"_vs_mg_gtdb_hmm_db "${OUTDIR}"/tmp\
+      --threads "${NSLOTS}" -e 1e-20 --cov-mode 2 -c 0.6
+  fi
 else
   # Sequernce-profile search against the Cluster HMM profiles
   "${MMSEQS_BIN}" search "${QUERY_DB}" "${CLHMM}" "${OUTDIR}"/"${NAME}"_vs_mg_gtdb_hmm_db "${OUTDIR}"/tmp\

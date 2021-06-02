@@ -81,7 +81,7 @@ tar -xzvf mmseqs_profiles.tar.gz
 wget https://ndownloader.figshare.com/files/23067140 -O cluster_ids_categ.tsv.gz
 gunzip cluster_ids_categ.tsv.gz
 
-Profile_search/profile_search.sh --query your-genes.fasta --clu_hmm mmseqs_profiles/clu_hmm_db --clu_cat cluster_ids_categ.tsv --mmseqs /path/to/mmseqs --threads 8
+Profile_search/profile_search.sh --query your-genes.fasta --clu_hmm mmseqs_profiles/clu_hmm_db --clu_cat cluster_ids_categ.tsv --mmseqs /path/to/mmseqs --mpi FALSE --threads 8
 ```
 
 As additional option you can specify an additional file using "--info". This file should be a table with the correspondence of the genes to the contigs and genomes/MAGs or samples. The format should be gene - contig - genome (or sample_ID) etc.
