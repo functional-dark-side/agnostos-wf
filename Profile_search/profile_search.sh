@@ -10,7 +10,7 @@ Options:
 --clu_cat        cluster categories table \
 --info             genes additional information \
 --mmseqs           location of mmseqs binary \
-  --threads          number of threads to use" 1>&2; exit 1; }
+--threads          number of threads to use" 1>&2; exit 1; }
 
 OPT_LIST="query:,clu_hmm:,clu_cat:,info:,mmseqs:,threads:"
 

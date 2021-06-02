@@ -57,7 +57,6 @@ get_majority <- function(X){
 }
 
 # Arguments from terminal: tsv-table with seaerch results
-
 args = commandArgs(trailingOnly=TRUE)
 
 res=basename(args[1])
@@ -73,26 +72,27 @@ votes <- get_majority(efilters)
 # Summary of consensus categories
 df_summ <- efilters %>% left_join(votes) %>% group_by(gene) %>%
   arrange(evalue, desc(qcov),desc(tcov)) %>% mutate(is_best=ifelse(row_number()==1,TRUE,FALSE)) %>%
-  select(gene,majority,cl_name,category,is_best)
+  select(gene,majority,cl_name,category,is_best,evalue)
 #write.table(df_summ,paste(getwd(),"/",res,"_summary.tsv",sep=""), col.names = T, row.names = F, quote = F, sep = "\t")
-df_best <- df_summ %>% filter(is_best==TRUE) %>% select(-is_best,-category) %>% rename(category=majority)
+df_best <- df_summ %>% filter(is_best==TRUE) %>% select(-is_best,-category) %>% rename(category=majority) %>%
+  mutate(gene_callers_id=gsub(".*_","",gene) %>% select(gene,cl_name,category,evalue)
 write.table(df_best,paste(dir,"/",res,"_best-hits.tsv",sep=""), col.names = T, row.names = F, quote = F, sep = "\t")
 
 # Join with info about genomes/MAGs
 # Must be a table with the corrispondence of the genes to the contigs (and in case also to the genomes/MAGs)
 #The format should be gene - genome (or sample_ID) etc..
-info <- fread(args[2], stringsAsFactors = F, header = T) %>%
-setNames(c("gene","sample"))
+#info <- fread(args[2], stringsAsFactors = F, header = T) %>%
+#setNames(c("gene","sample"))
 
-info <- info %>% group_by(sample) %>% add_count() %>%
-  rename(total_ngenes=n) %>% ungroup()
+#info <- info %>% group_by(sample) %>% add_count() %>%
+#  rename(total_ngenes=n) %>% ungroup()
 
-res_info_class <- df_best %>% left_join(info,by="gene") %>%
-  mutate(class=case_when(grepl('U',category) ~ "Unknown",
-                         TRUE ~ "Known")) %>%
-  group_by(sample, total_ngenes, class) %>% count()
-write.table(res_info_class,paste0(dir,"/",res,"_summary-classes.tsv"), col.names = T, row.names = F, quote = F, sep = "\t")
+#res_info_class <- df_best %>% left_join(info,by="gene") %>%
+#  mutate(class=case_when(grepl('U',category) ~ "Unknown",
+#                         TRUE ~ "Known")) %>%
+#  group_by(sample, total_ngenes, class) %>% count()
+#write.table(res_info_class,paste0(dir,"/",res,"_summary-classes.tsv"), col.names = T, row.names = F, quote = F, sep = "\t")
 
-res_info_categ <- df_best %>% left_join(info,by="gene") %>%
-  group_by(sample, total_ngenes, category) %>% count()
-write.table(res_info_categ,paste0(dir,"/",res,"_summary-categ.tsv"), col.names = T, row.names = F, quote = F, sep = "\t")
+#res_info_categ <- df_best %>% left_join(info,by="gene") %>%
+#  group_by(sample, total_ngenes, category) %>% count()
+#write.table(res_info_categ,paste0(dir,"/",res,"_summary-categ.tsv"), col.names = T, row.names = F, quote = F, sep = "\t")
