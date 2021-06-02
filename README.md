@@ -73,7 +73,14 @@ The scripts can be found in the [Profile_search/](Profile_search) folder.
 To run the search you just need the following command:
 
 ```{bash}
-Profile_search/profile_search.sh --query your-genes.fasta --clu_hmm clu_hmm_db --clu_cat cluster_ids_categ.tsv --mmseqs /path/to/mmseqs --threads 8
+# download the AGNOSTOS seed database gene cluster profiles
+wget https://ndownloader.figshare.com/files/23066963 -O mmseqs_profiles.tar.gz
+tar -xzvf mmseqs_profiles.tar.gz
+
+# download the AGNOSTOS seed database gene cluster categories
+wget https://ndownloader.figshare.com/files/23067140 -O cluster_ids_categ.tsv
+
+Profile_search/profile_search.sh --query your-genes.fasta --clu_hmm mmseqs_profiles/clu_hmm_db --clu_cat cluster_ids_categ.tsv --mmseqs /path/to/mmseqs --threads 8
 ```
 
 As additional option you can specify an additional file using "--info". This file should be a table with the correspondence of the genes to the contigs and genomes/MAGs or samples. The format should be gene - contig - genome (or sample_ID) etc.

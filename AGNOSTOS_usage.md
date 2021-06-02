@@ -16,17 +16,22 @@ To run one of these two modules follow the next stps:
 # workflow directory
 sed -i 's|vol/cloud/agnostos-wf/db_update|/your/wotkflow/path|g' db_update/config/config.yaml
 sed -i 's|vol/cloud/agnostos-wf/db_update|/your/wotkflow/path|g' db_update/config/config_communities.yaml
+
 # your data directory
 sed -i 's|/vol/cloud/agnostos_test/db_update_data|/your/data/path|g' db_update/config/config.yaml
+
 # your results directory
 sed -i 's|/vol/cloud/agnostos_test/db_update|/your/results/path|g' db_update/config/config.yaml
 sed -i 's|/vol/cloud/agnostos_test/db_update|/your/results/path|g' db_update/config/config_communities.yaml
+
 # the directory of the existing GC database
 sed -i 's|/vol/cloud/agnostosDB|/your/GC_DB/path|g' db_update/config/config.yaml
+
 # the directory to the external database
 sed -i 's|/vol/cloud/agnostos-wf/databases|/your/external_database/path|g' db_update/config/config.yaml
 sed -i 's|/vol/cloud/agnostos-wf/databases|/your/external_database/path|g' db_update/config/config_communities.yaml
-# OPRTIONAL: the directory to the binaries needed by the workflow,
+
+# OPTIONAL: the directory to the binaries needed by the workflow,
 # by default in the workflow folder under the directory bin/
 sed -i 's|/vol/cloud/agnostos-wf/bin/|/your/binaries/path|g' db_update/config/config.yaml
 ```
@@ -35,8 +40,10 @@ Additionally you will have to specify if your data consitis of contigs ("contigs
 ```{yaml}
 # Gene or contig file
 new_data: "/your/data/path/your_genes.fasta"
+
 # specify at which stage are your data, can be either "genes" or "contigs"
 new_data_stage: "genes" #"contigs" or "genes" or "anvio_genes"
+
 # If you alrady have the gene predictions, please provide path to gene completeness information
 ## In case your data comes from an Anvi'o contigDB, please specify here the anvio gene_calls.tsv file,
 ## retrieved via "anvi-export-gene-calls -c CONTIGS.db -o anvio_gene_calls.tsv"
@@ -59,9 +66,11 @@ The profile-search module does not require an HPC environment and can be run on 
 
 ```{bash}
 # download the AGNOSTOS seed database gene cluster profiles
-wget https://ndownloader.figshare.com/files/23066963 -O mmseqs_profiles
+wget https://ndownloader.figshare.com/files/23066963 -O mmseqs_profiles.tar.gz
+tar -xzvf mmseqs_profiles.tar.gz
+
 # download the AGNOSTOS seed database gene cluster categories
 wget https://ndownloader.figshare.com/files/23067140 -O cluster_ids_categ.tsv
 
-Profile_search/profile_search.sh --query your-genes.fasta --clu_hmm clu_hmm_db --clu_cat cluster_ids_categ.tsv --mmseqs /path/to/mmseqs --threads 8
+Profile_search/profile_search.sh --query your-genes.fasta --clu_hmm mmseqs_profiles/clu_hmm_db --clu_cat cluster_ids_categ.tsv --mmseqs /path/to/mmseqs --threads 8
 ```
