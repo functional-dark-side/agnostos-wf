@@ -17,9 +17,12 @@ ordir: "/vol/cloud/agnostosDB"
 # Formats: name_contigs.fasta or name_genes.fasta
 new_data: "/vol/cloud/agnostos_test/db_update_data/TARA_038_SRF_0.1-0.22_5K_contigs.fasta"
 # specify at which stage are your data, can be either "genes" or "contigs"
-new_data_stage: "contigs" #"genes" or "contigs"
+new_data_stage: "contigs" #"contigs" or "genes" or "anvio_genes"
 # If you alrady have the gene predictions, please provide path to gene completeness information
+## In case your data comes from an Anvi'o contigDB, please specify here the anvio gene_calls.tsv file,
+## retrieved via "anvi-export-gene-calls -c CONTIGS.db -o anvio_gene_calls.tsv"
 new_data_partial: "/vol/cloud/agnostos_test/db_update_data/new_genes_partial_info.tsv"
+#
 
 # Threads configuration
 threads_default: 28
