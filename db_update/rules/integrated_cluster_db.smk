@@ -116,7 +116,7 @@ rule integrated_cluster_db:
         fi
 
         # get the new genes in the good clusters (shared)
-        ### double join, first cluDB.info, then orf_seqs.txt to get the new ones only
+        ### double join, first cluDB_info, then orf_seqs.txt to get the new ones only
         join -11 -21 <(zcat {output.iclu_cat} | sort -k1,1) \
          <(awk '{{print $1,$3}}' {params.clu_info} | sort -k1,1 --parallel={threads} -T {params.local_tmp} ) > {params.tmpl1}
         join -13 -21 <(sort -k3,3 --parallel={threads} -T {params.local_tmp} {params.tmpl1}) \

@@ -45,6 +45,14 @@ rule gene_prediction:
 
             cp {params.new_data_partial} {output.partial}
 
+        elif [[ {params.stage} = "anvio_genes" ]]; then
+
+            cp {input.contigs} {output.fa}
+
+            grep '^>' {output.fa} | sed "s/^>//" > {output.orfs}
+
+            awk -vOFS="\\t" 'NR>1{{if($6==0) print $1,"00"; else print $1,"11";}' {params.new_data_partial} > {output.partial}
+
         fi
 
         """

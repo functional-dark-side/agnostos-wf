@@ -94,4 +94,7 @@ gzip "${OUTDIR}"/"${NAME}"_vs_mg_gtdb_hmm_search_res.tsv
 
 # Parse results to get best-hits and category proportions per sample (or genome or contig..)
 # NB: the info file should have the following format: <gene> <sample> (or <genome>, or <contig>)
-Rscript --vanilla "${MVOTE}" "${OUTDIR}"/"${NAME}"_vs_mg_gtdb_hmm_search_res.tsv.gz "${INFO}"
+"${MVOTE}"  --res "${OUTDIR}"/"${NAME}"_vs_mg_gtdb_hmm_search_res.tsv.gz \
+            --info "${INFO}" \
+
+#Rscript --vanilla "${MVOTE}" "${OUTDIR}"/"${NAME}"_vs_mg_gtdb_hmm_search_res.tsv.gz "${INFO}"

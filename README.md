@@ -16,17 +16,7 @@ The "agnostos-wf" snakemake workflow was developed using/runs in the de.NBI Clou
 We used a cluster setup with 10 nodes of 28 cores and 252 G of memory each.
 The cluster was build using BiBiGrid and it is using SLURM as Grid Batch Scheduler.
 
-#### Before running it:
-
-1.  Clone the repository: `git clone https://github.com/functional-dark-side/agnostos-wf` and `cd agnostos-wf/`
-
-2.  Run the installation script [installation_script.sh](util/installation_script.sh) (`sh installation_script.sh`).
-
-3.  Check the config files in the [config/](config) folder. Change the programs (binaries) and output paths to your designated folders.
-
-4.  Check that you have the required external DBs listed in the [config.yaml](config/config.yaml) file (in the "databases/" folder). In case you miss some of them, you can find the instructions for the dowload in [download_DBs.sh](util/download_DBs.sh). If you want to download all needed databases simply run `sh download_DBs.sh` (be patient this may take a while...).
-
-When everything is set...
+#### Before running AGNOSTOS check the [usage file](AGNOSTOS_usage) to set it up on your computer!
 
 ### Run the workflow:
 
@@ -39,14 +29,14 @@ snakemake --use-conda -j 100 --cluster-config config/cluster.yaml --cluster "sba
 
 **2.  DB-Update module**: Add your genomic/metagenomic contigs or genes to the agnostosDB dataset is stored in Figshare (https://doi.org/10.6084/m9.figshare.12459056) and publicy available for download. In case you cannot download the whole dataset, seen to the large size of many of the files, the workflow will download the necessary files for each step and it will then remove them. A description of the agnostosDB files can be found in the [AgnostosDB_README.md](AgnostosDB_README.md).
 
--   The DB-update workflow is in the [db_update/](db_update) folder. To run it, you just need to enter the folder, modify the [config.yaml](db_update/config/config.yaml) and [config_communities.yml](db_update/config/config_communities.yml) files specifying your input data and the output paths, and then run the command:
+-   The DB-update workflow is in the [db_update/](db_update) folder. To run it, you just need to enter the folder, modify the [config.yaml](db_update/config/config.yaml) and [config_communities.yml](db_update/config/config_communities.yml) files specifying your input data and the output paths (see [usage file](AGNOSTOS_usage)), and then run the command:
 
 ```{bash}
 cd db_update/
 snakemake -s Snakefile --use-conda -j 100 --cluster-config config/cluster.yaml --cluster "sbatch --export=ALL -t {cluster.time} -c {threads} --ntasks-per-node {cluster.ntasks_per_node} --nodes {cluster.nodes} --cpus-per-task {cluster.cpus_per_task} --job-name {rulename}.{jobid} --partition {cluster.partition}" -R --until workflow_report
 ```
 
-NB:  If you want to run the DB-update module on the results of the DB-creation module, first copy/move the cluster database in the final DB-update results:
+NB:  If you want to run the DB-update module on the results of the DB-creation module, first copy or move the cluster database in the final DB-update results:
 
 ```{bash}
 mv db_creation/mmseqs_clustering db_creation/clusterDB_results/
@@ -78,15 +68,15 @@ A brief description of the dataset is available on Figshare.
 
 <br>
 
-**Profile-search**: the profile-search vs the AgnostosDB cluster HMM profiles database is not part of the Snakemake workflow. However, if you want to search your set of genes against our profiles you just need to dowload the profile DB from [here](https://ndownloader.figshare.com/files/23066963).
+**Profile-search**: the profile-search vs the AgnostosDB cluster HMM profiles database is not part of the Snakemake workflow. However, if you want to search your set of genes against our profiles you just need to dowload the AGNOSTOS [gene cluster profiles](https://ndownloader.figshare.com/files/23066963) and the [gene cluster categories](https://ndownloader.figshare.com/files/23067140) and make sure you have [MMseqs2](https://github.com/soedinglab/MMseqs2) installed.
 The scripts can be found in the [Profile_search/](Profile_search) folder.
 To run the search you just need the following command:
 
 ```{bash}
-Profile_search/profile_search.sh --query your-genes.fasta --clu_hmm clu_hmm_db --clu_cat cluster_ids_categ.tsv --info your-genes_add_info.tsv --mmseqs /path/to/mmseqs --threads num-threads
+Profile_search/profile_search.sh --query your-genes.fasta --clu_hmm clu_hmm_db --clu_cat cluster_ids_categ.tsv --mmseqs /path/to/mmseqs --threads 8
 ```
 
-The "--info" file is optional, and should be a table with the correspondence of the genes to the contigs and/or genomes/MAGs/samples. The format should be gene - genome (or sample_ID) etc.
+As additional option you can specify an additional file using "--info". This file should be a table with the correspondence of the genes to the contigs and genomes/MAGs or samples. The format should be gene - contig - genome (or sample_ID) etc.
 
 <br>
 

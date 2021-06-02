@@ -68,7 +68,7 @@ rule mmseqs_clustering_results:
                 -- {params.clean_seqs} 2>>{log.err}
         fi
         # To convert this cluster results tab separated file in wide format (repres member member member ..)
-        awk -f {params.awk_wide} {input.clu} > {params.wide} 2>>{log.err}
+        awk -f {params.awk_wide} <(awk '!seen[$2]++' {input.clu}) > {params.wide} 2>>{log.err}
 
         # Cluster name rep and number of ORFs (size)
         awk -vFS='\\t' -vOFS='\\t' '{{print NR,$1,NF-1}}' {params.wide} > {params.info1}
@@ -108,14 +108,14 @@ rule mmseqs_clustering_results:
         fi
 
         # Join with the long format cluster file
-        parallel={threads} -T {params.local_tmp} -k1,1 {input.clu} ) \
-            <(sort --parallel={threads} -T {params.local_tmp} -k2,2 {params.info1} ) > {output.clu_info} 2>>{log.err}
+        join -11 -22 <(sort --parallel={threads} -T {params.local_tmp} -k1,1 {input.clu}) \
+            <(sort --parallel={threads} -T {params.local_tmp} -k2,2 {params.info1} ) > {params.tmp1} 2>>{log.err}
 
         # Add length info
         sed -e 's/\\x0//g' {params.cluseqdb} | {params.seqtk_bin} comp | cut -f1,2 > {params.length}
 
         join -11 -22 <(sort -k1,1 --parallel={threads} -T {params.local_tmp} {params.length}) \
-         <(sort -k2,2 --parallel={threads} -T {params.mmseqs_tmp} {output.clu_info}) > {params.tmp} 2>>{log.err} 1>>{log.out}
+         <(sort -k2,2 --parallel={threads} -T {params.mmseqs_tmp} {params.tmp1}) > {params.tmp} 2>>{log.err} 1>>{log.out}
 
         # Reorder fields (cl_name rep orf length size)
         sort -k4,4n --parallel={threads} -T {params.local_tmp} {params.tmp} | \
@@ -163,7 +163,7 @@ rule mmseqs_clustering_results:
         # Clusters with more than 1 member
         awk -vOFS='\\t' '$3>=2{{print $1,$2}}' {params.info2} > {params.tmp1}
         join -12 -21 <(sort -k2,2 {params.tmp1}) \
-        <(sort -k1,1 --parallel={threads} -T {params.local_tmp} {input.clu} ) > {params.tmp}
+        <(sort -k1,1 --parallel={threads} -T {params.local_tmp} <(awk '!seen[$2]++' {input.clu} )) > {params.tmp}
 
         awk -vOFS='\\t' '!seen[$0]++{{print $2,$1,$3}}' {params.tmp} > {output.clusters}
 

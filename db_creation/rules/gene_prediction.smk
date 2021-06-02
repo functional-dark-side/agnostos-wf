@@ -2,7 +2,7 @@ rule gene_prediction:
     input:
         contigs = config['data'] + "/{smp}_contigs.fasta"
     params:
-        prodigal_mode = "meta",
+        prodigal_mode = config["prodigal_mode"],
         prodigal_bin = config["prodigal_bin"],
         rename_orfs = "scripts/rename_orfs.awk",
         partial_info = "scripts/get_orf_partial_info.awk",

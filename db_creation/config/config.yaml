@@ -44,6 +44,7 @@ mpi_runner: "srun --mpi=pmi2"
 vmtouch: "vmtouch"
 
 # Gene prediction
+prodigal_mode: "meta" #"meta" for metagenomes or "normal" for genomes
 prodigal_bin: "prodigal"
 
 # Annotation

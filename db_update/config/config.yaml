@@ -12,7 +12,7 @@ conda_env: "/vol/cloud/agnostos-wf/envs/workflow.yml"
 # Setting update to TRUE to run the cluster-update version of the snakemake workflow (otherwise FALSE or empty)
 update: "TRUE"
 # Path to original cluster DB (sequence and cluster DBs)
-ordir: "/vol/cloud/agnostos_test/db_creation/clusterDB_results" #"/vol/cloud/agnostosDB"
+ordir: "/vol/cloud/agnostosDB"
 # Path to the sequences that need to be integrated
 # Formats: name_contigs.fasta or name_genes.fasta
 new_data: "/vol/cloud/agnostos_test/db_update_data/TARA_038_SRF_0.1-0.22_5K_contigs.fasta"
@@ -26,6 +26,7 @@ threads_default: 28
 threads_collect: 28
 threads_cat_ref: 28
 threads_res: 14
+
 # Databases
 pfam_db: "/vol/cloud/agnostos-wf/databases/Pfam-A.hmm"
 pfam_clan: "/vol/cloud/agnostos-wf/databases/Pfam-A.clans.tsv.gz"
