@@ -78,7 +78,8 @@ wget https://ndownloader.figshare.com/files/23066963 -O mmseqs_profiles.tar.gz
 tar -xzvf mmseqs_profiles.tar.gz
 
 # download the AGNOSTOS seed database gene cluster categories
-wget https://ndownloader.figshare.com/files/23067140 -O cluster_ids_categ.tsv
+wget https://ndownloader.figshare.com/files/23067140 -O cluster_ids_categ.tsv.gz
+gunzip cluster_ids_categ.tsv.gz
 
 Profile_search/profile_search.sh --query your-genes.fasta --clu_hmm mmseqs_profiles/clu_hmm_db --clu_cat cluster_ids_categ.tsv --mmseqs /path/to/mmseqs --threads 8
 ```
