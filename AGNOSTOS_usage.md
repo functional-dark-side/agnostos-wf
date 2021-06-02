@@ -77,4 +77,4 @@ gunzip cluster_ids_categ.tsv.gz
 Profile_search/profile_search.sh --query your-genes.fasta --clu_hmm mmseqs_profiles/clu_hmm_db --clu_cat cluster_ids_categ.tsv --mmseqs /path/to/mmseqs --threads 8
 ```
 
-NOTE: On MAC-OS-X you will probably need to install the gnu-getopt, which supports long options (--). For this you can use the command `brew install gnu-getopt`.
+NOTE: On MAC-OS-X you will probably need to install the gnu-getopt, which supports long options (--). For this you can use the command `conda install -c bioconda gnu-getopt` or with Homebrew as `brew install gnu-getopt`.
