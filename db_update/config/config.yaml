@@ -22,7 +22,9 @@ new_data_stage: "contigs" #"contigs" or "genes" or "anvio_genes"
 ## In case your data comes from an Anvi'o contigDB, please specify here the anvio gene_calls.tsv file,
 ## retrieved via "anvi-export-gene-calls -c CONTIGS.db -o anvio_gene_calls.tsv"
 new_data_partial: "/vol/cloud/agnostos_test/db_update_data/new_genes_partial_info.tsv"
-#
+
+# If you want to classify the singleton in the four category set the following entry to "true"
+singl: "true"
 
 # Threads configuration
 threads_default: 28

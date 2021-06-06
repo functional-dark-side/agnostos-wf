@@ -32,6 +32,10 @@ option_list <- list(
               help="GU annotations", metavar="character"),
   make_option(c("--orig_db"), type="character", default=NULL,
               help="original database", metavar="character"),
+  make_option(c("--is_singl"), type="character", default=NULL,
+              help="use singleton or not", metavar="character"),
+  make_option(c("--s_categ"), type="character", default=NULL,
+              help="singelton categories", metavar="character"),
   make_option(c("--threads"), type="character", default=1,
               help="number of threads", metavar="numeric")
 )
@@ -46,7 +50,8 @@ if (is.null(opt$clu_or) | is.null(opt$contig) |
     is.null(opt$name) | is.null(opt$comm) |
     is.null(opt$hq_clu) | is.null(opt$k_annot) |
     is.null(opt$kwp_annot) | is.null(opt$gu_annot) |
-    is.null(opt$orig_db) | is.null(opt$threads)){
+    is.null(opt$orig_db) | is.null(opt$threads) |
+    is.null(opt$is_singl)){
   print_help(opt_parser)
   stop("You need to provide the path to the previous validation step results and output files paths\n", call.=FALSE)
 }
@@ -77,6 +82,16 @@ DB_clu_info <- fread(opt$clu_info,stringsAsFactors = F, header = F, nThread = 32
 DB_info <- gene_info %>% dt_left_join(DB_clu_info) %>%
   mutate(category=ifelse(size==1,"SINGL",
                          ifelse(size>1 & is.na(category),"DISC",category)))
+
+if(opt$is_singl=="true"){
+  s_cat <- fread(opt$s_cat, header=F, sep="\t") %>%
+  setNames(c("cl_name","category_s","gene")) %>% select(-cl_name)
+
+  DB_info <- DB_info %>%
+    dt_left_join(s_cat, by="gene") %>%
+    mutate(is.singleton=ifelse(category=="SINGL",TRUE,FALSE),
+    category=ifelse(is.na(category_s),category,category_s))
+}
 
 # Table with gene - cluster - community - category
 Communities <- fread(opt$comm,stringsAsFactors = F, header = T)
@@ -147,6 +162,12 @@ if(original=="agnostosDB"){
     DB_mutant <- DB_info %>% select(cl_name,category) %>% distinct() %>%
             inner_join(mutant %>% mutate(cl_name=as.character(cl_name)))
     write.table(DB_mutant,paste0(dir,"/DB_mutant_phenotype_clusters.tsv"), row.names = F, sep="\t",quote = F)
+
+    DB_info_exp <- DB_info_exp %>%
+        distinct() %>%
+        dt_left_join(DB_info_ls) %>%
+        dt_left_join(DB_info_nb %>% select(cl_name,niche_breadth_sign)) %>%
+        mutate(is.LS=ifelse(is.na(is.LS),F,T))
 }
 
 # Create table with all annotations
@@ -164,12 +185,21 @@ DB_annot <- DB_info_exp %>% select(cl_name,category,pfam) %>% distinct() %>%
         distinct()
 write.table(DB_annot,paste0(dir,"/DB_cluster_annotations.tsv"), col.names = T, row.names = F, sep="\t",quote = F)
 
-
 DB_info_exp <- DB_info_exp %>%
     distinct() %>%
-    dt_left_join(DB_info_ls) %>%
-    dt_left_join(DB_info_nb %>% select(cl_name,niche_breadth_sign)) %>%
-    mutate(is.LS=ifelse(is.na(is.LS),F,T)) %>%
-    select(gene_callers_id,cl_name,contig,gene_x_contig,cl_size,category,pfam,is.HQ,is.LS,lowest_rank,lowest_level,niche_breadth_sign)
+    mutate(gene_callers_id=gsub(".*_","",gene))
 
+if(opt$is_singl=="true" & original=="agnostosDB"){
+    DB_info_exp <- DB_info_exp %>%
+    select(gene_callers_id,cl_name,contig,gene_x_contig,cl_size,category,is.singleton,pfam,is.HQ,is.LS,lowest_rank,lowest_level,niche_breadth_sign)
+}else if(opt$is_singl!="true" & original=="agnostosDB"){
+  DB_info_exp <- DB_info_exp %>%
+  select(gene_callers_id,cl_name,contig,gene_x_contig,cl_size,category,pfam,is.HQ,is.LS,lowest_rank,lowest_level,niche_breadth_sign)
+}else if(opt$is_singl=="true" & original!="agnostosDB"){
+  DB_info_exp <- DB_info_exp %>%
+  select(gene_callers_id,cl_name,contig,gene_x_contig,cl_size,category,is.singleton,pfam,is.HQ)
+}else{
+  DB_info_exp <- DB_info_exp %>%
+  select(gene_callers_id,cl_name,contig,gene_x_contig,cl_size,category,pfam,is.HQ)
+}
 write.table(DB_info_exp,paste0(dir,"/DB_genes_summary_info_exp.tsv"), col.names = T, row.names = F, sep="\t",quote = F)

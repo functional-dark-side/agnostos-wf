@@ -40,7 +40,10 @@ rule integrated_cluster_db:
         or_clu_hmm = config["ordir"] + "/mmseqs-profiles/clu_hmm_db",
         or_cluseqdb = config["ordir"] + "/mmseqs-cluseqdb",
         or_clu_seq = config["ordir"] + "/mmseqs-cluseqdb/clu_seqDB",
-        or_partial = config["ordir"] + "/orf_partial_info.tsv.gz"
+        or_partial = config["ordir"] + "/orf_partial_info.tsv.gz",
+        singl = config["singl"],
+        s_categ = config["rdir"] + "/cluster_classification/singleton_gene_cl_categories.tsv",
+        singl_cl_gene_categ = config["rdir"] + "/integrated_cluster_DB/singleton_cl_ids_categ_genes.tsv.gz"
     log:
         out = "logs/integ_stdout.log",
         err = "logs/integ_stderr.err"
@@ -113,6 +116,10 @@ rule integrated_cluster_db:
         # Download original gene cluster catgeory info
         if [[ ! -s {params.or_clu_gene} ]]; then
             wget https://ndownloader.figshare.com/files/24121865 -O {params.or_clu_gene}
+        fi
+
+        if [ {params.singl} == true ]; then
+        awk -vOFS="\\t" '{{print $2,$3,$1}}' {params.s_categ} | gzip -c > {params.singl_cl_gene_categ}
         fi
 
         # get the new genes in the good clusters (shared)

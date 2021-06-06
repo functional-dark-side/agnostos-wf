@@ -136,6 +136,16 @@ The results of the creation-mode workflow are structured in folders correspondin
 
     Plus, the mmseqs_clustering/ folder has to be copied here as well, including the cluDB, the seqDB and the file cluDB_name_rep_size.tsv
 
+##### General summary table for the gene cluster DB
+    -  clusterDB_results/DB_genes_summary_info.tsv
+      -  gene_callers_id
+      -  cl_name
+      -  cl_size
+      -  category
+      -  is.HQ
+      -  community
+      -  pfam
+
 ### Update-mode
 
 The results structure is the same as the creation-mode one (the clusters processed through the workflow steps are those not found in the original DB), plus a folder containing the cluster-update summary results (derived from the merging of the new with the original clusterDB):
@@ -178,7 +188,7 @@ Tables summarasing the results and eventually the cluster contextual data
         -  lowest_rank - lineage-secific taxonomic rank
         -  lowest_level - lineage-secific taxonomic level
         -  niche_breadth_sign - Levin's niche breadth distribution
-  
+
     -   DB_clusters_niche_breadth.tsv - clusters with significant niche breadth values in metagenomes
     -   DB_lineage_specific_clusters.tsv - linege-specific clusters within the GTDB phylogeney
     -   DB_mutant_phenotype_clusters.tsv - clusters with mutant phenotype (Proce et al. 2018)
@@ -193,7 +203,7 @@ The profile search output consist in one main file containing the search results
 
 The output files:
 
--   "your_name_search_res_best-hits.tsv": best-hits with categories.
+-   "your_name_search_res_best-hits.tsv": best-hits with categories (gene_callers_id-cl_name-category-evalue).
 
 -   "your_name_search_res_summary-categ.tsv": proportion of different categories per contig.
 

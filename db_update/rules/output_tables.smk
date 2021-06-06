@@ -16,6 +16,8 @@ rule output_tables:
         k_annot = config["rdir"] + "/integrated_cluster_DB/K_annotations.tsv.gz",
         kwp_annot = config["rdir"] + "/integrated_cluster_DB/KWP_annotations.tsv.gz",
         gu_annot = config["rdir"] + "/integrated_cluster_DB/GU_annotations.tsv.gz",
+        singl = config["singl"],
+        singl_cat = config["rdir"] + "/integrated_cluster_DB/singleton_cl_ids_categ_genes.tsv.gz",
         parser = "/scripts/output_tables.r"
     output:
         res = config["rdir"] + "/output_tables/DB_genes_summary_info_exp.tsv",
@@ -62,6 +64,8 @@ rule output_tables:
                           --kwp_annot {params.kwp_annot} \
                           --gu_annot {params.gu_annot} \
                           --orig_db {params.orig_db} \
+                          --is_singl {params.singl} \
+                          --s_cat {params.singl_cat} \
                           --threads {threads} 2>{log.err} 1>{log.out}
 
         """

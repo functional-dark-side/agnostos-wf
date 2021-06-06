@@ -19,7 +19,6 @@ if (!is.installed("entropy") || !is.installed("ggridges")) {
 
 library(data.table)
 library(tidyverse)
-library(maditr)
 library(entropy)
 library(ggridges)
 library(optparse)
@@ -98,7 +97,7 @@ category <- fread(opt$clu_categ,
 ) %>%
   setNames(c("cl_name", "category"))
 
-ref_clu <- ref_clu %>% dt_inner_join(category)
+ref_clu <- ref_clu %>% inner_join(category)
 
 # Start caluclating stats per cluster catgory (or first xcluster and then xcategory????)
 # cluster ORF length stats
@@ -116,7 +115,7 @@ clu_compl <- clu_stats %>%
   count() %>%
   mutate(p = n / size) %>%
   ungroup() %>%
-  dt_select(cl_name, partial, p) %>%
+  select(cl_name, partial, p) %>%
   spread(partial, p, fill = 0)
 
 if("01" %in% colnames(clu_compl)){
@@ -129,7 +128,7 @@ if("01" %in% colnames(clu_compl)){
 
 write_tsv(clu_compl, path=opt$compl, col_names = T)
 
-clu_stats <- clu_stats %>% dt_left_join(clu_compl) %>%
+clu_stats <- clu_stats %>% left_join(clu_compl) %>%
   mutate(rep_compl=ifelse(rep==orf & partial=="00", TRUE,FALSE)) %>%
   select(-orf,-length,-partial) %>% distinct()
 
@@ -222,7 +221,7 @@ cat_compl <- cat_stats %>%
   add_count() %>%
   mutate(p = n / sum(size)) %>%
   ungroup() %>%
-  dt_select(category, partial, p) %>%
+  select(category, partial, p) %>%
   distinct() %>%
   spread(partial, p, fill = 0)
 
@@ -263,11 +262,11 @@ cl_kaiju <- fread(opt$kaiju_tax,
   setNames(c("orf","domain","phylum","class","order","family","genus","species")) %>%
   unite(kaiju_tax, domain:species,sep=";")
 
-cl_kaiju <- cl_kaiju %>% dt_left_join(ref_clu %>% select(cl_name,category,orf))
+cl_kaiju <- cl_kaiju %>% left_join(ref_clu %>% select(cl_name,category,orf))
 
 cluster_taxonomy <- ref_clu %>% select(cl_name,category,orf) %>%
- dt_left_join(cl_mmseqs %>% select(-category,-cl_name)) %>%
- dt_left_join(cl_kaiju %>% select(-category,-cl_name))
+ left_join(cl_mmseqs %>% select(-category,-cl_name)) %>%
+ left_join(cl_kaiju %>% select(-category,-cl_name))
 write_tsv(cluster_taxonomy,path = paste0(opt$output, "/cluster_category_taxonomies.tsv"), col_names = TRUE)
 
 # Majority vote functions
@@ -347,15 +346,15 @@ write_tsv(cat_dark, path = paste0(opt$output, "/cluster_category_dpd_perc.tsv"),
 
 ## Cluster general stats
 clu_stats <- clu_stats %>% select(-rep_compl) %>% mutate(cl_name = as.character(cl_name)) %>%
-  dt_left_join(clu_majority_tax %>% ungroup() %>% mutate(cl_name = as.character(cl_name))) %>%
-  dt_left_join(cl_dark %>% ungroup() %>% mutate(cl_name = as.character(cl_name))) %>%
-  dt_left_join(HQ_clusters %>% mutate(is.HQ = TRUE) %>% mutate(cl_name = as.character(cl_name))) %>% distinct()
+  left_join(clu_majority_tax %>% ungroup() %>% mutate(cl_name = as.character(cl_name))) %>%
+  left_join(cl_dark %>% ungroup() %>% mutate(cl_name = as.character(cl_name))) %>%
+  left_join(HQ_clusters %>% mutate(is.HQ = TRUE) %>% mutate(cl_name = as.character(cl_name))) %>% distinct()
 write_tsv(clu_stats, path = opt$summ_stats, col_names = TRUE)
 
 ## Category general stats
 cat_stats <- cat_stats %>%
-  dt_left_join(cat_compl) %>%
-  dt_select(-cl_name, -orf, -rep, -size, -length, -partial) %>%
+  left_join(cat_compl) %>%
+  select(-cl_name, -orf, -rep, -size, -length, -partial) %>%
   distinct() %>%
-  dt_left_join(cat_dark)
+  left_join(cat_dark)
 write_tsv(cat_stats, path = paste0(opt$output, "/only_category_summary_stats.tsv"), col_names = TRUE)

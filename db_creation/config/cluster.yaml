@@ -56,42 +56,42 @@ cluster_refinement:
 
 cluster_classification:
     time: 1000:00:00
-    nodes: 10
+    nodes: 7
     ntasks_per_node: 1
-    ntasks: 10
+    ntasks: 7
     cpus_per_task: 28
-    partition: debug
+    partition: nomaster
 
 cluster_category_refinement:
-    nodes: 10
-    ntasks: 280
+    nodes: 7
+    ntasks: 196
     ntasks_per_node: 28
-    partition: debug
+    partition: nomaster
 
 cluster_category_database:
-    nodes: 10
-    ntasks: 280
+    nodes: 7
+    ntasks: 196
     ntasks_per_node: 28
-    partition: debug
+    partition: nomaster
 
 cluster_category_stats:
     time: 1000:00:00
-    nodes: 10
+    nodes: 7
     ntasks_per_node: 1
-    ntasks: 10
+    ntasks: 7
     cpus_per_task: 28
-    partition: debug
+    partition: nomaster
 
 cluster_communities_dbs:
     time: 1000:00:00
-    nodes: 10
-    ntasks: 280
+    nodes: 7
+    ntasks: 196
     ntasks_per_node: 28
-    partition: debug
+    partition: nomaster
 
 cluster_communities_inference:
     time: 1000:00:00
-    nodes: 10
+    nodes: 7
     ntasks_per_node: 4
-    ntasks: 40
-    partition: debug
+    ntasks: 28
+    partition: nomaster

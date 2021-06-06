@@ -31,7 +31,8 @@ rule mmseqs_clustering_results:
         namedb = config["rdir"] + "/mmseqs_clustering/cluDB_ids.db",
         shared = config["rdir"] + "/mmseqs_clustering/cluDB_shared_name_rep_size.tsv",
         original = config["rdir"] + "/mmseqs_clustering/cluDB_original_name_rep_size.tsv",
-        index = config["rdir"] + "/mmseqs_clustering/cluDB_name_index.txt"
+        index = config["rdir"] + "/mmseqs_clustering/cluDB_name_index.txt",
+        clu_info = config["rdir"] + "/mmseqs_clustering/cluDB_info.tsv"
     conda:
         config["conda_env"]
     log:
@@ -43,7 +44,6 @@ rule mmseqs_clustering_results:
         clusters = config["rdir"] + \
             "/mmseqs_clustering/cluDB_no_singletons.tsv",
         singl = config["rdir"] + "/mmseqs_clustering/cluDB_singletons.tsv",
-        clu_info = config["rdir"] + "/mmseqs_clustering/cluDB_info.tsv",
         new_index = config["rdir"] + "/mmseqs_clustering/new_cluDB_name_index.txt"
     shell:
         """
@@ -119,7 +119,7 @@ rule mmseqs_clustering_results:
 
         # Reorder fields (cl_name rep orf length size)
         sort -k4,4n --parallel={threads} -T {params.local_tmp} {params.tmp} | \
-         awk -vOFS='\\t' '!seen[$0]++{{print $4,$3,$1,$2,$5}}' > {output.clu_info} 2>>{log.err} 1>>{log.out}
+         awk -vOFS='\\t' '!seen[$0]++{{print $4,$3,$1,$2,$5}}' > {params.clu_info} 2>>{log.err} 1>>{log.out}
 
         ## Retrieve the different cluster sets:
         # 1. Only-original clusters: cluDB_original_name_rep_size.tsv
