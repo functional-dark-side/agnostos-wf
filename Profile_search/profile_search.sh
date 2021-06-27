@@ -43,14 +43,14 @@ if [ -z "${QUERY}" ] || [ -z "${CLHMM}" ] || [ -z "${CLCAT}" ]; then
   usage
 fi
 
-MMSEQS_BIN=${MMSEQS_BIN:=~/opt/MMseqs2/bin/mmseqs}
+MMSEQS_BIN=${MMSEQS_BIN:=mmseqs}
 
 MPI=${MPI:=FALSE}
 
 # Fixed variables
 MPI="srun --mpi=pmi2"
-EFILTER="${PWD}"/agnostos-wf/Profile_search/evalue_filter.awk
-MVOTE="${PWD}"/agnostos-wf/Profile_search/majority_vote_categ.R
+EFILTER="${PWD}"/Profile_search/evalue_filter.awk
+MVOTE="${PWD}"/Profile_search/majority_vote_categ.R
 LTMP=/vol/scratch/tmp
 OUTDIR="${PWD}"/profile_search_res
 
@@ -77,13 +77,13 @@ if [[ ${NSEQS} -ge 100000 ]]; then
       --split-mode 0 --split-memory-limit 150G \
       --mpi-runner \"${MPI}\" "
   else
-    "${MMSEQS_BIN}" search "${QUERY_DB}" "${CLHMM}" "${OUTDIR}"/"${NAME}"_vs_mg_gtdb_hmm_db "${OUTDIR}"/tmp\
+    "${MMSEQS_BIN}" search "${QUERY_DB}" "${CLHMM}" "${OUTDIR}"/"${NAME}"_vs_mg_gtdb_hmm_db "${OUTDIR}"/tmp \
       --threads "${NSLOTS}" -e 1e-20 --cov-mode 2 -c 0.6
   fi
 else
   # Sequernce-profile search against the Cluster HMM profiles
-  "${MMSEQS_BIN}" search "${QUERY_DB}" "${CLHMM}" "${OUTDIR}"/"${NAME}"_vs_mg_gtdb_hmm_db "${OUTDIR}"/tmp\
-    --threads "${NSLOTS}" -e 1e-20 --cov-mode 2 -c 0.6
+  "${MMSEQS_BIN}" search "${QUERY_DB}" "${CLHMM}" "${OUTDIR}"/"${NAME}"_vs_mg_gtdb_hmm_db "${OUTDIR}"/tmp \
+   --threads "${NSLOTS}" -e 1e-20 --cov-mode 2 -c 0.6
 fi
 
 wait
@@ -104,7 +104,8 @@ gzip "${OUTDIR}"/"${NAME}"_vs_mg_gtdb_hmm_search_res.tsv
 
 # Parse results to get best-hits and category proportions per sample (or genome or contig..)
 # NB: the info file should have the following format: <gene> <sample> (or <genome>, or <contig>)
+INFO="none"
 "${MVOTE}"  --res "${OUTDIR}"/"${NAME}"_vs_mg_gtdb_hmm_search_res.tsv.gz \
-            --info "${INFO}" \
+            --info "${INFO}"
 
 #Rscript --vanilla "${MVOTE}" "${OUTDIR}"/"${NAME}"_vs_mg_gtdb_hmm_search_res.tsv.gz "${INFO}"

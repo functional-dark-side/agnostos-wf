@@ -68,13 +68,10 @@ option_list <- list(
 opt_parser <- OptionParser(option_list=option_list)
 opt <- parse_args(opt_parser)
 
-dir <- dirname(opt$contig)
-
 if (is.null(opt$res)){
   print_help(opt_parser)
   stop("You need to provide the path to the search results\n", call.=FALSE)
 }
-
 
 res=basename(opt$res)
 res=gsub(".tsv.gz","",res)
@@ -98,7 +95,7 @@ write.table(df_best,paste(dir,"/",res,"_best-hits.tsv",sep=""), col.names = T, r
 # Join with info about genomes/MAGs
 # Must be a table with the corrispondence of the genes to the contigs (and in case also to the genomes/MAGs)
 #The format should be gene - contig - genome (or sample_ID) etc..
-if(! is.null(opt$info) ){
+if( opt$info != "none" ){
   info <- fread(opt$info, stringsAsFactors = F, header = T) %>%
   setNames(c("gene","contig","sample"))
 
