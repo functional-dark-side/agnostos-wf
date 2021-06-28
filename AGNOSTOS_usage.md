@@ -14,8 +14,8 @@ To run one of these two modules follow the next stps:
 
 ```{bash}
 # workflow directory
-sed -i 's|vol/cloud/agnostos-wf/db_update|/your/wotkflow/path|g' db_update/config/config.yaml
-sed -i 's|vol/cloud/agnostos-wf/db_update|/your/wotkflow/path|g' db_update/config/config_communities.yaml
+sed -i 's|/vol/cloud/agnostos-wf/db_update|/your/wotkflow/path|g' db_update/config/config.yaml
+sed -i 's|/vol/cloud/agnostos-wf/db_update|/your/wotkflow/path|g' db_update/config/config_communities.yaml
 
 # your data directory
 sed -i 's|/vol/cloud/agnostos_test/db_update_data|/your/data/path|g' db_update/config/config.yaml
