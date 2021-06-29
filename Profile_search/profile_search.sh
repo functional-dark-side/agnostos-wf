@@ -47,6 +47,7 @@ MMSEQS_BIN=${MMSEQS_BIN:=mmseqs}
 
 MPI=${MPI:=FALSE}
 
+INFO=${INFO:="none"}
 # Fixed variables
 MPI="srun --mpi=pmi2"
 EFILTER="${PWD}"/Profile_search/evalue_filter.awk
@@ -104,7 +105,7 @@ gzip "${OUTDIR}"/"${NAME}"_vs_mg_gtdb_hmm_search_res.tsv
 
 # Parse results to get best-hits and category proportions per sample (or genome or contig..)
 # NB: the info file should have the following format: <gene> <sample> (or <genome>, or <contig>)
-INFO="none"
+
 "${MVOTE}"  --res "${OUTDIR}"/"${NAME}"_vs_mg_gtdb_hmm_search_res.tsv.gz \
             --info "${INFO}"
 
