@@ -94,10 +94,11 @@ write.table(df_best,paste(dir,"/",res,"_best-hits.tsv",sep=""), col.names = T, r
 
 # Join with info about genomes/MAGs
 # Must be a table with the corrispondence of the genes to the contigs (and in case also to the genomes/MAGs)
-#The format should be gene - contig - genome (or sample_ID) etc..
+# The format should be gene - contig - genome (or sample_ID) etc..
 if( opt$info != "none" ){
   info <- fread(opt$info, stringsAsFactors = F, header = T) %>%
-  setNames(c("gene","contig","sample"))
+  select(1,2) %>%
+  setNames(c("gene","contig"))
 
   info <- info %>% group_by(sample) %>% add_count() %>%
     rename(total_ngenes=n) %>% ungroup()
@@ -105,10 +106,10 @@ if( opt$info != "none" ){
   res_info_class <- df_best %>% left_join(info,by="gene") %>%
     mutate(class=case_when(grepl('U',category) ~ "Unknown",
                          TRUE ~ "Known")) %>%
-    group_by(sample, total_ngenes, class) %>% count()
+    group_by(contig, total_ngenes, class) %>% count()
   write.table(res_info_class,paste0(dir,"/",res,"_summary-classes.tsv"), col.names = T, row.names = F, quote = F, sep = "\t")
 
   res_info_categ <- df_best %>% left_join(info,by="gene") %>%
-    group_by(sample, total_ngenes, category) %>% count()
+    group_by(contig, total_ngenes, category) %>% count()
   write.table(res_info_categ,paste0(dir,"/",res,"_summary-categ.tsv"), col.names = T, row.names = F, quote = F, sep = "\t")
 }
