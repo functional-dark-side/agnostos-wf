@@ -199,7 +199,7 @@ The cluster-update results in the form of MMseqs2 databases are stored in the "m
 
 ### Profile-search
 
-The profile search output consist in one main file containing the search results, and two additional files which are generated only if the "gene-info" file ("--info") is provided in input.
+The profile search output consist in one main file containing the search results, and two additional files which are generated only if the "gene-info" file, containing the gene-to-contig correspondance is specified in input.
 
 The output files:
 
