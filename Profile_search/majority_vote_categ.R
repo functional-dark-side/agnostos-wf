@@ -100,7 +100,7 @@ if( opt$info != "none" ){
   select(1,2) %>%
   setNames(c("gene","contig"))
 
-  info <- info %>% group_by(sample) %>% add_count() %>%
+  info <- info %>% group_by(contig) %>% add_count() %>%
     rename(total_ngenes=n) %>% ungroup()
 
   res_info_class <- df_best %>% left_join(info,by="gene") %>%
