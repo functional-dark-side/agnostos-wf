@@ -15,29 +15,57 @@ Options:
 
 OPT_LIST="query:,clu_hmm:,clu_cat:,info:,mmseqs:,mpi:,threads:"
 
-eval set -- $(getopt -o '' --long "${OPT_LIST}" -- "$@")
-while true; do
-  case "$1" in
-    --query)
-      QUERY=$2; shift 2 ;;
-    --clu_hmm)
-      CLHMM=$2; shift 2 ;;
-    --clu_cat)
-      CLCAT=$2; shift 2 ;;
-    --info)
-      INFO=$2; shift 2 ;;
-    --mmseqs)
-      MMSEQS_BIN=$2; shift 2 ;;
-    --mpi)
-      MPI=$2; shift 2 ;;
-    --threads)
-      NSLOTS=$2; shift 2 ;;
-    --)
+system=$(uname )
+
+if [ $system == "Darwin" ]; then
+  eval set -- $(gnu-getopt -o '' --long "${OPT_LIST}" -- "$@")
+  while true; do
+    case "$1" in
+      --query)
+        QUERY=$2; shift 2 ;;
+      --clu_hmm)
+        CLHMM=$2; shift 2 ;;
+      --clu_cat)
+        CLCAT=$2; shift 2 ;;
+      --info)
+        INFO=$2; shift 2 ;;
+      --mmseqs)
+        MMSEQS_BIN=$2; shift 2 ;;
+      --mpi)
+        MPI=$2; shift 2 ;;
+      --threads)
+        NSLOTS=$2; shift 2 ;;
+      --)
       shift; break ;;
-    *)
+      *)
       usage ;;
-  esac
-done
+    esac
+  done
+else
+  eval set -- $(getopt -o '' --long "${OPT_LIST}" -- "$@")
+  while true; do
+    case "$1" in
+      --query)
+        QUERY=$2; shift 2 ;;
+      --clu_hmm)
+        CLHMM=$2; shift 2 ;;
+      --clu_cat)
+        CLCAT=$2; shift 2 ;;
+      --info)
+        INFO=$2; shift 2 ;;
+      --mmseqs)
+        MMSEQS_BIN=$2; shift 2 ;;
+      --mpi)
+        MPI=$2; shift 2 ;;
+      --threads)
+        NSLOTS=$2; shift 2 ;;
+      --)
+      shift; break ;;
+      *)
+      usage ;;
+    esac
+  done
+fi
 
 if [ -z "${QUERY}" ] || [ -z "${CLHMM}" ] || [ -z "${CLCAT}" ]; then
   usage
@@ -79,12 +107,12 @@ if [[ ${NSEQS} -ge 100000 ]]; then
       --mpi-runner \"${MPI}\" "
   else
     "${MMSEQS_BIN}" search "${QUERY_DB}" "${CLHMM}" "${OUTDIR}"/"${NAME}"_vs_mg_gtdb_hmm_db "${OUTDIR}"/tmp \
-      --threads "${NSLOTS}" -e 1e-20 --cov-mode 2 -c 0.6
+      --exhaustive-search --threads "${NSLOTS}" -e 1e-20 --cov-mode 2 -c 0.6
   fi
 else
   # Sequernce-profile search against the Cluster HMM profiles
   "${MMSEQS_BIN}" search "${QUERY_DB}" "${CLHMM}" "${OUTDIR}"/"${NAME}"_vs_mg_gtdb_hmm_db "${OUTDIR}"/tmp \
-   --threads "${NSLOTS}" -e 1e-20 --cov-mode 2 -c 0.6
+      --exhaustive-search --threads "${NSLOTS}" -e 1e-20 --cov-mode 2 -c 0.6
 fi
 
 wait
