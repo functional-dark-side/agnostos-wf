@@ -26,20 +26,22 @@ option_list <- list(
               help="use singleton or not", metavar="character"),
   make_option(c("--s_categ"), type="character", default=NULL,
               help="singelton categories", metavar="character"),
-  make_option(c("--threads"), type="character", default=1,
+  make_option(c("--res"), type="character", default=NULL,
+              help="output results", metavar="character"),
+  make_option(c("--threads"), type="numeric", default=1,
               help="number of threads", metavar="numeric")
 )
 
 opt_parser <- OptionParser(option_list=option_list)
 opt <- parse_args(opt_parser)
 
-dir <- dirname(opt$contig)
+dir <- dirname(opt$cat)
 
-if (is.null(opt$clu_or) | is.null(opt$contig) |
+if (is.null(opt$clu_or) |
     is.null(opt$cat) | is.null(opt$clu_info) |
     is.null(opt$comm) | is.null(opt$hq_clu) |
     is.null(opt$k_annot) | is.null(opt$threads) |
-    is.null(opt$is_singl)){
+    is.null(opt$is_singl) | is.null(opt$res)){
   print_help(opt_parser)
   stop("You need to provide the path to the previous validation step results and output files paths\n", call.=FALSE)
 }
@@ -50,7 +52,7 @@ options(datatable.verbose = FALSE)
 
 ## GC DB information ################################################################
 DB_cl <- fread(opt$clu_or) %>%
-  setNames(c("cl_name","db","size")) %>% filter(grepl(opt$name,db)) %>% mutate(cl_name=as.character(cl_name))
+  setNames(c("cl_name","db","size")) %>% mutate(cl_name=as.character(cl_name))
 
 # Load cluster DB results
 summary_DB <- fread(opt$cat, stringsAsFactors = F, header = F, nThread = 32) %>%
@@ -61,7 +63,7 @@ DB_clu_info <- fread(opt$clu_info,stringsAsFactors = F, header = F, nThread = 32
   dt_inner_join(DB_cl) %>%
   dt_left_join(summary_DB)
 
-DB_info <- gene_info %>% dt_left_join(DB_clu_info) %>%
+DB_info <- DB_clu_info %>%
   mutate(category=ifelse(size==1,"SINGL",
                          ifelse(size>1 & is.na(category),"DISC",category)))
 
@@ -76,7 +78,8 @@ if(opt$is_singl=="true"){
 }
 
 # Table with gene - cluster - community - category
-Communities <- fread(opt$comm,stringsAsFactors = F, header = T) %>% select(gene,community)
+Communities <- fread(opt$comm,stringsAsFactors = F, header = T) %>% select(cl_name,com) %>%
+mutate(cl_name=as.character(cl_name))
 
 # Expanded summary info table
 ## gene - cl_name - category - db - is.HQ - community - pfam
@@ -100,9 +103,9 @@ DB_info_exp <- DB_info_exp %>%
 
 if(opt$is_singl=="true"){
     DB_info_exp <- DB_info_exp %>%
-    select(gene_callers_id,cl_name,cl_size,category,is.singleton,is.HQ,comm,pfam)
+    select(gene_callers_id,cl_name,cl_size,category,is.singleton,is.HQ,com,pfam)
 }else{
   DB_info_exp <- DB_info_exp %>%
-  select(gene_callers_id,cl_name,cl_size,category,is.HQ,comm,pfam)
+  select(gene_callers_id,cl_name,cl_size,category,is.HQ,com,pfam)
 }
-write.table(DB_info_exp,paste0(dir,"/DB_genes_summary_info.tsv"), col.names = T, row.names = F, sep="\t",quote = F)
+write.table(opt$res, col.names = T, row.names = F, sep="\t",quote = F)
