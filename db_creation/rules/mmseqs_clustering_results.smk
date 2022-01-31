@@ -42,7 +42,7 @@ rule mmseqs_clustering_results:
         # This DB can be accessed with ffindex, to extractt separated fasta files for each cluster and perform operations on them
         # Ex: ffindex_apply_mpi cluseqdb cluseqdb.index -- your_program/script
 
-        {params.mmseqs_bin} createseqfiledb {params.seqdb} {params.cludb} {params.cluseqdb} 2>{log.err}
+        {params.mmseqs_bin} createseqfiledb {params.seqdb} {params.cludb} {params.cluseqdb} {threads} 2>{log.err}
 
         # To convert this cluster results tab separated file in wide format (repres member member member ..)
         awk -f {params.awk_wide} {input.clu} > {params.wide}
