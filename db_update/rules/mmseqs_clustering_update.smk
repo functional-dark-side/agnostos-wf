@@ -58,7 +58,7 @@ rule mmseqs_clustering_update:
         # Concat new and old seq DBs
         {params.mmseqs_bin} concatdbs {params.or_seqdb} {params.new_seqdb} \
             {params.conc_seqdb} \
-            --threads 1 #--preserve-keys 2>>{log.err} 1>>{log.out}
+            --threads 1  2>>{log.err} 1>>{log.out}
         {params.mmseqs_bin} concatdbs {params.or_seqdb}_h {params.new_seqdb}_h \
             {params.conc_seqdb}_h \
             --threads 1  2>>{log.err} 1>>{log.out}

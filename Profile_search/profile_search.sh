@@ -96,7 +96,7 @@ NSEQS=$(grep -c '^>' "${QUERY}")
 
 if [[ ${NSEQS} -ge 100000 ]]; then
   if [[ ${MPI}=="mpi" ]]; then
-    # Sequernce-profile search against the Cluster HMM profiles
+    # Sequence-profile search against the Cluster HMM profiles
     sbatch --ntasks-per-node 1 --wait \
       --nodes 9 --cpus-per-task 28 \
       --job-name profs --partition nomaster \
