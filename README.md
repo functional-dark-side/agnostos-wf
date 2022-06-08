@@ -57,7 +57,7 @@ The test-dataset can be downloaded from Figshare as follows:
 ```{bash}
 mkdir -p agnostos_test
 cd agnostos_test
-wget https://ndownloader.figshare.com/files/25473332 -O db_creation_data.tar.gz
+wget https://figshare.com/ndownloader/files/31247614 -O db_creation_data.tar.gz
 tar -xzvf db_creation_data.tar.gz
 
 wget https://ndownloader.figshare.com/files/25473335 -O db_update_data.tar.gz
