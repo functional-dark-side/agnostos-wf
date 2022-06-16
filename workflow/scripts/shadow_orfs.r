@@ -10,6 +10,8 @@ if (!is.installed("valr")){
   cat("We will try to install the package... (this will be only be done once)\n")
   Sys.sleep(5)
   if (!is.installed("valr")){
+    suppressMessages(install.packages("BiocManager", repos = "http://cran.us.r-project.org"))
+    suppressMessages(BiocManager::install("rtracklayer"))
     suppressMessages(install.packages("valr", repos = "http://cran.us.r-project.org"))
   }
 }
