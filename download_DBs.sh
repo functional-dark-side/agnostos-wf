@@ -6,30 +6,30 @@ mkdir -p databases
 
 cd databases
 
-
 # Pfam database
 if [ ! -s Pfam-A.hmm ]; then
   echo "Dowloading Pfam-A database"
-  wget ftp://ftp.ebi.ac.uk/pub/databases/Pfam/releases/Pfam31.0/Pfam-A.hmm.gz
+  wget ftp://ftp.ebi.ac.uk/pub/databases/Pfam/releases/Pfam34.0/Pfam-A.hmm.gz
   gunzip Pfam-A.hmm.gz
 fi
 # Pfam clans
 if [ ! -s Pfam-A.clans.tsv.gz ]; then
   echo "Dowloading Pfam-A clan information"
-  wget ftp://ftp.ebi.ac.uk/pub/databases/Pfam/current_release/Pfam-A.clans.tsv.gz
+  wget ftp://ftp.ebi.ac.uk/pub/databases/Pfam/releases/Pfam34.0/Pfam-A.clans.tsv.gz
 fi
 # Pfam HHBLITS DB
 if [ ! -s pfam_hhm.ffdata ]; then
   echo "Dowloading Pfam hh-suite database"
-  wget http://wwwuser.gwdg.de/~compbiol/data/hhsuite/databases/hhsuite_dbs/pfamA_31.0.tgz
-  tar xvfz pfamA_31.0.tgz
+  wget http://wwwuser.gwdg.de/~compbiol/data/hhsuite/databases/hhsuite_dbs/pfamA_34.0.tar.gz
+  tar xvfz pfamA_34.0.tar.gz
 fi
 
 # Pfam list common domain terms
-if [ ! -s Pfam-31_names_mod_01122019.tsv ]; then
+if [ ! -s Pfam-34_names_mod_20102021.tsv ]; then
   echo "Dowloading Pfam list of shared domain names"
-  wget https://ndownloader.figshare.com/files/23756204 -O Pfam-31_names_mod_01122019.tsv
+  wget https://figshare.com/ndownloader/files/31127782 -O Pfam-34_names_mod_20102021.tsv
 fi
+
 # Antifam databases
 if [ ! -s AntiFam.hmm ]; then
   echo "Dowloading AntiFam database"
@@ -37,34 +37,30 @@ if [ ! -s AntiFam.hmm ]; then
   tar xvfz Antifam.tar.gz
   ../bin/hmmpress AntiFam.hmm
 fi
+
 # Uniref90
 if [ ! -s uniref90.proteins.tsv.gz ]; then
-  echo "Dowloading UniRef90 DB"
-  aria2c --file-allocation=none -c -x 10 -s 10 ftp://ftp.uniprot.org/pub/databases/uniprot/uniref/uniref90/uniref90.fasta.gz
-  echo "Creating the MMseqs2 database"
-  "${MMSEQS}" createdb uniref90.fasta.gz uniref90.db --write-lookup 0 -v 0
+  echo "Dowloading UniRef90 DB using mmseqs"
+  "${MMSEQS}" databases UniRef90 uniref90.db tmp --threads 28 --remove-tmp-files
   # Create the protein description file:
   echo "extracting protein information"
-  zcat uniref90.fasta.gz | grep '^>' | sed 's/^>//' | sed 's/ /\t/' | sed 's/ /_/g' | gzip > uniref90.proteins.tsv.gz
-  rm uniref90.fasta.gz
+  sed 's/\x0//g' uniref90.db_h | sed 's/ /__/g' | sed 's/__/\t/' | sed 's/__/_/g' | gzip > uniref90.proteins.tsv.gz
 fi
 
 # NCBI nr
 if [ ! -s nr.proteins.tsv.gz ]; then
-  echo "Dowloading NCBI nr DB"
-  aria2c --file-allocation=none -c -x 10 -s 10 ftp://ftp.ncbi.nih.gov/blast/db/FASTA/nr.gz
-  echo "Creating the MMseqs2 database"
-  "${MMSEQS}" createdb nr.gz nr.db --write-lookup 0 -v 0
+  echo "Dowloading NR DB using mmseqs"
+  "${MMSEQS}" databases NR nr.db tmp --threads 28 --remove-tmp-files
   # Create the protein description file:
   echo "extracting protein information"
-  zcat nr.gz | grep '^>' | sed 's/^>//' | sed 's/ /\t/' | sed 's/ /_/g' | gzip > nr.proteins.tsv.gz
-  rm nr.gz
+  sed 's/\x0//g' nr.db_h | sed 's/ /__/g' | sed 's/__/\t/' | sed 's/__/_/g' | gzip > nr.proteins.tsv.gz
 fi
+
 # Uniclust HHBLITS DB
-if [ ! -s uniclust30_2018_08/uniclust30_2018_08_a3m.ffdata ]; then
-  echo "Dowloading Uniclust30 hh-suite database"
-  aria2c --file-allocation=none -c -x 10 -s 10 http://wwwuser.gwdg.de/~compbiol/uniclust/2018_08/uniclust30_2018_08_hhsuite.tar.gz
-  tar xvfz uniclust30_2018_08_hhsuite.tar.gz
+if [ ! -s UniRef30_2021_03_a3m.ffdata ]; then
+  echo "Dowloading Uniclust hh-suite database"
+  aria2c --file-allocation=none -c -x 10 -s 10 http://wwwuser.gwdg.de/~compbiol/uniclust/2021_03/UniRef30_2021_03.tar.gz
+  tar xvfz UniRef30_2021_03.tar.gz
 fi
 
 # DPD and info
@@ -81,12 +77,22 @@ if [ ! -s gtdb-r89_54k/gtdb-r89_54k.fmi ]; then
   tar xzvf gtdb-r89_54k.tar.gz
 fi
 
-# Uniprot KB for MMseqs2 taxonomy
-if [ ! -s uniprotKB ]; then
-  echo "Dowloading UniProtKB mmseqs taxonomy DB"
-  "${MMSEQS}" databases "UniProtKB" uniprotKB tmp --remove-tmp-files 1 -v 0
-  rm uniprotKB.lookout
+# Mutant phenotypes (Price et al. 2018)
+if [ ! -s aaseqs ]; then
+  ## Amino acid sequences
+  wget https://fit.genomics.lbl.gov/cgi_data/aaseqs
 fi
+if [ ! -s feba.db ]; then
+  ## Contextual data
+  wget https://fit.genomics.lbl.gov/cgi_data/feba.db
+fi
+
+# Uniprot KB for MMseqs2 taxonomy
+#if [ ! -s uniprotKB ]; then
+#  echo "Dowloading UniProtKB mmseqs taxonomy DB"
+#  "${MMSEQS}" databases "UniProtKB" uniprotKB tmp --remove-tmp-files 1 -v 0
+#  rm uniprotKB.lookout
+#fi
 
 
 cd ..

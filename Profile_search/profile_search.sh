@@ -100,41 +100,41 @@ if [[ ${NSEQS} -ge 100000 ]]; then
     sbatch --ntasks-per-node 1 --wait \
       --nodes 9 --cpus-per-task 28 \
       --job-name profs --partition nomaster \
-      --wrap " ${MMSEQS_BIN} search ${QUERY_DB} ${CLHMM} ${OUTDIR}/${NAME}_vs_mg_gtdb_hmm_db ${OUTDIR}/tmp \
+      --wrap " ${MMSEQS_BIN} search ${QUERY_DB} ${CLHMM} ${OUTDIR}/${NAME}_vs_agnostos_hmm_db ${OUTDIR}/tmp \
       --local-tmp ${LTMP} \
       --threads ${NSLOTS} -e 1e-20 --cov-mode 2 -c 0.6 \
       --split-mode 0 --split-memory-limit 150G \
       --mpi-runner \"${MPI}\" "
   else
-    "${MMSEQS_BIN}" search "${QUERY_DB}" "${CLHMM}" "${OUTDIR}"/"${NAME}"_vs_mg_gtdb_hmm_db "${OUTDIR}"/tmp \
+    "${MMSEQS_BIN}" search "${QUERY_DB}" "${CLHMM}" "${OUTDIR}"/"${NAME}"_vs_agnostos_hmm_db "${OUTDIR}"/tmp \
       --exhaustive-search --threads "${NSLOTS}" -e 1e-20 --cov-mode 2 -c 0.6
   fi
 else
   # Sequernce-profile search against the Cluster HMM profiles
-  "${MMSEQS_BIN}" search "${QUERY_DB}" "${CLHMM}" "${OUTDIR}"/"${NAME}"_vs_mg_gtdb_hmm_db "${OUTDIR}"/tmp \
+  "${MMSEQS_BIN}" search "${QUERY_DB}" "${CLHMM}" "${OUTDIR}"/"${NAME}"_vs_agnostos_hmm_db "${OUTDIR}"/tmp \
       --exhaustive-search --threads "${NSLOTS}" -e 1e-20 --cov-mode 2 -c 0.6
 fi
 
 wait
 
 # Convert result database in tsv-file
-"${MMSEQS_BIN}" convertalis "${QUERY_DB}" "${CLHMM}" "${OUTDIR}"/"${NAME}"_vs_mg_gtdb_hmm_db \
-  "${OUTDIR}"/"${NAME}"_vs_mg_gtdb_hmm_hits.tsv \
+"${MMSEQS_BIN}" convertalis "${QUERY_DB}" "${CLHMM}" "${OUTDIR}"/"${NAME}"_vs_agnostos_hmm_db \
+  "${OUTDIR}"/"${NAME}"_vs_agnostos_hmm_hits.tsv \
   --format-output 'query,target,pident,alnlen,mismatch,gapopen,qstart,qend,tstart,tend,evalue,bits,qcov,tcov' \
   --threads "${NSLOTS}"
 # Filter hits within 90% of the Log(best(e-value))
-awk -v P=0.9 -f "${EFILTER}" "${OUTDIR}"/"${NAME}"_vs_mg_gtdb_hmm_hits.tsv > "${OUTDIR}"/"${NAME}"_vs_mg_gtdb_hmm_res_qcov06_e90.tsv
+awk -v P=0.9 -f "${EFILTER}" "${OUTDIR}"/"${NAME}"_vs_agnostos_hmm_hits.tsv > "${OUTDIR}"/"${NAME}"_vs_agnostos_hmm_res_qcov06_e90.tsv
 # Add functional category information
-join -12 -21 <(sort -k2,2 "${OUTDIR}"/"${NAME}"_vs_mg_gtdb_hmm_res_qcov06_e90.tsv ) \
+join -12 -21 <(sort -k2,2 "${OUTDIR}"/"${NAME}"_vs_agnostos_hmm_res_qcov06_e90.tsv ) \
   <(sort -k1,1   "${CLCAT}") \
-  > "${OUTDIR}"/"${NAME}"_vs_mg_gtdb_hmm_search_res.tsv
+  > "${OUTDIR}"/"${NAME}"_vs_agnostos_hmm_search_res.tsv
 
-gzip "${OUTDIR}"/"${NAME}"_vs_mg_gtdb_hmm_search_res.tsv
+gzip "${OUTDIR}"/"${NAME}"_vs_agnostos_hmm_search_res.tsv
 
 # Parse results to get best-hits and category proportions per sample (or genome or contig..)
 # NB: the info file should have the following format: <gene> <sample> (or <genome>, or <contig>)
 
-"${MVOTE}"  --res "${OUTDIR}"/"${NAME}"_vs_mg_gtdb_hmm_search_res.tsv.gz \
+"${MVOTE}"  --res "${OUTDIR}"/"${NAME}"_vs_agnostos_hmm_search_res.tsv.gz \
             --info "${INFO}"
 
-#Rscript --vanilla "${MVOTE}" "${OUTDIR}"/"${NAME}"_vs_mg_gtdb_hmm_search_res.tsv.gz "${INFO}"
+#Rscript --vanilla "${MVOTE}" "${OUTDIR}"/"${NAME}"_vs_agnostos_hmm_search_res.tsv.gz "${INFO}"

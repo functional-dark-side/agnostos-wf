@@ -21,6 +21,7 @@ dependencies:
   - mcl
   - pandoc
   - vmtouch
+  - aria2
   - r-base=3.6.3
   - r-rcpp
   - r-dplyr

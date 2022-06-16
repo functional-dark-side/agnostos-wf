@@ -25,7 +25,7 @@ chmod +x "${WD}"/bin/famsa
 
 # OD-seq (Outlier detection in multiple sequence alignments)
 # In the mac systems we need to install gcc with brew (brew install gcc), then call specifically that gcc version (ex: /usr/local/Cellar/gcc/8.3.0/bin/g++-8)
-wget http://www.bioinf.ucd.ie/download/od-seq.tar.gz
+#wget http://www.bioinf.ucd.ie/download/od-seq.tar.gz
 tar -zxf od-seq.tar.gz
 cd OD-Seq/
 g++ -fopenmp -o "${WD}"/bin/OD-seq AliReader.cpp Bootstrap.cpp DistCalc.cpp DistMatReader.cpp DistWriter.cpp FastaWriter.cpp IQR.cpp ODseq.cpp PairwiseAl.cpp Protein.cpp ResultWriter.cpp runtimeargs.cpp util.cpp
@@ -43,21 +43,13 @@ cmake -DCMAKE_BUILD_TYPE=RelWithDebInfo -G "Unix Makefiles" -DCMAKE_INSTALL_PREF
 make -j 8
 make install
 cd ../../
-###############################################################################
 
-# FFindex (mpi mode)
-git clone https://github.com/soedinglab/ffindex_soedinglab
-cd ffindex_soedinglab
-cmake -DCMAKE_BUILD_TYPE=RelWithDebInfo -G "Unix Makefiles" -DCMAKE_INSTALL_PREFIX="${WD}" .
-make -j 8
-make install
-cd ..
 ###############################################################################
 
 # MMseqs2
 git clone https://github.com/soedinglab/MMseqs2.git
 cd MMseqs2
-git checkout 2f1db01c5109b07db23dc06df9d232e82b1b4b99
+git checkout 9cc89aa594131293b8bc2e7a121e2ed412f0b931
 mkdir build
 cd build
 cmake -DHAVE_MPI=1 -DCMAKE_BUILD_TYPE=RELEASE -DCMAKE_INSTALL_PREFIX="${WD}" ..
@@ -84,7 +76,17 @@ make -j 8
 make check
 make install
 cd ..
+####################################################################################
+
+# Eggnog-mapper
+git clone https://github.com/eggnogdb/eggnog-mapper.git
+cd eggnog-mapper
+python setup.py install
+pip install biopython
+python download_eggnog_data.py -y
+cd ../
 ###############################################################################
+
 # Parasail
 git clone https://github.com/jeffdaily/parasail
 cd parasail
@@ -99,25 +101,17 @@ cd ../..
 export LD_LIBRARY_PATH=/vol/cloud/agnostos-wf/lib:${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}
 ###############################################################################
 
-# LEON-BIS
-wget http://www.lbgi.fr/~julie/LEON-BIS/Src/leon-bis.tar
-tar xvf leon-bis.tar --directory "${WD}"/bin/
-###############################################################################
-
 # Igraph C-library
 wget https://igraph.org/nightly/get/c/igraph-0.7.1.tar.gz
 tar xvfz igraph-0.7.1.tar.gz
 cd igraph-0.7.1
 ./configure --prefix="${WD}"/bin/igraph
 make -j 8
-make check
+#make check
 make install
 cd ../../
 
 export LD_LIBRARY_PATH=/vol/cloud/agnostos-wf/bin/igraph/lib:${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}
 
-gcc db_creation/scripts/is_connected.c -o db_creation/scripts/is_connected -Ibin/igraph/include -Lbin/igraph/lib -ligraph
-gcc db_creation/scripts/filter_graph.c -o db_creation/scripts/filter_graph -Ibin/igraph/include -Lbin/igraph/lib -ligraph
-
-gcc db_update/scripts/is_connected.c -o db_update/scripts/is_connected -Ibin/igraph/include -Lbin/igraph/lib -ligraph
-gcc db_update/scripts/filter_graph.c -o db_update/scripts/filter_graph -Ibin/igraph/include -Lbin/igraph/lib -ligraph
+gcc workflow/scripts/is_connected.c -o workflow/scripts/is_connected -Ibin/igraph/include -Lbin/igraph/lib -ligraph
+gcc workflow/scripts/filter_graph.c -o workflow/scripts/filter_graph -Ibin/igraph/include -Lbin/igraph/lib -ligraph

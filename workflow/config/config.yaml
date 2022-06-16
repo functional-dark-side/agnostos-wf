@@ -1,0 +1,134 @@
+# This file should contain everything to configure the workflow on a global scale.
+# In case of sample based data, it should be complemented by a samples.tsv file that contains
+# one row per sample. It can be parsed easily via pandas.
+wdir: "/vol/cloud/agnostos-wf/workflow"
+rdir: "/vol/cloud/agnostos_test/db_creation"
+idir: "/vol/cloud/agnostos_test/db_creation_data"
+# choose a name for your dataset
+data_name: "tara_039_041"
+
+conda_env: "/vol/cloud/agnostos-wf/envs/workflow.yml"
+
+# Cluster update configuration
+# Setting module to "update" to run the cluster-update version of the snakemake workflow (otherwise "creation")
+module: "creation" #"update"
+
+# Path to existing cluster DB (sequence and cluster DBs) for the update module
+ordir: "/vol/cloud/agnostos_test/db_creation/clusterDB_results"
+# Path to the sequences that will be clustered or integrated into an existing cluster DB
+# Formats: name_contigs.fasta or name_genes.fasta
+data: "/vol/cloud/agnostos_test/db_creation_data/TARA_039_041_SRF_0.1-0.22_5K_contigs.fasta"
+# specify at which stage are your data, can be either "genes" or "contigs"
+data_stage: "contigs" #"contigs" or "genes" or "anvio_genes"
+# If you alrady have the gene predictions, please provide path to gene completeness information
+## In case your data comes from an Anvi'o contigDB, please specify here the anvio gene_calls.tsv file,
+## retrieved via "anvi-export-gene-calls -c CONTIGS.db -o anvio_gene_calls.tsv"
+data_partial: "/vol/cloud/agnostos_test/db_creation_data/genes_partial_info.tsv"
+
+# If you want to classify the singleton in the four category set the following entry to "true"
+singl: "true"
+
+# If you want to re-validate and classify the existing GCs that got integrated with new genes
+eval_shared: "true"
+# all shared GCs is the default, other possibilities are:
+#"discarded" for reprocessing all the previously discarded GCs with new sequences
+#"increase" for reprocessing all the shared GCs with 30% new sequences
+shared_type: "all" # "discarded" # "increase"
+
+# If you want ot dowload the required DBs at each step and then remove them, set db_mode to memory.
+db_mode: "all" # Options: "memory", "all"
+
+# Threads configuration
+threads_default: 28
+threads_collect: 28
+threads_cat_ref: 28
+threads_res: 14
+
+# Databases
+pfam_db: "/vol/cloud/agnostos-wf/databases/Pfam-A.hmm"
+pfam_clan: "/vol/cloud/agnostos-wf/databases/Pfam-A.clans.tsv.gz"
+antifam_db: "/vol/cloud/agnostos-wf/databases/AntiFam.hmm"
+uniref90_db: "/vol/cloud/agnostos-wf/databases/uniref90.db"
+nr_db: "/vol/cloud/agnostos-wf/databases/nr.db"
+uniclust_db: "/vol/cloud/agnostos-wf/databases/UniRef30_2021_03"
+#uniprot_db: "/vol/cloud/agnostos-wf/databases/uniprotKB.fasta.gz"
+pfam_hh_db: "/vol/cloud/agnostos-wf/databases/pfam"
+DPD: "/vol/cloud/agnostos-wf/databases/dpd_uniprot_sprot.fasta.gz"
+db_dir: "/vol/cloud/agnostos-wf/databases/"
+# Taxonomy for the gene cluster sequences
+conf_tax_db: "gtdb"
+gtdb_tax: "/vol/cloud/agnostos-wf/databases/gtdb-r89_54k/gtdb-r89_54k.fmi"
+nr_tax: "/vol/cloud/agnostos-wf/databases/nr_euk_db/kaiju_db_nr_euk.fmi"
+# Files retrieved from the databases
+# List of shared reduced Pfam domain names (dowloadable from Figshare..)
+pfam_shared_terms: "/vol/cloud/agnostos-wf/databases/Pfam-34_names_mod_20102021.tsv"
+# Created using the protein accessions and the descriptions found on the fasta headers
+uniref90_prot: "/vol/cloud/agnostos-wf/databases/uniref90.proteins.tsv.gz"
+nr_prot: "/vol/cloud/agnostos-wf/databases/nr.proteins.tsv.gz"
+# Information dowloaded from Dataset-S1 from the DPD paper:
+dpd_info: "/vol/cloud/agnostos-wf/databases/dpd_ids_all_info.tsv.gz"
+# Mutant phenotype Databases
+## amino acid sequences
+aa_mutants: "/vol/cloud/agnostos-wf/databases/aaseqs"
+## contextual data for the fitness experiments
+mutantDB: "/vol/cloud/agnostos-wf/databases/feba.db"
+
+# Local template folder
+local_tmp: "/vol/scratch/tmp"
+
+# MPI runner (de.NBI cloud, SLURM)
+mpi_runner: "srun --mpi=pmi2"
+
+#vmtouch for the DBs
+vmtouch: "vmtouch"
+
+# Gene prediction
+prodigal_bin: "prodigal"
+prodigal_mode: "meta" # for metagenomic data or "normal" for genomic data
+
+# Annotation
+hmmer_bin: "/vol/cloud/agnostos-wf/bin/hmmsearch"
+
+# Clustering config
+mmseqs_bin: "/vol/cloud/agnostos-wf/bin/mmseqs"
+mmseqs_tmp: "/vol/cloud/agnostos-wf/workflow/tmp"
+mmseqs_local_tmp: "/vol/scratch/tmp"
+mmseqs_split_mem: "100G"
+mmseqs_split: 10
+
+# Clustering results config
+seqtk_bin: "seqtk"
+
+# Spurious and shadows config
+hmmpress_bin: "/vol/cloud/agnostos-wf/bin/hmmpress"
+
+# Compositional validation config
+datamash_bin: "datamash"
+famsa_bin: "/vol/cloud/agnostos-wf/bin/famsa"
+odseq_bin: "/vol/cloud/agnostos-wf/bin/OD-seq"
+parasail_bin: "/vol/cloud/agnostos-wf/bin/parasail_aligner"
+parallel_bin: "parallel"
+igraph_lib: "export LD_LIBRARY_PATH=/vol/cloud/agnostos-wf/bin/igraph/lib:${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
+parasail_lib: "export LD_LIBRARY_PATH=/vol/cloud/agnostos-wf/lib:${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
+
+# Cluster classification config
+seqkit_bin: "seqkit"
+filterbyname: "filterbyname.sh"
+hhcons_bin: "/vol/cloud/agnostos-wf/bin/hh-suite/bin/hhconsensus"
+
+# Cluster category refinement
+hhsuite: "/vol/cloud/agnostos-wf/bin/hh-suite"
+hhblits_bin_mpi: "/vol/cloud/agnostos-wf/bin/hh-suite/bin/hhblits_mpi"
+hhmake: "/vol/cloud/agnostos-wf/bin/hh-suite/bin/hhmake"
+hhblits_prob: 90
+hypo_filt: 1.0
+
+# Taxonomy
+kaiju_bin: "/vol/cloud/agnostos-wf/bin/kaiju"
+
+# Eggnog
+eggnog_bin: "/vol/cloud/agnostos-wf/programs/eggnog-mapper/emapper.py"
+
+# Cluster communities
+hhblits_bin: "/vol/cloud/agnostos-wf/bin/hh-suite/bin/hhblits"
+hhsearch_bin: "/vol/cloud/agnostos-wf/bin/hh-suite/bin/hhsearch"
