@@ -25,7 +25,7 @@ chmod +x "${WD}"/bin/famsa
 
 # OD-seq (Outlier detection in multiple sequence alignments)
 # In the mac systems we need to install gcc with brew (brew install gcc), then call specifically that gcc version (ex: /usr/local/Cellar/gcc/8.3.0/bin/g++-8)
-#wget http://www.bioinf.ucd.ie/download/od-seq.tar.gz
+wget http://www.bioinf.ucd.ie/download/od-seq.tar.gz
 tar -zxf od-seq.tar.gz
 cd OD-Seq/
 g++ -fopenmp -o "${WD}"/bin/OD-seq AliReader.cpp Bootstrap.cpp DistCalc.cpp DistMatReader.cpp DistWriter.cpp FastaWriter.cpp IQR.cpp ODseq.cpp PairwiseAl.cpp Protein.cpp ResultWriter.cpp runtimeargs.cpp util.cpp
