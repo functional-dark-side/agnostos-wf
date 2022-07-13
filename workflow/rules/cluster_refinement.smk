@@ -61,24 +61,26 @@ rule cluster_refinement:
         # 2. shadow clusters (≥ 30% shadow ORFs)
         # 3. single rejected ORFs (shadow, spurious and bad-aligned)
 
-        # 1st step: from the validation results we already have a table with the good clusters:
-        # good_clusters.tsv (in the directory with the validation results)= {input.good}
+        if [[ ! -s {params.toremove} ]]; then
+            # 1st step: from the validation results we already have a table with the good clusters:
+            # good_clusters.tsv (in the directory with the validation results)= {input.good}
 
-        # 2nd step: we remove from the good clusters those with ≥ 30% shadows
-        join -11 -21 -v2 <(awk '$5>=0.3 && !seen[$2]++{{print $2}}' {input.sp_sh} | sort -k1,1) \
-          <( grep -v 'cl_name' {input.good} | awk '{{print $1}}' | sort -k1,1) > {params.good_noshadow}
+            # 2nd step: we remove from the good clusters those with ≥ 30% shadows
+            join -11 -21 -v2 <(awk '$5>=0.3 && !seen[$2]++{{print $2}}' {input.sp_sh} | sort -k1,1) \
+            <( grep -v 'cl_name' {input.good} | awk '{{print $1}}' | sort -k1,1) > {params.good_noshadow}
 
-        ## Retrieve the subdb with the ORFs of these clusters
-        {params.mmseqs_bin} createsubdb <(awk '{{print $1}}' {params.good_noshadow}) ${{DB}} {params.tmpdb}
+            ## Retrieve the subdb with the ORFs of these clusters
+            {params.mmseqs_bin} createsubdb <(awk '{{print $1}}' {params.good_noshadow}) ${{DB}} {params.tmpdb}
 
-        # 3rd step: retrieve the single rejected/spurious/shadow ORFs and remove them from the remaining clusters
-        ## retrieve the bad-aligned sequences in the set of good & no-shadow clusters
-        join -11 -21 <(sort -k1,1 {input.cval_rej} ) <(sort -k1,1 {params.good_noshadow}) > {params.rej}
+            # 3rd step: retrieve the single rejected/spurious/shadow ORFs and remove them from the remaining clusters
+            ## retrieve the bad-aligned sequences in the set of good & no-shadow clusters
+            join -11 -21 <(sort -k1,1 {input.cval_rej} ) <(sort -k1,1 {params.good_noshadow}) > {params.rej}
 
-        ## Add the bad-aligned sequences to the spurious and shadows
-        awk '$5<0.3 && $6!="FALSE"{{print $1}}' {input.sp_sh} > {params.toremove}
-        awk '$5<0.3 && $7!="FALSE"{{print $1}}' {input.sp_sh} >> {params.toremove}
-        awk '{{print $2}}' {params.rej} >> {params.toremove}
+            ## Add the bad-aligned sequences to the spurious and shadows
+            awk '$5<0.3 && $6!="FALSE"{{print $1}}' {input.sp_sh} > {params.toremove}
+            awk '$5<0.3 && $7!="FALSE"{{print $1}}' {input.sp_sh} >> {params.toremove}
+            awk '{{print $2}}' {params.rej} >> {params.toremove}
+        fi
 
         if [[ -s {params.toremove} ]]; then
                 # add cluster membership
@@ -87,16 +89,17 @@ rule cluster_refinement:
                 > {params.toremove_cl}
 
                 # remove the single orfs from the clusters with less than 10% bad-aligned ORFs and less than 30% shadows.
-                {params.mpi_runner} {params.mmseqs_bin} apply {params.tmpdb} {params.refdb} --threads {threads} \
-                -- {params.toremove_sh} {params.toremove_cl} 2>>{log.err} 1>>{log.out}
-
+                if [[ ! -s {params.refdb} ]]; then
+                    {params.mpi_runner} {params.mmseqs_bin} apply {params.tmpdb} {params.refdb} --threads {threads} \
+                    -- {params.toremove_sh} {params.toremove_cl} 2>>{log.err} 1>>{log.out}
+                fi
                 # Create tables with new seqs and new clusters for some stats and checking the numbers
-                join -11 -21 <(awk '{{print $1}}' {params.refdb}.index | sort -k1,1) \
+                join -11 -21 <(awk '{{print $1}}' {params.refdb}.index | sort -k1,1 --parallel={threads} -T {params.local_tmp}) \
                     <(awk '{{print $1,$3}}' {params.clu_info} \
                     | sort -k1,1 --parallel={threads} -T {params.local_tmp}) > {params.tmp1}
                 # Remove "bad" ORFs from the refined table
-                join -12 -21 -v1 <(sort -k2,2 {params.tmp1}) \
-                    <(sort -k1,1 {params.toremove}) > {params.tmp} && mv {params.tmp} {params.tmp1}
+                join -12 -21 -v1 <(sort -k2,2 --parallel={threads} -T {params.local_tmp} {params.tmp1}) \
+                    <(sort -k1,1 --parallel={threads} -T {params.local_tmp} {params.toremove}) > {params.tmp} && mv {params.tmp} {params.tmp1}
         else
           mv {params.good_noshadow} {params.tmp1}
           mv {params.tmpdb} {params.refdb}
@@ -106,15 +109,15 @@ rule cluster_refinement:
         # From the refined clusters select the annotated and the not annotated for the following classification steps
 
         # annotated (check those left with no-annotated sequences): join with file with all annotated clusters (using the orfs)
-        join -11 -21 <(sort -k1,1 {params.tmp1}) \
+        join -11 -21 <(sort -k1,1 --parallel={threads} -T {params.local_tmp} {params.tmp1}) \
           <(awk '{{print $3,$4}}' {params.annot} \
-          |  sort -k1,1) > {output.ref_annot}
+          |  sort -k1,1 --parallel={threads} -T {params.local_tmp}) > {output.ref_annot}
 
         # Reorder columns to have cl_name - orf - pfam_name
         awk -vOFS='\\t' '{{print $2,$1,$3}}' {output.ref_annot} > {params.tmp} && mv {params.tmp} {output.ref_annot}
 
         # Find in the refined annotated clusters, those left with no annotated ORFs
-        sort -k1,1 {output.ref_annot} \
+        sort -k1,1 --parallel={threads} -T {params.local_tmp} {output.ref_annot} \
           | awk '!seen[$1,$3]++{{print $1,$3}}' \
           | awk 'BEGIN{{getline;id=$1;l1=$1;l2=$2;}}{{if($1 != id){{print l1,l2;l1=$1;l2=$2;}}else{{l2=l2"|"$2;}}id=$1;}}END{{print l1,l2;}}' \
           | grep -v "|" | awk '$2=="NA"{{print $1}}' > {params.new_noannot}
@@ -122,23 +125,25 @@ rule cluster_refinement:
         if [[ -s {params.new_noannot} ]]; then
 
           # move the clusters left with no annotated member to the not annotated
-          join -11 -21 -v1 <(awk '!seen[$1,$2,$3]++' {output.ref_annot} | sort -k1,1) \
+          join -11 -21 -v1 <(awk '!seen[$1,$2,$3]++' {output.ref_annot} | sort -k1,1 --parallel={threads} -T {params.local_tmp}) \
             <(sort {params.new_noannot}) > {params.tmp}
 
           join -11 -21 <(awk '!seen[$1,$2,$3]++{{print $1,$2}}' {output.ref_annot} | sort -k1,1) \
             <(sort {params.new_noannot}) > {output.ref_noannot}
 
           # not annotated
-          join -12 -21 <(sort -k2,2 {params.tmp1}) \
-            <(awk -vFS='\\t' '$4=="noannot"{{print $1,$2}}' {input.good} | sort -k1,1) >> {output.ref_noannot}
+          join -12 -21 <(sort -k2,2 --parallel={threads} -T {params.local_tmp} {params.tmp1}) \
+            <(awk -vFS='\\t' '$4=="noannot"{{print $1,$2}}' {input.good} |\
+             sort -k1,1 --parallel={threads} -T {params.local_tmp}) >> {output.ref_noannot}
 
           mv {params.tmp} {output.ref_annot}
 
         else
 
           # not annotated
-          join -12 -21 <(sort -k2,2 {params.tmp1}) \
-            <(awk '$4=="noannot"{{print $1,$2}}' {input.good} | sort -k1,1) > {output.ref_noannot}
+          join -12 -21 <(sort -k2,2 --parallel={threads} -T {params.local_tmp} {params.tmp1}) \
+            <(awk '$4=="noannot"{{print $1,$2}}' {input.good} |\
+             sort -k1,1 --parallel={threads} -T {params.local_tmp}) > {output.ref_noannot}
         fi
 
         awk -vOFS='\\t' '{{print $1,$2}}' {output.ref_noannot} > {params.tmp} && mv {params.tmp} {output.ref_noannot}
