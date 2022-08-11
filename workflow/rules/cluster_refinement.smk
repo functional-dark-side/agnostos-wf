@@ -128,7 +128,8 @@ rule cluster_refinement:
           join -11 -21 -v1 <(awk '!seen[$1,$2,$3]++' {output.ref_annot} | sort -k1,1 --parallel={threads} -T {params.local_tmp}) \
             <(sort {params.new_noannot}) > {params.tmp}
 
-          join -11 -21 <(awk '!seen[$1,$2,$3]++{{print $1,$2}}' {output.ref_annot} | sort -k1,1) \
+          join -11 -21 <(awk '!seen[$1,$2,$3]++{{print $1,$2}}' {output.ref_annot} |\
+            sort -k1,1 --parallel={threads} -T {params.local_tmp}) \
             <(sort {params.new_noannot}) > {output.ref_noannot}
 
           # not annotated
@@ -157,23 +158,23 @@ rule cluster_refinement:
 
         # Colums partial: 1:orf|2:partial_info
         # Columns tmp3: 1:orf|2:partial_info|3:cl_name
-        join -11 -21 <(sort -k1,1 --parallel={threads} ${{PARTIAL}}) \
+        join -11 -21 <(sort -k1,1 --parallel={threads} -T {params.local_tmp} ${{PARTIAL}}) \
             <(sort -k1,1 --parallel={threads} -T {params.local_tmp} {params.tmp1}) > {params.tmp2}
 
         # Add cluster size and ORF length
         # Columns clu_info: 1:cl_name|2:old_repr|3:orf|4:orf_len|5:cl_size
         # Columns intermediate: 1:orf|2:partial_info|3:cl_name|4:old_repr|5:orf_len|6:cl_size
         # Columns tmp4: 1:cl_name|2:orf|3:partial|4:cl_size|5:orf_len
-        join -11 -21 <(sort -k1,1 --parallel={threads} {params.tmp2}) \
+        join -11 -21 <(sort -k1,1 --parallel={threads} -T {params.local_tmp} {params.tmp2}) \
             <(awk '{{print $3,$2,$4,$5}}' {params.clu_info} \
             | sort -k1,1 --parallel={threads} -T {params.local_tmp}) \
-            | sort -k3,3 \
+            | sort -k3,3 --parallel={threads} -T {params.local_tmp} \
             | awk -vOFS='\\t' '{{print $3,$1,$2,$6,$5}}' > {params.tmp3}
 
         # Add new representatives from validation
         # Columns tmp5: 1:cl_name|2:orf|3:partial|4:cl_size|5:orf_len|6:new_repr
         join -11 -21 <(sort -k1,1 --parallel={threads} -T {params.local_tmp} {params.tmp3}) \
-            <(awk '{{print $1,$2}}' {input.val_res} | sort -k1,1 --parallel={threads}) > {params.tmp4}
+            <(awk '{{print $1,$2}}' {input.val_res} | sort -k1,1 --parallel={threads} -T {params.local_tmp}) > {params.tmp4}
 
         # Reorder columns: 1:cl_name|2:new_repres|3:orf|4:cl_size|5:orf_length|6:partial
         awk -vOFS='\\t' '{{print $1,$6,$2,$4,$5,$3}}' {params.tmp4} > {output.ref_clu}
