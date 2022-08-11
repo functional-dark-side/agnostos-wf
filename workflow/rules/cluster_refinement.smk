@@ -138,6 +138,7 @@ rule cluster_refinement:
              sort -k1,1 --parallel={threads} -T {params.local_tmp}) >> {output.ref_noannot}
 
           mv {params.tmp} {output.ref_annot}
+          sed -i 's/ /\t/g' {output.ref_annot}
 
         else
 
