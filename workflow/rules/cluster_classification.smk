@@ -89,20 +89,20 @@ rule cluster_classification:
             sed -e 's/\\x0//g' {params.db_cons} > {params.ref_cons}
 
             rm {params.db_aln}* {params.db_cons}*
-        fi
 
-        # Add singletons not annotated here to ref_cons if config["singl"]=="true"
-        # keep the name ref_cons for the two searches (easier)
-        if [ {params.singl} == "true" ]; then
-            join -11 -21 -v1 <(awk '{{print $2}}' {params.s_all} | sort -k1,1) \
-            <(awk '{{print $1}}' {params.s_annot} | sort -k1,1) > {params.outdir}/singletons_not_annot.txt
-            sed -e 's/\\x0//g' {params.genes} > {params.outdir}/genes.fasta
-            {params.filterbyname} in={params.outdir}/genes.fasta \
-                                  out={params.outdir}/singletons_not_annot.fasta \
-                                  names={params.outdir}/singletons_not_annot.txt \
-                                  include=t ignorejunk overwrite="true" 2>>{log.err} 1>>{log.out}
-            cat {params.outdir}/singletons_not_annot.fasta >> {params.ref_cons}
-            rm {params.outdir}/genes.fasta
+            # Add singletons not annotated here to ref_cons if config["singl"]=="true"
+            # keep the name ref_cons for the two searches (easier)
+            if [ {params.singl} == "true" ]; then
+                join -11 -21 -v1 <(awk '{{print $2}}' {params.s_all} | sort -k1,1) \
+                <(awk '{{print $1}}' {params.s_annot} | sort -k1,1) > {params.outdir}/singletons_not_annot.txt
+                sed -e 's/\\x0//g' {params.genes} > {params.outdir}/genes.fasta
+                {params.filterbyname} in={params.outdir}/genes.fasta \
+                                    out={params.outdir}/singletons_not_annot.fasta \
+                                    names={params.outdir}/singletons_not_annot.txt \
+                                    include=t ignorejunk overwrite="true" 2>>{log.err} 1>>{log.out}
+                cat {params.outdir}/singletons_not_annot.fasta >> {params.ref_cons}
+                rm {params.outdir}/genes.fasta
+            fi
         fi
 
         # Search the not annotated cluster consensus sequences against the UniRef90 database
@@ -116,7 +116,7 @@ rule cluster_classification:
         fi
 
         if [ ! -f {params.outdir}/noannot_vs_uniref90_hits.txt ]; then
-            {params.vmtouch} -f {params.uniref_db}
+            {params.vmtouch} -f {params.uniref_db}*
             {params.mmseqs_search} --search {params.mmseqs_bin} \
                                     --mpi_runner "{params.mpi_runner}" \
                                     --ltmp {params.local_tmp} \
@@ -159,7 +159,7 @@ rule cluster_classification:
         fi
 
         if [ ! -f {params.outdir}/uniref-nohits_vs_NR_hits.txt ]; then
-            {params.vmtouch} -f {params.nr_db}
+            {params.vmtouch} -f {params.nr_db}*
             {params.mmseqs_search} --search {params.mmseqs_bin} \
                                     --mpi_runner "{params.mpi_runner}" \
                                     --ltmp {params.local_tmp} \
@@ -309,8 +309,8 @@ rule cluster_classification:
         awk -vOFS='\\t' 'NR>1 && $9!="DUF"{{print $1,"PFAM","0.0",$6}}' {params.dom_arch} >> {params.outdir}/k_annotations.tsv
 
         # Clear results
-        rm -rf {params.outdir}/noannot_vs_uniref90_* {params.outdir}/uniref-nohits_vs_NR_*
-        rm -rf {params.refdb_noannot}*
+        #rm -rf {params.outdir}/noannot_vs_uniref90_* {params.outdir}/uniref-nohits_vs_NR_*
+        #rm -rf {params.refdb_noannot}*
 
         """
 
