@@ -133,7 +133,7 @@ rule cluster_category_refinement:
                     mv {params.tmp_eu}.ffindex {params.tmp_eu}.index
                 fi
                 {params.mpi_runner} {params.mmseqs_bin} apply {params.tmp_eu} {params.tmp_eu}.parsed_pfam \
-                    -- {params.hhblits_search} {params.outdir}/templ {threads} {params.hhblits_prob} --threads 1 2>>{log.err} 1>>{log.out}
+                    -- {params.hhpfam_parser} {params.outdir}/templ {threads} {params.hhblits_prob} --threads 1 2>>{log.err} 1>>{log.out}
                 rm -rf {params.outdir}/templ
                 sed -e 's/\\x0//g' {params.tmp_eu}.parsed_pfam > {params.tmp_eu}.tsv
 
@@ -239,7 +239,7 @@ rule cluster_category_refinement:
 
         #######
         ## Known without Pfam refinement, searching for remote homologies (in the Pfam DB)
-        
+
         # Pfam clans
         if [ ! -s {params.pfam_clan} ]; then
           echo "Dowloading Pfam-A clan information"
