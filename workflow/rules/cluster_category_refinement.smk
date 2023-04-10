@@ -133,7 +133,7 @@ rule cluster_category_refinement:
                     mv {params.tmp_eu}.ffindex {params.tmp_eu}.index
                 fi
                 {params.mpi_runner} {params.mmseqs_bin} apply {params.tmp_eu} {params.tmp_eu}.parsed_pfam \
-                    -- {params.hhpfam_parser} {params.outdir}/templ {threads} {params.hhblits_prob} --threads 1 2>>{log.err} 1>>{log.out}
+                    -- {params.hhblits_search} {params.outdir}/templ {threads} {params.hhblits_prob} --threads 1 2>>{log.err} 1>>{log.out}
                 rm -rf {params.outdir}/templ
                 sed -e 's/\\x0//g' {params.tmp_eu}.parsed_pfam > {params.tmp_eu}.tsv
 
