@@ -140,38 +140,39 @@ rule cluster_category_refinement:
                 #Parsing hhblits result files and filtering for hits with coverage > 0.4, and removing overlapping pfam domains/matches
                 ./{params.hhpfam_parser} {params.tmp_eu}.tsv {threads} > {params.tmp_eu}_filt.tsv
 
-                # join with the pfam names and clans
-                join -11 -21 <(awk '{{split($1,a,"."); print a[1],$3,$8,$9}}' {params.tmp_eu}_filt.tsv | sort -k1,1) \
-                    <(gzip -dc {params.pfam_clan} |\
-                    awk -vFS='\\t' -vOFS='\\t' '{{print $1,$2,$4}}' |\
-                    awk -vFS='\\t' -vOFS='\\t' '{{for(i=1; i<=NF; i++) if($i ~ /^ *$/) $i = "no_clan"}};1' \
-                    | sort -k1,1) > {params.tmp_eu}_name_acc_clan.tsv
+                if [ -s {params.tmp_eu}_filt.tsv ]; then
+                    # join with the pfam names and clans
+                    join -11 -21 <(awk '{{split($1,a,"."); print a[1],$3,$8,$9}}' {params.tmp_eu}_filt.tsv | sort -k1,1) \
+                        <(gzip -dc {params.pfam_clan} |\
+                        awk -vFS='\\t' -vOFS='\\t' '{{print $1,$2,$4}}' |\
+                        awk -vFS='\\t' -vOFS='\\t' '{{for(i=1; i<=NF; i++) if($i ~ /^ *$/) $i = "no_clan"}};1' \
+                        | sort -k1,1) > {params.tmp_eu}_name_acc_clan.tsv
 
-                # Multi domain format
-                awk '{{print $2,$3,$4,$5,$1,$6}}' {params.tmp_eu}_name_acc_clan.tsv |\
-                    sort -k1,1 -k2,3g | \
-                    awk -vOFS='\\t' '{{print $1,$4,$5,$6}}' | \
-                    awk -f {params.concat} > {params.tmp_eu}_name_acc_clan_multi.tsv
+                    # Multi domain format
+                    awk '{{print $2,$3,$4,$5,$1,$6}}' {params.tmp_eu}_name_acc_clan.tsv |\
+                        sort -k1,1 -k2,3g | \
+                        awk -vOFS='\\t' '{{print $1,$4,$5,$6}}' | \
+                        awk -f {params.concat} > {params.tmp_eu}_name_acc_clan_multi.tsv
 
-                rm {params.tmp_eu}_name_acc_clan.tsv
+                        rm {params.tmp_eu}_name_acc_clan.tsv
 
-                if [ -s {params.tmp_eu}_name_acc_clan_multi.tsv ]; then
-                    # Divide the new hits with pfam into DUFs and not DUFs
-                    ./{params.new_da} {params.tmp_eu}_name_acc_clan_multi.tsv {params.tmp_eu}
+                    if [ -s {params.tmp_eu}_name_acc_clan_multi.tsv ]; then
+                        # Divide the new hits with pfam into DUFs and not DUFs
+                        ./{params.new_da} {params.tmp_eu}_name_acc_clan_multi.tsv {params.tmp_eu}
 
-                    # New K clusters
-                    awk '{{print $1}}' {params.tmp_eu}_new_k_ids_annot.tsv >> {output.k}
-                    cat {input.k} >> {output.k}
-                    # New GU clusters
-                    awk '{{print $1}}' {params.tmp_eu}_new_gu_ids_annot.tsv >> {output.gu}
-                    # Remaning EU clusters
-                    join -11 -21 -v1 <(sort -k1,1 {input.eu}) \
-                        <(awk '{{print $1}}' {params.tmp_eu}_name_acc_clan_multi.tsv | sort -k1,1) > {output.eu}.1
-                    # Subset the EU hmm DB
-                    {params.mmseqs_bin} createsubdb {output.eu}.1 {params.hmm_eu} {params.hmm_eu}.left
-                    mv {params.hmm_eu}.left {params.hmm_eu}
-                    mv {params.hmm_eu}.left.index {params.hmm_eu}.index
-
+                        # New K clusters
+                        awk '{{print $1}}' {params.tmp_eu}_new_k_ids_annot.tsv >> {output.k}
+                        cat {input.k} >> {output.k}
+                        # New GU clusters
+                        awk '{{print $1}}' {params.tmp_eu}_new_gu_ids_annot.tsv >> {output.gu}
+                        # Remaning EU clusters
+                        join -11 -21 -v1 <(sort -k1,1 {input.eu}) \
+                            <(awk '{{print $1}}' {params.tmp_eu}_name_acc_clan_multi.tsv | sort -k1,1) > {output.eu}.1
+                        # Subset the EU hmm DB
+                        {params.mmseqs_bin} createsubdb {output.eu}.1 {params.hmm_eu} {params.hmm_eu}.left
+                        mv {params.hmm_eu}.left {params.hmm_eu}
+                        mv {params.hmm_eu}.left.index {params.hmm_eu}.index
+                    fi
                 fi
                 # Run remaining EU GCs vs Uniclust
                 {params.vmtouch} -f {params.hmm_eu}
