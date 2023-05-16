@@ -260,7 +260,7 @@ rule cluster_category_refinement:
                           --outdir {params.outdir} \
                           --idir {params.idir} \
                           --clu_hhm "none" \
-                          --threads {threads} 2>{log.err} 1>{log.out}
+                          --threads {threads} 2>>{log.err} 1>>{log.out}
         fi
 
         rm -f {params.hmm_kwp}.ff*
