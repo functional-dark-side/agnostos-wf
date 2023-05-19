@@ -39,7 +39,11 @@ MultiAnnot <- function(annot_data, annot, clstrnoNA, size){
   if(dim(singl)[1] > 0){
     n.singl <- dim(singl)[1]
     prop.singl <- n.singl/size
-    ds <- Jaccard(singl)
+    if(length(unique(singl$annot))==1){
+        ds <- rep(1,length(singl$memb))
+    } else {
+        ds <- Jaccard(singl)
+    }
     if(n.singl==1){
       median <- 1
     } else {
@@ -153,4 +157,3 @@ MultiAnnot <- function(annot_data, annot, clstrnoNA, size){
   }
   return(res)
 }
-
