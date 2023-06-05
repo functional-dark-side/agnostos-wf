@@ -212,7 +212,7 @@ int main(int argc, char **argv) {
         igraph_eigenvector_centrality(&g, &evc, &value, /*directed=*/ 0,
                                       /*scale=*/ 1, &weightatt,  &options);
         max = igraph_vector_which_max(&evc);
-        igraph_strvector_get(&names, max, &nam);
+        igraph_strvector_get(&names, max);
 
         printf("%s\n", "Writing trimmed graph...");
         FILE *output;
@@ -239,4 +239,3 @@ int main(int argc, char **argv) {
         igraph_destroy(&g1);
         return 0;
 }
-

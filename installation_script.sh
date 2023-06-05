@@ -105,13 +105,14 @@ export LD_LIBRARY_PATH=/vol/cloud/agnostos-wf/lib:${LD_LIBRARY_PATH:+:$LD_LIBRAR
 wget https://github.com/igraph/igraph/releases/download/0.10.4/igraph-0.10.4.tar.gz
 tar xvfz igraph-0.10.4.tar.gz
 cd igraph-0.10.4
-./configure --prefix="${WD}"/bin/igraph
-make -j 8
-#make check
-make install
-cd ../../
+mkdir build && cd build
+cmake -DCMAKE_INSTALL_PREFIX="${WD}"/bin/igraph ..
+cmake --build .
+#cmake --build . --target check
+cmake --install .
+cd ../../../
 
 export LD_LIBRARY_PATH=/vol/cloud/agnostos-wf/bin/igraph/lib:${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}
 
-gcc workflow/scripts/is_connected.c -o workflow/scripts/is_connected -Ibin/igraph/include -Lbin/igraph/lib -ligraph
-gcc workflow/scripts/filter_graph.c -o workflow/scripts/filter_graph -Ibin/igraph/include -Lbin/igraph/lib -ligraph
+gcc workflow/scripts/is_connected.c -o workflow/scripts/is_connected -Ibin/igraph/include -Lbin/igraph/lib -ligraph -lm -lstdc++ -lgomp -lpthread
+gcc workflow/scripts/filter_graph.c -o workflow/scripts/filter_graph -Ibin/igraph/include -Lbin/igraph/lib -ligraph -lm -lstdc++ -lgomp -lpthread
