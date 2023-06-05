@@ -102,7 +102,7 @@ export LD_LIBRARY_PATH=/vol/cloud/agnostos-wf/lib:${LD_LIBRARY_PATH:+:$LD_LIBRAR
 ###############################################################################
 
 # Igraph C-library
-wget https://igraph.org/nightly/get/c/igraph-0.10.4.tar.gz
+wget https://github.com/igraph/igraph/releases/download/0.10.4/igraph-0.10.4.tar.gz
 tar xvfz igraph-0.10.4.tar.gz
 cd igraph-0.10.4
 ./configure --prefix="${WD}"/bin/igraph
