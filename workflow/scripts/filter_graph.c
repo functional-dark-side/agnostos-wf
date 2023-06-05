@@ -102,7 +102,7 @@ long int binarySearch(igraph_t *g, igraph_vector_t *v, igraph_vector_t *vsort,  
 }
 
 int main(int argc, char **argv) {
-        igraph_i_set_attribute_table(&igraph_cattribute_table);
+        igraph_set_attribute_table(&igraph_cattribute_table);
         long int nedges, nertex, m, maxw, minw, max;
         int n, k = 0;
         const char *weight = "weight";
