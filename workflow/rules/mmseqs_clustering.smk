@@ -12,9 +12,10 @@ rule mmseqs_clustering:
         mmseqs_tmp = config["rdir"] + "/mmseqs_clustering/tmp",
         seqdb = config["rdir"] + "/mmseqs_clustering/seqDB",
         cludb = config["rdir"] + "/mmseqs_clustering/cluDB"
-
     threads: 28
     priority: 50
+    conda:
+        config["conda_env"]
     output:
         clu = config["rdir"] + "/mmseqs_clustering/cluDB.tsv"
     log:

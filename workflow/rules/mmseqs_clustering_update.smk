@@ -20,6 +20,8 @@ rule mmseqs_clustering_update:
         mmseqs_split = config["mmseqs_split"],
         mmseqs_mpi_runner = config["mpi_runner"]
     threads: 28
+    conda:
+        config["conda_env"]
     output:
         updt_clu = config["rdir"] + "/mmseqs_clustering/cluDB.tsv"
     log:
