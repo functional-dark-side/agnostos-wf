@@ -4,6 +4,7 @@ rule mmseqs_clustering:
     params:
         mmseqs_bin = config["mmseqs_bin"],
         mmseqs_mpi_runner = config["mpi_runner"],
+        mmseqs_local_tmp = config["mmseqs_local_tmp"],
         mmseqs_cov = 0.8,
         mmseqs_id = 0.3,
         mmseqs_cov_mode = 0,
@@ -37,6 +38,7 @@ rule mmseqs_clustering:
           {params.seqdb} \
           {params.cludb} \
           {params.mmseqs_tmp} \
+          --local-tmp {params.mmseqs_local_tmp} \
           --threads {threads} \
           -c {params.mmseqs_cov} \
           --cov-mode {params.mmseqs_cov_mode} \
