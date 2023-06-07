@@ -248,7 +248,7 @@ rule cluster_category_refinement:
         fi
 
         if [[ ! -f {params.hmm_kwp} ]]; then
-            if [[ -s {output.kwp}.1 ]]; then
+            if [[ -s {output.kwp} ]]; then
                 IDIR={params.outdir}
             else
                 IDIR={params.idir}
