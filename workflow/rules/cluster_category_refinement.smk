@@ -248,6 +248,11 @@ rule cluster_category_refinement:
         fi
 
         if [[ ! -f {params.hmm_kwp} ]]; then
+            if [[ -s {output.kwp}.1 ]]; then
+                IDIR={params.outdir}
+            else
+                IDIR={params.idir}
+            fi
             {params.categ_db} --cluseq_db {params.cluseqdb} \
                           --step "{params.step_k}" \
                           --mpi_runner "{params.mpi_runner}" \
@@ -258,7 +263,7 @@ rule cluster_category_refinement:
                           --consensus {params.consensus} \
                           --hhmake {params.hhmake} \
                           --outdir {params.outdir} \
-                          --idir {params.idir} \
+                          --idir "${{IDIR}}" \
                           --clu_hhm "none" \
                           --threads {threads} 2>>{log.err} 1>>{log.out}
         fi
