@@ -59,8 +59,8 @@ fi
 # Uniclust HHBLITS DB
 if [ ! -s UniRef30_2021_03_a3m.ffdata ]; then
   echo "Dowloading Uniclust hh-suite database"
-  aria2c --file-allocation=none -c -x 10 -s 10 http://wwwuser.gwdg.de/~compbiol/uniclust/2021_03/UniRef30_2021_03.tar.gz
-  tar xvfz UniRef30_2021_03.tar.gz
+  aria2c --file-allocation=none -c -x 10 -s 10 http://wwwuser.gwdg.de/~compbiol/uniclust/2023_02/UniRef30_2023_02_hhsuite.tar.gz
+  tar xvfz UniRef30_2023_02_hhsuite.tar.gz
 fi
 
 # DPD and info

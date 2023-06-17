@@ -120,6 +120,8 @@ rule cluster_category_refinement:
                     -- {params.hhblits_search} {params.outdir}/templ {threads} {params.hhblits_prob} --threads 1 2>>{log.err} 1>>{log.out}
 
                  sed -e 's/\\x0//g' {params.tmp_eu}.parsed > {params.tmp_eu}_parsed.tsv
+                 awk '{{print $1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15"-"$16"-"$17"-"$18"-"$19"-"$20}}' {params.tmp_eu}_parsed.tsv |\
+                 sed 's/ /\t/g' > {params.outdir}/tmpl && mv {params.outdir}/tmpl {params.tmp_eu}_parsed.tsv                 
                  rm -rf {params.outdir}/templ
             else
                 # Run EU vs PFAM and then EU vs Uniclust
@@ -188,7 +190,7 @@ rule cluster_category_refinement:
                     -- {params.hhblits_search} {params.outdir}/templ {threads} {params.hhblits_prob} --threads 1 2>>{log.err} 1>>{log.out}
 
                 sed -e 's/\\x0//g' {params.tmp_eu}.parsed_unicl > {params.tmp_eu}_parsed.tsv
-                awk '{print $1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15"-"$16"-"$17"-"$18"-"$19"-"$20}' {params.tmp_eu}_parsed.tsv |\
+                awk '{{print $1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15"-"$16"-"$17"-"$18"-"$19"-"$20}}' {params.tmp_eu}_parsed.tsv |\
                 sed 's/ /\t/g' > {params.outdir}/tmpl && mv {params.outdir}/tmpl {params.tmp_eu}_parsed.tsv
                 rm -rf {params.outdir}/templ
             fi
