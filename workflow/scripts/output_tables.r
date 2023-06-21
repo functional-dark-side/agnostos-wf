@@ -36,6 +36,8 @@ option_list <- list(
               help="use singleton or not", metavar="character"),
   make_option(c("--s_categ"), type="character", default=NULL,
               help="singelton categories", metavar="character"),
+make_option(c("--anvio"), type="character", default=NULL,
+              help="anvio genes", metavar="character"),
   make_option(c("--threads"), type="character", default=1,
               help="number of threads", metavar="numeric")
 )
@@ -51,7 +53,7 @@ if (is.null(opt$clu_or) | is.null(opt$contig) |
     is.null(opt$hq_clu) | is.null(opt$k_annot) |
     is.null(opt$kwp_annot) | is.null(opt$gu_annot) |
     is.null(opt$orig_db) | is.null(opt$threads) |
-    is.null(opt$is_singl) | is.null(opt$s_categ)){
+    is.null(opt$is_singl) | is.null(opt$anvio) | is.null(opt$s_categ)){
   print_help(opt_parser)
   stop("You need to provide the path to the previous validation step results and output files paths\n", call.=FALSE)
 }
