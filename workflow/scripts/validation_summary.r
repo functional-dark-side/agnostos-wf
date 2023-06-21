@@ -168,7 +168,7 @@ lag <- brStick(p_rej_cl)$thresh_by_bsm %>% enframe() %>% mutate(lag = round(valu
 if (length(lag)!=0){
   rej_threshold <- brStick(p_rej_cl)$thresh_by_bsm[lag - 1]
 } else if (length(brStick(p_rej_cl)$thresh_by_bsm) == 0) {
-  rej_threshold <- 0
+  rej_threshold <- 1
 } else {
   rej_threshold <- brStick(p_rej_cl)$thresh_by_bsm %>% as_tibble %>% filter(value<0.9) %>% .$value %>% max()
   #rej_threshold <- brStick(p_rej_cl)$thresh_by_bsm[length(brStick(p_rej_cl)$thresh_by_bsm)]
