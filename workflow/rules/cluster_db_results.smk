@@ -11,6 +11,7 @@ rule cluster_db_results:
     params:
         mmseqs_bin = config["mmseqs_bin"],
         data_name = config["data_name"],
+        data_stage = config["data_stage"],
         singl = config["singl"],
         parser = config["wdir"] +  "/scripts/creation_output_tables.r",
         rdir = config["rdir"] + "/clusterDB_results",
@@ -98,6 +99,7 @@ rule cluster_db_results:
                           --k_annot {params.multi_annot} \
                           --is_singl {params.singl} \
                           --s_cat {params.s_categ} \
+                          --anvio {params.data_stage} \
                           --res {output.clu_out_tbl} \
                           --threads {threads} 2>{log.err} 1>{log.out}
 

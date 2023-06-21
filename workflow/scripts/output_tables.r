@@ -192,9 +192,12 @@ DB_annot <- DB_info_exp %>% select(cl_name,category,pfam) %>% distinct() %>%
         distinct()
 write.table(DB_annot,paste0(dir,"/DB_cluster_annotations.tsv"), col.names = T, row.names = F, sep="\t",quote = F)
 
-DB_info_exp <- DB_info_exp %>%
-    distinct() %>%
-    mutate(gene_callers_id=gsub(".*_","",gene))
+
+if(opt$anvio=="anvio_genes"){
+    DB_info_exp <- DB_info_exp %>% distinct() %>% mutate(gene_callers_id=gsub(".*_","",gene))
+}else{
+    DB_info_exp <- DB_info_exp %>% distinct() %>% rename(gene_callers_id=gene)
+}
 
 if(opt$is_singl=="true" & original=="agnostosDB"){
     DB_info_exp <- DB_info_exp %>%

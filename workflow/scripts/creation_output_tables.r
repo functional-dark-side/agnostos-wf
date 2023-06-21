@@ -26,6 +26,8 @@ option_list <- list(
               help="use singleton or not", metavar="character"),
   make_option(c("--s_categ"), type="character", default=NULL,
               help="singelton categories", metavar="character"),
+  make_option(c("--anvio"), type="character", default=NULL,
+              help="anvio genes", metavar="character"),
   make_option(c("--res"), type="character", default=NULL,
               help="output results", metavar="character"),
   make_option(c("--threads"), type="numeric", default=1,
@@ -41,7 +43,7 @@ if (is.null(opt$clu_or) |
     is.null(opt$cat) | is.null(opt$clu_info) |
     is.null(opt$comm) | is.null(opt$hq_clu) |
     is.null(opt$k_annot) | is.null(opt$threads) |
-    is.null(opt$is_singl) | is.null(opt$res)){
+    is.null(opt$is_singl) | is.null(opt$anvio) | is.null(opt$res)){
   print_help(opt_parser)
   stop("You need to provide the path to the previous validation step results and output files paths\n", call.=FALSE)
 }
@@ -78,7 +80,7 @@ if(opt$is_singl=="true"){
   DB_clu_info <- DB_clu_info %>% mutate(gene=as.character(gene)) %>%
     dt_left_join(s_cat, by="gene") %>%
     mutate(is.singleton=ifelse(category=="SINGL",TRUE,FALSE),
-           category=ifelse(is.na(category_s),category,category_s)) %>% select(-category_s) %>%
+           category=ifelse(category=="SINGL",category_s,category)) %>% select(-category_s) %>%
            rename(n_genes=size,community=com, origin_db=db) %>%
            select(cl_name, origin_db, n_genes, category, community, is.singleton, gene)
 }
@@ -101,8 +103,13 @@ DB_info_exp <- DB_info_exp  %>%
       dt_left_join(K_annot)
 
 DB_info_exp <- DB_info_exp %>%
-    distinct() %>% mutate(is.HQ=ifelse(is.na(is.HQ),FALSE,is.HQ)) %>%
-    mutate(gene_callers_id=gsub(".*_","",gene))
+    distinct() %>% mutate(is.HQ=ifelse(is.na(is.HQ),FALSE,is.HQ))
+
+if(opt$anvio=="anvio_genes"){
+    DB_info_exp <- DB_info_exp %>% mutate(gene_callers_id=gsub(".*_","",gene))
+}else{
+    DB_info_exp <- DB_info_exp %>% rename(gene_callers_id=gene)
+}
 
 if(opt$is_singl=="true"){
     DB_info_exp <- DB_info_exp %>%
