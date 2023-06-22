@@ -96,7 +96,7 @@ if(opt$is_singl=="true"){
            select(cl_name, origin_db, n_genes, category, community, is.singleton, gene)
 }
 
-write.table(DB_clu_info, paste0(dir,"/integrated_DB_cluster_information.tsv", sep="\t", row.names=F, quote=F))
+write.table(DB_clu_info, paste0(dir,"/integrated_DB_cluster_information.tsv"), sep="\t", row.names=F, quote=F)
 
 # Load gene - contig table
 gene_info <- fread(opt$contig,header=F,sep="\t") %>% setNames(c("contig","gene")) %>%
