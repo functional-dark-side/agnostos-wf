@@ -132,11 +132,11 @@ rule cluster_category_stats:
         mkdir -p {params.mutant_dir}
 
         # Mutant phenotypes (Price et al. 2018)
-        if [ ! -s aaseqs ]; then
+        if [ ! -s {params.aa_mutants} ]; then
             ## Amino acid sequences
             wget https://fit.genomics.lbl.gov/cgi_data/aaseqs -O {params.aa_mutants}
         fi
-        if [ ! -s feba.db ]; then
+        if [ ! -s {params.mutantDB} ]; then
             ## Contextual data
             wget https://fit.genomics.lbl.gov/cgi_data/feba.db -O {params.mutantDB}
         fi
