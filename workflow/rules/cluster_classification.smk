@@ -277,7 +277,7 @@ rule cluster_classification:
         ## GU annotations
         join -11 -21 <(sort -k1,1 {output.gu} ) \
             <(sort -k1,1 {params.outdir}/noannot_uniref_nr_annotations.tsv) > {params.outdir}/gu_annotations.tsv
-        awk 'NR>1 && $9=="DUF"{{print $1,"PFAM","0.0",$6}}' {params.dom_arch} >> {params.outdir}/gu_annotations.tsv
+        awk 'NR>1 && $9=="DUF"{{print $1,"PFAM","0.0",$5}}' {params.dom_arch} >> {params.outdir}/gu_annotations.tsv
 
         #rm {params.outdir}/noannot_uniref_nr_annotations.tsv
 
@@ -306,7 +306,7 @@ rule cluster_classification:
         fi
 
         ## K annotations
-        awk -vOFS='\\t' 'NR>1 && $9!="DUF"{{print $1,"PFAM","0.0",$6}}' {params.dom_arch} >> {params.outdir}/k_annotations.tsv
+        awk -vOFS='\\t' 'NR>1 && $9!="DUF"{{print $1,"PFAM","0.0",$5}}' {params.dom_arch} >> {params.outdir}/k_annotations.tsv
 
         # Clear results
         #rm -rf {params.outdir}/noannot_vs_uniref90_* {params.outdir}/uniref-nohits_vs_NR_*
